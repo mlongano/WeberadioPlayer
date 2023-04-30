@@ -1,127 +1,38 @@
-import React, { Component, useEffect, useRef, useState } from 'react';
+import React, {  } from 'react';
 import TopBar from './TopBar';
 import AlbumArt from './AlbumArt';
 import TrackDetails from './TrackDetails';
 import Controls from './Controls';
 import Video from 'react-native-video';
-import Icon2 from 'react-native-vector-icons/MaterialCommunityIcons';
 
-import { io } from 'socket.io-client';
-import { clamp } from './utils/helpers';
 
 import {
-  View,
-  Text,
-  useColorScheme,
   ScrollView,
+  StyleSheet,
 } from 'react-native';
-import VolumeBar from './VolumeBar';
-import Slider from '@react-native-community/slider';
 import VolumeControl from './VolumeControl';
 import Header from './Header';
+import useSongMetadata from './hooks/useSongMetadata';
+import useAudioControls from './hooks/useAudioControls';
 
-interface SongMetadata {
-  title: string;
-  artist: string;
-  album?: string;
-  year?: string;
-  coverUrl?: string;
-  listeners?: number;
-}
 export default function App(): JSX.Element {
-  const defaultCoverLight = "https://webe.radio/images/logo-light.png";
-  const defaultCoverDark = "https://webe.radio/images/logo-dark.png";
-  const songSrc = "https://stream.webe.radio/live";
-  const [songMetadata, setSongMetadata] = useState<SongMetadata>({ title: '', artist: '', album: '', year: '', coverUrl: '', listeners: 0 });
-  const colorMode = useColorScheme();
-  console.log("colorMode: ", colorMode);
-
-  const [defaultCover, setDefaultCover] = useState<String | any>(colorMode === "light" ? defaultCoverLight : defaultCoverDark);
-  const [cover, setCover] = useState<string>(defaultCover);
-
-  // Change default cover when color mode changes
-  useEffect(() => {
-    const nextDefaultCover = colorMode === "light" ? defaultCoverLight : defaultCoverDark;
-    if (cover === defaultCover) {
-      setCover(nextDefaultCover);
-    }
-    setDefaultCover(nextDefaultCover);
-  }, [colorMode]);
-
-  // Get current song metadata on WeBe Radio from the socket.io server at https://metadata.webe.radio
-  useEffect(() => {
-    console.log("Connecting...");
-    const socket = io("https://metadata.webe.radio");
-
-    try {
-      socket.on('connect', () => {
-        console.log("Connected!");
-      });
-
-      socket.on('metadata', (data) => {
-        console.log("metadata: ", data);
-        setSongMetadata(data);
-        setCover(data.coverUrl)
-      });
-    } catch (e) {
-      console.log("Error: ", e);
-    }
-    return () => {
-      socket.disconnect();
-    }
-  }, []);
+  const { songMetadata, cover } = useSongMetadata();
 
   // Audio player controls
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [volume, setVolume] = useState(0.5);
-  const [oldVolume, setOldVolume] = useState(volume);
-  const audioPlayer = useRef<any>(null);
+  const { isPlaying, volume, audioPlayer, togglePlay, changeVolume, toggleMute, volumeDown, volumeUp } = useAudioControls();
 
-  function togglePlay() {
-    const nextIsPlaying = !isPlaying;
-    setIsPlaying(nextIsPlaying);
-  }
-
-  function changeVolume(volume: number) {
-
-    const nextVolume = Math.round(clamp(0, volume, 1) * 100) / 100;
-
-    setVolume(nextVolume);
-  }
-
-  function changeVolumeBy(delta: number) {
-    const nextVolume = clamp(0, volume + delta, 1);
-    setVolume(nextVolume);
-  }
-
-  function volumeDown() {
-    changeVolumeBy(-0.10);
-  }
-
-  function volumeUp() {
-    changeVolumeBy(0.10);
-  }
-
-  function toggleMute() {
-    if (volume > 0) {
-      setOldVolume(volume);
-    }
-    const nextVolume = volume === 0 ? oldVolume : 0;
-    setVolume(nextVolume);
-    audioPlayer && audioPlayer.current && (audioPlayer.current.volume = nextVolume);
-  }
-
+  const songSrc = "https://stream.webe.radio/live";
 
   return (
     <ScrollView style={styles.container}>
       <TopBar message="Playing from webe.radio" />
-      <Header ascoltatori={songMetadata?.listeners || 0}  color='rgb(253 224 71)' titleSize={20}
-      subtitleSize={10}/>
+      <Header ascoltatori={songMetadata?.listeners || 0} color='rgb(253 224 71)' titleSize={20}
+        subtitleSize={10} />
       <Controls isPlaying={isPlaying}
         onPressPlay={togglePlay}
         onPressPause={togglePlay}
       />
-      <AlbumArt url={cover || defaultCover} />
+      <AlbumArt url={cover} />
       <TrackDetails
         title={songMetadata.title}
         artist={songMetadata.artist}
@@ -142,19 +53,15 @@ export default function App(): JSX.Element {
         progressUpdateInterval={250.0}    // [iOS] Interval to fire onProgress (default to ~250ms)
         onEnd={() => { console.log('Done!') }}
         style={styles.audioElement}
-        onProgress={(data) => {
-          console.log("progress: ", data);
-        }}
-         />
+      />
 
-      <VolumeControl volume={volume} setVolume={changeVolume} toggleMute={toggleMute} volumeDown={volumeDown}  volumeUp={volumeUp}/>
+      <VolumeControl volume={volume} setVolume={changeVolume} toggleMute={toggleMute} volumeDown={volumeDown} volumeUp={volumeUp} />
 
     </ScrollView>
   );
 }
 
-
-const styles = {
+const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'rgb(4,4,4)',
@@ -163,4 +70,4 @@ const styles = {
     height: 0,
     width: 0,
   }
-}
+});
