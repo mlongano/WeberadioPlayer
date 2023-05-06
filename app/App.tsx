@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import TopBar from './TopBar';
-import AlbumArt from './AlbumArt';
-import TrackDetails from './TrackDetails';
-import Controls from './Controls';
+import TopBar from './components/TopBar';
+import AlbumArt from './components/AlbumArt';
+import TrackDetails from './components/TrackDetails';
+import Controls from './components/Controls';
 import TrackPlayer, { State, Capability, RepeatMode, usePlaybackState, useProgress, AppKilledPlaybackBehavior } from 'react-native-track-player';
 
 
@@ -10,8 +10,8 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
-import VolumeControl from './VolumeControl';
-import Header from './Header';
+import VolumeControl from './components/VolumeControl';
+import Header from './components/Header';
 import useSongMetadata from './hooks/useSongMetadata';
 import useAudioControls from './hooks/useAudioControls';
 
