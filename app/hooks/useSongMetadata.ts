@@ -21,12 +21,12 @@ export default function useSongMetadata() {
   console.log("colorMode: ", colorMode);
 
   const [defaultCover, setDefaultCover] = useState<string>(colorMode === "light" ? defaultCoverLight : defaultCoverDark);
-  const [cover, setCover] = useState<string>(defaultCover);
+  const [cover, setCover] = useState<string>(defaultCoverLight);
 
   // Change default cover when color mode changes
   useEffect(() => {
     const nextDefaultCover = colorMode === "light" ? defaultCoverLight : defaultCoverDark;
-    if (cover === defaultCover) {
+    if ((!cover) || cover === defaultCover) {
       setCover(nextDefaultCover);
     }
     setDefaultCover(nextDefaultCover);
@@ -45,7 +45,7 @@ export default function useSongMetadata() {
       socket.on('metadata', (data) => {
         console.log("metadata: ", data);
         setSongMetadata(data);
-        setCover(data.coverUrl);
+        setCover(data.coverUrl || defaultCover);
       });
     } catch (e) {
       console.log("Error: ", e);
