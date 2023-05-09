@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react';
-import TopBar from './components/TopBar';
-import AlbumArt from './components/AlbumArt';
-import TrackDetails from './components/TrackDetails';
-import Controls from './components/Controls';
+import AlbumArt from '../components/AlbumArt';
+import TrackDetails from '../components/TrackDetails';
+import Controls from '../components/Controls';
 import TrackPlayer, { State, Capability, RepeatMode, usePlaybackState, useProgress, AppKilledPlaybackBehavior } from 'react-native-track-player';
 
 
@@ -10,16 +9,17 @@ import {
   ScrollView,
   StyleSheet,
 } from 'react-native';
-import VolumeControl from './components/VolumeControl';
-import Header from './components/Header';
-import useSongMetadata from './hooks/useSongMetadata';
-import useAudioControls from './hooks/useAudioControls';
+import VolumeControl from '../components/VolumeControl';
+import Header from '../components/Header';
+import useSongMetadata from '../hooks/useSongMetadata';
+import useAudioControls from '../hooks/useAudioControls';
+import { useTheme } from 'react-native-paper';
 
 export default function App(): JSX.Element {
 
   const { songMetadata, cover } = useSongMetadata();
   const playbackState = usePlaybackState();
-  console.log("playbackState: ", playbackState);
+  //console.log("playbackState: ", playbackState);
   const [isPlayingTrackPlayer, setIsPlayingTrackPlayer] = useState(false);
   const { position, buffered, duration } = useProgress();
 
@@ -107,16 +107,30 @@ export default function App(): JSX.Element {
     await toggleMute();
     togglePlay();
   }
+  const theme = useTheme();
+  const styles = StyleSheet.create({
+    container: {
+      flex: 1,
+      backgroundColor: theme.colors.background,
+    },
+    audioElement: {
+      height: 0,
+      width: 0,
+    }
+  });
+
+
+
 
 
   return (
     <ScrollView style={styles.container}>
-      <TopBar message="Playing from webe.radio" />
-      <Header ascoltatori={songMetadata?.listeners || 0} color='rgb(253 224 71)' titleSize={20}
+      <Header ascoltatori={songMetadata?.listeners || 0} color={theme.colors.primary} titleSize={20}
         subtitleSize={10} />
       <Controls isPlaying={isPlaying}
         onPressPlay={togglePlayback}
         onPressPause={togglePlayback}
+        theme={theme}
       />
       <AlbumArt url={cover} />
       <TrackDetails
@@ -124,20 +138,10 @@ export default function App(): JSX.Element {
         artist={songMetadata.artist}
         album={songMetadata?.album || ''}
         year={songMetadata?.year || ''}
+        theme={theme}
       />
-      <VolumeControl volume={volume} setVolume={changeVolume} toggleMute={toggleMute} volumeDown={volumeDown} volumeUp={volumeUp} />
+      <VolumeControl volume={volume} setVolume={changeVolume} toggleMute={toggleMute} volumeDown={volumeDown} volumeUp={volumeUp} theme={theme} />
 
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: 'rgb(4,4,4)',
-  },
-  audioElement: {
-    height: 0,
-    width: 0,
-  }
-});

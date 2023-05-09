@@ -18,7 +18,7 @@ export default function useSongMetadata() {
 
   const [songMetadata, setSongMetadata] = useState<SongMetadata>({ title: '', artist: '', album: '', year: '', coverUrl: '', listeners: 0 });
   const colorMode = useColorScheme();
-  console.log("colorMode: ", colorMode);
+  //console.log("colorMode: ", colorMode);
 
   const [defaultCover, setDefaultCover] = useState<string>(colorMode === "light" ? defaultCoverLight : defaultCoverDark);
   const [cover, setCover] = useState<string>(defaultCoverLight);

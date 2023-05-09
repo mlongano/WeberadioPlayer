@@ -1,12 +1,9 @@
 import Slider from '@react-native-community/slider';
-import React, { Component } from 'react';
+import React from 'react';
 
 import {
   View,
-  Text,
   StyleSheet,
-  Image,
-  TouchableOpacity,
 } from 'react-native';
 
 

@@ -1,11 +1,9 @@
-import React, { Component } from 'react';
+import React from 'react';
 
 import {
   View,
-  Text,
   StyleSheet,
   Image,
-  TouchableHighlight,
   TouchableOpacity,
   Dimensions,
 } from 'react-native';
@@ -13,6 +11,7 @@ import {
 interface Props {
   url: string;
   onPress?: () => void;
+  theme?: any;
 }
 
 const AlbumArt: React.FC<Props> = ({

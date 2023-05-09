@@ -1,7 +1,7 @@
 // hooks/useAudioControls.ts
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { clamp } from '../utils/helpers';
-import TrackPlayer, { Event, State, PlaybackState, Capability, RepeatMode, usePlaybackState, useProgress, AppKilledPlaybackBehavior } from 'react-native-track-player';
+import TrackPlayer from 'react-native-track-player';
 
 export default function useAudioControls() {
   const [isPlaying, setIsPlaying] = useState(false);
