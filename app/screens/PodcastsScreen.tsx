@@ -1,16 +1,56 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView, View } from 'react-native';
 import Video from 'react-native-video';
 import { Button, Card, Text, useTheme } from 'react-native-paper';
 import Config from "react-native-config";
 import { queryEpisodes, schoolsFetchAllBasic, strapiFetch } from '../api/fetch';
+import LoadingSpinner from '../components/LoadingSpinner';
+import SeekBar from '../components/SeekBar';
 
 const PodcastsScreen: React.FC = () => {
   const [lastSchoolsEpisode, setLastSchoolsEpisode] = useState<any[]>([]);
-  const [playing, setPlaying] = useState<boolean[]>([]);
-  const videoRef = useRef<Video[]>([]);
-  const [currentIndex, setCurrentIndex] = useState<number>(-1);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [playingIndex, setPlayingIndex] = useState(-1);
+  const audioElements = useRef<Video[]>([]);
+  const [currentTime, setCurrentTime] = useState<number[]>([]);
+  const [duration, setDuration] = useState<number[]>([]);
 
+
+  function seek(index: number, time: number, isPlaying = true) {
+    time = Math.round(time);
+    audioElements.current[index] && audioElements.current[index].seek(time);
+    const newCurrentTime = [...currentTime];
+    newCurrentTime[index] = time;
+    setCurrentTime(newCurrentTime);
+    setPlaying(index, isPlaying);
+  }
+
+  function onSeeking(index: number) {
+    return (time: number) => {
+      seek(index, time, true);
+    }
+  }
+
+  const setPlaying = (index: number, isPlaying: boolean) => {
+    if (playingIndex === index && !isPlaying) {
+      setPlayingIndex(-1);
+    } else {
+      setPlayingIndex(index);
+    }
+  }
+
+
+  const handlePlay = (index: number) => {
+    if (playingIndex !== -1 && playingIndex !== index) {
+      setPlayingIndex(index);
+    } else if (playingIndex !== -1) {
+      setPlayingIndex(-1);
+    }
+    else {
+      setPlayingIndex(index);
+    }
+
+  };
 
   useEffect(() => {
     const fetchPodcasts = async () => {
@@ -60,9 +100,11 @@ const PodcastsScreen: React.FC = () => {
           return 0;
         });
 
-        setPlaying(episodes.map(() => false)); // add a playing state to the playing array
+        setCurrentTime(episodes.map(() => 0));
+        setDuration(episodes.map(() => 1));
 
         setLastSchoolsEpisode(episodes);
+        setLoading(false);
 
       } catch (error) {
         console.error(error);
@@ -72,25 +114,6 @@ const PodcastsScreen: React.FC = () => {
     fetchPodcasts();
   }, []);
 
-  const handlePlay = (index: number) => {
-    // Pause all other episodes
-    const newPlaying: boolean[] = playing.map((item: any, i: number) => {
-      if (i !== index) {
-        item = false;
-      }
-      return item;
-    });
-
-    // Toggle the playing state of the current episode
-    newPlaying[index] = !newPlaying[index];
-    playing[index] = !playing[index];
-    //setPlaying(newPlaying);
-    if (currentIndex !== -1) {
-      setCurrentIndex(-1);
-    } else {
-      setCurrentIndex(index);
-    }
-  };
   const theme = useTheme();
   const styles = StyleSheet.create({
     container: {
@@ -145,7 +168,12 @@ const PodcastsScreen: React.FC = () => {
     },
   });
 
-
+  if (loading) {
+    return (
+      <LoadingSpinner />
+    );
+  }
+  //console.log('playingIndex: ', playingIndex);
   return (
     <ScrollView style={styles.container}>
       {lastSchoolsEpisode.map((item, index) => {
@@ -153,6 +181,8 @@ const PodcastsScreen: React.FC = () => {
         const school = item?.school;
         const coverImageUrl = Config.STRAPI_URL_BASE + episode?.cover?.data?.attributes?.url;
         const audioUrl = Config.STRAPI_URL_BASE + episode?.audio?.data?.attributes?.url;
+        const isPlaying = index === playingIndex;
+        //console.log('isPlaying: ', index, isPlaying);
         return (
           <Card key={school.slug} style={styles.card}>
             <Card.Cover source={{ uri: coverImageUrl }} />
@@ -161,16 +191,40 @@ const PodcastsScreen: React.FC = () => {
               <Text variant='titleMedium'>{episode.title}</Text>
               <Text variant='bodyMedium'>{episode.description}</Text>
               <Video
-                ref={(ref: Video) => videoRef.current[index] = ref}
+                ref={(ref: any) => {
+                  audioElements.current[index] = ref;
+                }}
                 audioOnly={true}
                 source={{ uri: audioUrl }}
                 style={styles.audioPlayer}
-                paused={currentIndex !== index}
+                paused={!isPlaying}
+                onProgress={(e) => {
+                  setCurrentTime((prev) => {
+                    const newCurrentTime = [...prev];
+                    newCurrentTime[index] = e.currentTime;
+                    return newCurrentTime;
+                  });
+                  setDuration((prev) => {
+                    const newDuration = [...prev];
+                    newDuration[index] = e.seekableDuration;
+                    return newDuration;
+                  });
+                }}
+                onEnd={() => {
+                  setPlayingIndex(-1);
+                  seek(index, 0)
+                }}
               />
-
+              <SeekBar
+                onSeek={onSeeking(index)}
+                trackLength={duration[index]}
+                onSlidingStart={() => setPlaying(index, true)}
+                currentPosition={currentTime[index]}
+                theme={theme}
+              />
             </Card.Content>
             <Card.Actions>
-              <Button icon={playing[index] ? 'stop' : 'play'} mode='elevated' onPress={() => handlePlay(index)} buttonColor={theme.colors.primary} textColor={theme.colors.onPrimary}>
+              <Button icon={isPlaying ? 'stop' : 'play'} mode='elevated' onPress={() => handlePlay(index)} buttonColor={theme.colors.primary} textColor={theme.colors.onPrimary}>
                 Play
               </Button>
             </Card.Actions>
