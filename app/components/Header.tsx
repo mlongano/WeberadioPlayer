@@ -12,7 +12,7 @@ export default function Header(
 ) {
   return (
     <>
-      <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', }}>
+      <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20 }}>
         <Icon name='radio-tower' color={color} size={titleSize} />
         <Text style={{ color: color, fontSize: titleSize, fontWeight: 'bold', marginTop: 0, marginLeft: 0, marginRight: 0 }}>WeBe Radio</Text>
         <Icon name='radio-tower' color={color} size={20} />

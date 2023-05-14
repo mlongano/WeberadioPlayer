@@ -4,9 +4,11 @@ import { Text, useTheme, Card } from 'react-native-paper';
 import { postsFetchAll, queryPosts } from '../api/fetch';
 import Config from 'react-native-config';
 import Markdown from 'react-native-marked';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 const NewsScreen: React.FC = () => {
   const [posts, setPosts] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -24,6 +26,7 @@ const NewsScreen: React.FC = () => {
     };
 
     fetchPosts();
+    setLoading(false);
   }, []);
 
   const theme = useTheme();
@@ -68,7 +71,7 @@ const NewsScreen: React.FC = () => {
     }).format(new Date(post.date));
 
     const isValid = ! /<(.|\n)*?>/gm.test(post.article);
-    console.log("isValid:", isValid);
+    //console.log("isValid:", isValid);
     return (
       <Card key={item.id} >
       <Card.Cover source={{ uri: image }} />
@@ -88,6 +91,12 @@ const NewsScreen: React.FC = () => {
 
     );
   };
+
+  if (loading) {
+    return (
+      <LoadingSpinner />
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>

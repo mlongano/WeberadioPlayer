@@ -11,13 +11,18 @@ import NewsScreen from './screens/NewsScreen';
 import PodcastsScreen from './screens/PodcastsScreen';
 import AboutScreen from './screens/AboutScreen';
 import SplashScreen from './screens/SplashScreen';
+import ExploreScreen from './screens/ExploreScreen';
 
+import Constants from 'expo-constants';
 const App = () => {
+  //console.log("Expo Constants: ",Constants.systemFonts);
+
   const [index, setIndex] = useState(-1);
   const [routes] = useState([
-    { key: 'home', title: 'Home', focusedIcon: 'home', unfocusedIcon: 'home-outline' },
     { key: 'player', title: 'On Air', focusedIcon: 'play-circle' },
+    { key: 'home', title: 'Home', focusedIcon: 'home', unfocusedIcon: 'home-outline' },
     { key: 'podcasts', title: 'Podcasts', focusedIcon: 'podcast' },
+    { key: 'explore', title: 'Explore', focusedIcon: 'magnify' },
     { key: 'news', title: 'News', focusedIcon: 'newspaper' },
     { key: 'about', title: 'About', focusedIcon: 'information' },
   ]);
@@ -30,10 +35,11 @@ const App = () => {
   }, []);
 
   const renderScene = BottomNavigation.SceneMap({
-    home: HomeScreen,
     player: PlayerScreen,
+    home: HomeScreen,
     news: NewsScreen,
     podcasts: PodcastsScreen,
+    explore: ExploreScreen,
     about: AboutScreen,
   });
 
@@ -42,10 +48,10 @@ const App = () => {
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
   const theme = isDarkMode ? MD3DarkTheme : MD3LightTheme;
-  console.log("colorScheme:", colorScheme);
+  //console.log("colorScheme:", colorScheme);
   //console.log("theme:", theme);
-  console.log("theme.dark:", theme.dark);
-  console.log("theme.mode:", theme.mode);
+  //console.log("theme.dark:", theme.dark);
+  //console.log("theme.mode:", theme.mode);
   const styles = StyleSheet.create({
     container: {
       flex: 1,

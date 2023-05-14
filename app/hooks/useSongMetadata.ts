@@ -43,7 +43,7 @@ export default function useSongMetadata() {
       });
 
       socket.on('metadata', (data) => {
-        console.log("metadata: ", data);
+        //console.log("metadata: ", data);
         setSongMetadata(data);
         setCover(data.coverUrl || defaultCover);
       });

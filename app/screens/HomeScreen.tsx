@@ -6,6 +6,7 @@ import Video from 'react-native-video';
 import { Button, Text, useTheme } from 'react-native-paper';
 import Markdown from 'react-native-marked';
 import SeekBar from '../components/SeekBar';
+import LoadingSpinner from '../components/LoadingSpinner';
 
 
 const HomeScreen: React.FC = () => {
@@ -51,7 +52,7 @@ const HomeScreen: React.FC = () => {
         setEpisode(episode);
         setHeroImage(heroImage);
         setLoading(false);
-        console.log("episode:", episode.audio.data.attributes.url);
+        //console.log("episode:", episode.audio.data.attributes.url);
         //console.log("schools", schools);
         //console.log("strapiUrlBase", strapiUrlBase);
         //console.log("heroImage", heroImage);
@@ -69,7 +70,7 @@ const HomeScreen: React.FC = () => {
   const audioUrl = `${Config.STRAPI_URL_BASE}${episode?.audio?.data?.attributes?.url}`;
   const imageUrl = `${Config.STRAPI_URL_BASE}${episode?.cover?.data?.attributes?.url}`;
   //console.log("audioUrl", audioUrl);
-  console.log("imageUrl", imageUrl);
+  //console.log("imageUrl", imageUrl);
   const theme = useTheme();
   const styles = StyleSheet.create({
     container: {
@@ -115,14 +116,12 @@ const HomeScreen: React.FC = () => {
 
   if (loading) {
     return (
-      <View style={styles.container}>
-        <Text>Loading...</Text>
-      </View>
+      <LoadingSpinner />
     );
   }
 
   const isValidMarkdown = episode?.description && ! /<(.|\n)*?>/gm.test(episode?.description);
-  console.log("current time", currentTime);
+  //console.log("current time", currentTime);
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Benvenuto su WeBe Radio</Text>
@@ -137,8 +136,8 @@ const HomeScreen: React.FC = () => {
         onProgress={(e) => {
           setCurrentTime(e.currentTime)
           setDuration(e.seekableDuration)
-          console.log("current time", e.currentTime);
-          console.log("duration", e.seekableDuration);
+          //console.log("current time", e.currentTime);
+          //console.log("duration", e.seekableDuration);
         }}
         onEnd={() => {
           setIsPlaying(false)
