@@ -42,5 +42,6 @@ const styles = StyleSheet.create({
     width: imageSize,
     height: imageSize,
     resizeMode: 'contain',
+    alignSelf: 'center',
   },
 })

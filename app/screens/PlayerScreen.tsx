@@ -87,25 +87,11 @@ export default function App(): JSX.Element {
     await TrackPlayer.setRepeatMode(RepeatMode.Queue);
     await toggleMute();
     await TrackPlayer.play();
-    console.log("Setup done: ", await TrackPlayer.getQueue());
+    //console.log("Setup done: ", await TrackPlayer.getQueue());
   }
 
   async function togglePlayback() {
-    console.log("togglePlayback state:", playbackState);
-    console.log("track progress: ", position, buffered, duration);
-    console.log("isPlaying: ", isPlaying);
-    console.log("Queue: ", await TrackPlayer.getQueue());
-    if (playbackState.state !== State.Playing) {
-      if ((await TrackPlayer.getQueue()).length === 0) {
-        await TrackPlayer.add(webeRadioStream);
-      }
-      console.log("Track: ", await TrackPlayer.getActiveTrack());
-      await TrackPlayer.play();
-      togglePlay();
-      return
-    }
     await toggleMute();
-    togglePlay();
   }
   const theme = useTheme();
   const styles = StyleSheet.create({
@@ -118,10 +104,6 @@ export default function App(): JSX.Element {
       width: 0,
     }
   });
-
-
-
-
 
   return (
     <ScrollView style={styles.container}>
