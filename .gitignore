@@ -64,3 +64,9 @@ yarn-error.log
 .yarn
 .env
 .vscode
+.expo/devices.json
+.expo/README.md
+.expo/xcodebuild-error.log
+.expo/xcodebuild.log
+.expo/prebuild/cached-packages.json
+.vscode/settings.json
