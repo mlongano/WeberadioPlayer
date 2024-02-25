@@ -1,6 +1,6 @@
 // hooks/useAudioControls.ts
-import { useState } from 'react';
-import { clamp } from '../utils/helpers';
+import {useState} from 'react';
+import {clamp} from '../utils/helpers';
 import TrackPlayer from 'react-native-track-player';
 
 export default function useAudioControls() {
@@ -31,11 +31,11 @@ export default function useAudioControls() {
   }
 
   function volumeDown() {
-    changeVolumeBy(-0.10);
+    changeVolumeBy(-0.1);
   }
 
   function volumeUp() {
-    changeVolumeBy(0.10);
+    changeVolumeBy(0.1);
   }
 
   async function toggleMute() {
@@ -53,5 +53,13 @@ export default function useAudioControls() {
     TrackPlayer.setVolume(nextVolume);
   }
 
-  return { isPlaying, volume, togglePlay, changeVolume, toggleMute, volumeDown, volumeUp };
+  return {
+    isPlaying,
+    volume,
+    togglePlay,
+    changeVolume,
+    toggleMute,
+    volumeDown,
+    volumeUp,
+  };
 }

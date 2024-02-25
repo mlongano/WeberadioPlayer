@@ -1,12 +1,8 @@
 import React from 'react';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 
-import {
-  View,
-  StyleSheet,
-  TouchableOpacity,
-} from 'react-native';
-import { MD3Theme } from 'react-native-paper';
+import {View, StyleSheet, TouchableOpacity} from 'react-native';
+import {MD3Theme} from 'react-native-paper';
 
 interface Props {
   isPlaying: boolean;
@@ -14,7 +10,6 @@ interface Props {
   onPressPause: () => void;
   theme?: MD3Theme;
 }
-
 
 const Controls: React.FC<Props> = ({
   isPlaying,
@@ -44,27 +39,35 @@ const Controls: React.FC<Props> = ({
       width: 18,
     },
     off: {
-      opacity: 0.30,
-    }
+      opacity: 0.3,
+    },
   });
 
   return (
     <View style={styles.container}>
-      {!isPlaying ?
+      {!isPlaying ? (
         <TouchableOpacity onPress={onPressPause}>
           <View style={styles.playButton}>
-            <Icon name={'play-arrow'} size={50} color={theme ? theme.colors.primary : 'rgb(253 224 71)'} />
-          </View>
-        </TouchableOpacity> :
-        <TouchableOpacity onPress={onPressPlay}>
-          <View style={styles.playButton}>
-            <Icon name={'stop'} size={50} color={theme ? theme.colors.primary : 'rgb(253 224 71)'} />
+            <Icon
+              name={'play-arrow'}
+              size={50}
+              color={theme ? theme.colors.primary : 'rgb(253 224 71)'}
+            />
           </View>
         </TouchableOpacity>
-      }
+      ) : (
+        <TouchableOpacity onPress={onPressPlay}>
+          <View style={styles.playButton}>
+            <Icon
+              name={'stop'}
+              size={50}
+              color={theme ? theme.colors.primary : 'rgb(253 224 71)'}
+            />
+          </View>
+        </TouchableOpacity>
+      )}
     </View>
-  )
+  );
 };
 
 export default Controls;
-

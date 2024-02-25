@@ -1,9 +1,9 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, ScrollView, View } from 'react-native';
+import React, {useState, useEffect, useRef} from 'react';
+import {StyleSheet, ScrollView, View} from 'react-native';
 import Video from 'react-native-video';
-import { Button, Card, Text, useTheme } from 'react-native-paper';
-import Config from "react-native-config";
-import { queryEpisodes, schoolsFetchAllBasic, strapiFetch } from '../api/fetch';
+import {Button, Card, Text, useTheme} from 'react-native-paper';
+import Config from 'react-native-config';
+import {queryEpisodes, schoolsFetchAllBasic, strapiFetch} from '../api/fetch';
 import LoadingSpinner from '../components/LoadingSpinner';
 import SeekBar from '../components/SeekBar';
 
@@ -14,7 +14,6 @@ const PodcastsScreen: React.FC = () => {
   const audioElements = useRef<Video[]>([]);
   const [currentTime, setCurrentTime] = useState<number[]>([]);
   const [duration, setDuration] = useState<number[]>([]);
-
 
   function seek(index: number, time: number, isPlaying = true) {
     time = Math.round(time);
@@ -28,7 +27,7 @@ const PodcastsScreen: React.FC = () => {
   function onSeeking(index: number) {
     return (time: number) => {
       seek(index, time, true);
-    }
+    };
   }
 
   const setPlaying = (index: number, isPlaying: boolean) => {
@@ -37,19 +36,16 @@ const PodcastsScreen: React.FC = () => {
     } else {
       setPlayingIndex(index);
     }
-  }
-
+  };
 
   const handlePlay = (index: number) => {
     if (playingIndex !== -1 && playingIndex !== index) {
       setPlayingIndex(index);
     } else if (playingIndex !== -1) {
       setPlayingIndex(-1);
-    }
-    else {
+    } else {
       setPlayingIndex(index);
     }
-
   };
 
   useEffect(() => {
@@ -60,35 +56,44 @@ const PodcastsScreen: React.FC = () => {
           return {
             school: school.attributes,
             query: {
-              sort: "date:desc",
+              sort: 'date:desc',
               filters: {
                 schools: {
                   slug: {
-                    $eq: school.attributes.slug
-                  }
-                }
+                    $eq: school.attributes.slug,
+                  },
+                },
               },
               ...queryEpisodes,
-            }
-          }
+            },
+          };
         });
 
-        const schoolsLastEpisode = await Promise.all(queriesSchoolsLastEpisode.map(async (querySchool: any) => {
-          try {
-            const episode = await strapiFetch(`/api/episodes`, querySchool.query, false, 1);
-            return {
-              school: querySchool.school,
-              episode: episode?.data[0]
+        const schoolsLastEpisode = await Promise.all(
+          queriesSchoolsLastEpisode.map(async (querySchool: any) => {
+            try {
+              const episode = await strapiFetch(
+                '/api/episodes',
+                querySchool.query,
+                false,
+                1,
+              );
+              return {
+                school: querySchool.school,
+                episode: episode?.data[0],
+              };
+            } catch (e) {
+              return {
+                school: querySchool.school,
+                episode: null,
+              };
             }
-          } catch (e) {
-            return {
-              school: querySchool.school,
-              episode: null
-            }
-          }
-        }));
+          }),
+        );
 
-        const episodes = schoolsLastEpisode.filter((episode: any) => episode.episode !== null);
+        const episodes = schoolsLastEpisode.filter(
+          (episode: any) => episode.episode !== null,
+        );
         // Sort episodes by date desc
         episodes.sort((a: any, b: any) => {
           if (a.episode?.attributes.date > b.episode?.attributes.date) {
@@ -105,7 +110,6 @@ const PodcastsScreen: React.FC = () => {
 
         setLastSchoolsEpisode(episodes);
         setLoading(false);
-
       } catch (error) {
         console.error(error);
       }
@@ -169,9 +173,7 @@ const PodcastsScreen: React.FC = () => {
   });
 
   if (loading) {
-    return (
-      <LoadingSpinner />
-    );
+    return <LoadingSpinner />;
   }
   //console.log('playingIndex: ', playingIndex);
   return (
@@ -179,32 +181,34 @@ const PodcastsScreen: React.FC = () => {
       {lastSchoolsEpisode.map((item, index) => {
         const episode = item?.episode?.attributes;
         const school = item?.school;
-        const coverImageUrl = Config.STRAPI_URL_BASE + episode?.cover?.data?.attributes?.url;
-        const audioUrl = Config.STRAPI_URL_BASE + episode?.audio?.data?.attributes?.url;
+        const coverImageUrl =
+          Config.STRAPI_URL_BASE + episode?.cover?.data?.attributes?.url;
+        const audioUrl =
+          Config.STRAPI_URL_BASE + episode?.audio?.data?.attributes?.url;
         const isPlaying = index === playingIndex;
         //console.log('isPlaying: ', index, isPlaying);
         return (
           <Card key={school.slug} style={styles.card}>
-            <Card.Cover source={{ uri: coverImageUrl }} />
+            <Card.Cover source={{uri: coverImageUrl}} />
             <Card.Content>
-              <Text variant='headlineSmall'>{school.short_name}</Text>
-              <Text variant='titleMedium'>{episode.title}</Text>
-              <Text variant='bodyMedium'>{episode.description}</Text>
+              <Text variant="headlineSmall">{school.short_name}</Text>
+              <Text variant="titleMedium">{episode.title}</Text>
+              <Text variant="bodyMedium">{episode.description}</Text>
               <Video
                 ref={(ref: any) => {
                   audioElements.current[index] = ref;
                 }}
                 audioOnly={true}
-                source={{ uri: audioUrl }}
+                source={{uri: audioUrl}}
                 style={styles.audioPlayer}
                 paused={!isPlaying}
-                onProgress={(e) => {
-                  setCurrentTime((prev) => {
+                onProgress={e => {
+                  setCurrentTime(prev => {
                     const newCurrentTime = [...prev];
                     newCurrentTime[index] = e.currentTime;
                     return newCurrentTime;
                   });
-                  setDuration((prev) => {
+                  setDuration(prev => {
                     const newDuration = [...prev];
                     newDuration[index] = e.seekableDuration;
                     return newDuration;
@@ -212,7 +216,7 @@ const PodcastsScreen: React.FC = () => {
                 }}
                 onEnd={() => {
                   setPlayingIndex(-1);
-                  seek(index, 0)
+                  seek(index, 0);
                 }}
               />
               <SeekBar
@@ -224,16 +228,20 @@ const PodcastsScreen: React.FC = () => {
               />
             </Card.Content>
             <Card.Actions>
-              <Button icon={isPlaying ? 'stop' : 'play'} mode='elevated' onPress={() => handlePlay(index)} buttonColor={theme.colors.primary} textColor={theme.colors.onPrimary}>
+              <Button
+                icon={isPlaying ? 'stop' : 'play'}
+                mode="elevated"
+                onPress={() => handlePlay(index)}
+                buttonColor={theme.colors.primary}
+                textColor={theme.colors.onPrimary}>
                 Play
               </Button>
             </Card.Actions>
           </Card>
-        )
+        );
       })}
     </ScrollView>
   );
 };
-
 
 export default PodcastsScreen;

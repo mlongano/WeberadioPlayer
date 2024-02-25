@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, useColorScheme } from 'react-native';
-import { BottomNavigation, Text, Provider as PaperProvider, useTheme } from 'react-native-paper';
-import { SafeAreaProvider } from 'react-native-safe-area-context';
-import { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
+import React, {useEffect, useState} from 'react';
+import {View, StyleSheet, useColorScheme} from 'react-native';
+import {BottomNavigation, Provider as PaperProvider} from 'react-native-paper';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {MD3DarkTheme, MD3LightTheme} from 'react-native-paper';
 
 // import SplashScreen from './SplashScreen';
 import HomeScreen from './screens/HomeScreen';
@@ -13,18 +13,23 @@ import AboutScreen from './screens/AboutScreen';
 import SplashScreen from './screens/SplashScreen';
 import ExploreScreen from './screens/ExploreScreen';
 
-import Constants from 'expo-constants';
+import EpisodeCard from './components/EpisodeCard';
 const App = () => {
   //console.log("Expo Constants: ",Constants.systemFonts);
 
   const [index, setIndex] = useState(-1);
   const [routes] = useState([
-    { key: 'player', title: 'On Air', focusedIcon: 'play-circle' },
-    { key: 'home', title: 'Home', focusedIcon: 'home', unfocusedIcon: 'home-outline' },
-    { key: 'podcasts', title: 'Podcasts', focusedIcon: 'podcast' },
-    { key: 'explore', title: 'Explore', focusedIcon: 'magnify' },
-    { key: 'news', title: 'News', focusedIcon: 'newspaper' },
-    { key: 'about', title: 'About', focusedIcon: 'information' },
+    {key: 'player', title: 'On Air', focusedIcon: 'play-circle'},
+    {
+      key: 'home',
+      title: 'Home',
+      focusedIcon: 'home',
+      unfocusedIcon: 'home-outline',
+    },
+    {key: 'podcasts', title: 'Podcasts', focusedIcon: 'podcast'},
+    {key: 'explore', title: 'Explore', focusedIcon: 'magnify'},
+    {key: 'news', title: 'News', focusedIcon: 'newspaper'},
+    {key: 'about', title: 'About', focusedIcon: 'information'},
   ]);
 
   useEffect(() => {
@@ -41,9 +46,12 @@ const App = () => {
     podcasts: PodcastsScreen,
     explore: ExploreScreen,
     about: AboutScreen,
+    episodes: EpisodeCard,
   });
 
-  const renderSplashScreen = () => <SplashScreen onSplashEnd={() => setIndex(0)} />;
+  const renderSplashScreen = () => (
+    <SplashScreen onSplashEnd={() => setIndex(0)} />
+  );
 
   const colorScheme = useColorScheme();
   const isDarkMode = colorScheme === 'dark';
@@ -59,7 +67,6 @@ const App = () => {
     },
   });
 
-
   return (
     <SafeAreaProvider>
       <PaperProvider theme={theme}>
@@ -68,7 +75,7 @@ const App = () => {
             renderSplashScreen()
           ) : (
             <BottomNavigation
-              navigationState={{ index, routes }}
+              navigationState={{index, routes}}
               onIndexChange={setIndex}
               renderScene={renderScene}
             />
@@ -79,5 +86,5 @@ const App = () => {
   );
 };
 
-
+// eslint-disable-next-line eol-last, prettier/prettier
 export default App;

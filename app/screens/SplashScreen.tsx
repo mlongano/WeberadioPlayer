@@ -1,10 +1,10 @@
-import React, { useRef, useEffect } from 'react';
-import { View, Animated, StyleSheet } from 'react-native';
+import React, {useRef, useEffect} from 'react';
+import {View, Animated, StyleSheet} from 'react-native';
 
 import Logo from '../components/Logo';
-import { useTheme } from 'react-native-paper';
+import {useTheme} from 'react-native-paper';
 
-const SplashScreen: React.FC<{ onSplashEnd: () => void }> = ({ onSplashEnd }) => {
+const SplashScreen: React.FC<{onSplashEnd: () => void}> = ({onSplashEnd}) => {
   const animationValue = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
@@ -46,7 +46,6 @@ const SplashScreen: React.FC<{ onSplashEnd: () => void }> = ({ onSplashEnd }) =>
     },
   });
 
-
   return (
     <View style={styles.container}>
       <Animated.View style={[styles.logoContainer, animationStyle]}>
@@ -55,6 +54,5 @@ const SplashScreen: React.FC<{ onSplashEnd: () => void }> = ({ onSplashEnd }) =>
     </View>
   );
 };
-
 
 export default SplashScreen;

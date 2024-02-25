@@ -1,19 +1,25 @@
-import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, Image } from 'react-native';
-import { useTheme } from 'react-native-paper';
-import Markdown from "react-native-marked";
-import { heroImageFetch, strapiFetch } from '../api/fetch';
+import React, {useEffect, useState} from 'react';
+import {View, StyleSheet, Image} from 'react-native';
+import {useTheme} from 'react-native-paper';
+import Markdown from 'react-native-marked';
+import {heroImageFetch, strapiFetch} from '../api/fetch';
 
 const AboutScreen: React.FC = () => {
-  const [title, setTitle] = useState<string>("");
-  const [about, setAbout] = useState<string>("");
-  const [heroImage, setHeroImage] = useState<string>("");
+  const [title, setTitle] = useState<string>('');
+  const [about, setAbout] = useState<string>('');
+  const [heroImage, setHeroImage] = useState<string>('');
 
   useEffect(() => {
     const fetchHomeScreenInfo = async () => {
-
-      const { data: { attributes: { title } }, data: { attributes: { about } } } = await strapiFetch("/api/about-us", { fields: ["title", "about"] });
-      const heroImage = await heroImageFetch("home_page");
+      const {
+        data: {
+          attributes: {title},
+        },
+        data: {
+          attributes: {about},
+        },
+      } = await strapiFetch('/api/about-us', {fields: ['title', 'about']});
+      const heroImage = await heroImageFetch('home_page');
       setTitle(title);
       setAbout(about);
       setHeroImage(heroImage);
@@ -42,23 +48,25 @@ const AboutScreen: React.FC = () => {
     },
   });
 
-
   return (
     <View style={styles.container}>
-      <Image source={require('../assets/logo.png')} style={{ width: 200, height: 200 }} />
-      <Markdown value={about}
+      <Image
+        source={require('../assets/logo.png')}
+        style={{width: 200, height: 200}}
+      />
+      <Markdown
+        value={about}
         flatListProps={{
           initialNumToRender: 8,
           contentContainerStyle: {
             padding: 16,
             marginRight: 10,
             backgroundColor: theme.colors.background,
-          }
+          },
         }}
       />
     </View>
   );
 };
-
 
 export default AboutScreen;

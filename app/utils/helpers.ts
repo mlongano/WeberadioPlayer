@@ -7,7 +7,6 @@
 // output
 // { titolo: 'Yellow Bus', artista: 'Baklan', anno: '2020', album: 'Yellow Bus' }
 
-
 export function zip(props: string[], values: string[]) {
   return values.reduce((acc, curr: string, i) => {
     (acc as any)[props[i]] = curr;
@@ -15,18 +14,29 @@ export function zip(props: string[], values: string[]) {
   }, {});
 }
 
-export const clamp = (num: number, min: number, max: number) => Math.min(Math.max(num, min), max);
-
+export const clamp = (num: number, min: number, max: number) =>
+  Math.min(Math.max(num, min), max);
 
 // convert a string date to a string international date
 // example: 2021-01-01 to 1 January 2021
 export const getFriendlyDate = (date: string) => {
   const d = new Date(date);
 
-  let options:any = {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
+  let options: any = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
   };
-  return new Intl.DateTimeFormat("it-IT", options).format(new Date(date));
-}
+  return new Intl.DateTimeFormat('it-IT', options).format(new Date(date));
+};
+
+export const getCover = (attributes: any, imageUrlBase: string) => {
+  if (!attributes?.cover?.data?.attributes?.url) {
+    return '';
+  }
+  const coverData = attributes?.cover?.data?.attributes;
+  const format = coverData.width > 500 ? 'small_' : '';
+  const urlPath = coverData.url?.substring(0, coverData.url?.lastIndexOf('/'));
+  const cover = `${imageUrlBase}${urlPath}/${format}${coverData.hash}${coverData.ext}`;
+  return cover;
+};
