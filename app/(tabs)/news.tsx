@@ -1,10 +1,11 @@
 import React, {useState, useEffect} from 'react';
-import {View, StyleSheet, ScrollView} from 'react-native';
+import {View, StyleSheet, ScrollView, FlatList} from 'react-native';
 import {Text, useTheme, Card} from 'react-native-paper';
 import {postsFetchAll, queryPosts} from '../api/fetch';
-import Config from 'react-native-config';
+import {Config} from '../utils/config';
 import Markdown from 'react-native-marked';
 import LoadingSpinner from '../components/LoadingSpinner';
+import ArticleCard from '../components/ArticleCard';
 
 const NewsScreen: React.FC = () => {
   const [posts, setPosts] = useState<any[]>([]);
@@ -102,14 +103,21 @@ const NewsScreen: React.FC = () => {
   }
 
   return (
-    <ScrollView style={styles.container}>
-      {posts.map(item => (
-        <React.Fragment key={item.id}>
-          <View style={styles.separator} />
-          {renderItem({item})}
-        </React.Fragment>
-      ))}
-    </ScrollView>
+    <FlatList
+      style={styles.container}
+      data={posts}
+      renderItem={({item}) => <ArticleCard post={item.attributes} />}
+      ListHeaderComponent={() => (
+        <>
+          {posts.map(item => (
+            <React.Fragment key={item.id}>
+              <View style={styles.separator} />
+              <ArticleCard post={item.attributes} />
+            </React.Fragment>
+          ))}
+        </>
+      )}
+    />
   );
 };
 

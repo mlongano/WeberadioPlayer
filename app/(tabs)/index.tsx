@@ -1,55 +1,43 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import AlbumArt from '../components/AlbumArt';
 import TrackDetails from '../components/TrackDetails';
 import Controls from '../components/Controls';
-import TrackPlayer, {
-  State,
-  Capability,
-  RepeatMode,
-  usePlaybackState,
-  useProgress,
-  AppKilledPlaybackBehavior,
-} from 'react-native-track-player';
+import TrackPlayer, { State, Capability, RepeatMode, usePlaybackState, useProgress, AppKilledPlaybackBehavior } from 'react-native-track-player';
 
-import {ScrollView, StyleSheet} from 'react-native';
+
+import {
+  ScrollView,
+  StyleSheet,
+} from 'react-native';
 import VolumeControl from '../components/VolumeControl';
 import Header from '../components/Header';
 import useSongMetadata from '../hooks/useSongMetadata';
 import useAudioControls from '../hooks/useAudioControls';
-import {useTheme} from 'react-native-paper';
+import { useTheme } from 'react-native-paper';
 
 export default function App(): JSX.Element {
-  const {songMetadata, cover} = useSongMetadata();
+
+  const { songMetadata, cover } = useSongMetadata();
   const playbackState = usePlaybackState();
   //console.log("playbackState: ", playbackState);
   const [isPlayingTrackPlayer, setIsPlayingTrackPlayer] = useState(false);
-  const {position, buffered, duration} = useProgress();
+  const { position, buffered, duration } = useProgress();
 
   useEffect(() => {
     setIsPlaying();
   }, [playbackState]);
 
   async function setIsPlaying() {
-    if (
-      playbackState.state === State.Playing &&
-      (await TrackPlayer.getVolume()) > 0
-    ) {
+    if (playbackState.state === State.Playing && (await TrackPlayer.getVolume()) > 0) {
       setIsPlayingTrackPlayer(true);
     } else {
       setIsPlayingTrackPlayer(false);
     }
   }
 
+
   // Audio player controls
-  const {
-    isPlaying,
-    volume,
-    togglePlay,
-    changeVolume,
-    toggleMute,
-    volumeDown,
-    volumeUp,
-  } = useAudioControls();
+  const { isPlaying, volume, togglePlay, changeVolume, toggleMute, volumeDown, volumeUp } = useAudioControls();
 
   const webeRadioStream = {
     id: 'webe-radio-stream',
@@ -57,7 +45,7 @@ export default function App(): JSX.Element {
     title: 'WeBe Radio',
     artist: 'WeBe Radio',
     isLiveStream: true,
-  };
+  }
 
   const radioParadiseStream = {
     id: 'radio-paradise-stream',
@@ -65,9 +53,11 @@ export default function App(): JSX.Element {
     title: 'Radio Paradise',
     artist: 'Radio Paradise',
     isLiveStream: true,
-  };
+  }
 
-  const tracks = [webeRadioStream];
+  const tracks = [
+    webeRadioStream,
+    ]
 
   useEffect(() => {
     setupTrackPlayer();
@@ -77,12 +67,11 @@ export default function App(): JSX.Element {
     try {
       await TrackPlayer.setupPlayer();
     } catch (error) {
-      console.log('Error setting up TrackPlayer: ', error);
+      console.log("Error setting up TrackPlayer: ", error);
     }
     await TrackPlayer.updateOptions({
       android: {
-        appKilledPlaybackBehavior:
-          AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
+        appKilledPlaybackBehavior: AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification
       },
       capabilities: [
         Capability.Play,
@@ -113,19 +102,14 @@ export default function App(): JSX.Element {
     audioElement: {
       height: 0,
       width: 0,
-    },
+    }
   });
 
   return (
     <ScrollView style={styles.container}>
-      <Header
-        ascoltatori={songMetadata?.listeners || 0}
-        color={theme.colors.primary}
-        titleSize={20}
-        subtitleSize={10}
-      />
-      <Controls
-        isPlaying={isPlaying}
+      <Header ascoltatori={songMetadata?.listeners || 0} color={theme.colors.primary} titleSize={20}
+        subtitleSize={10} />
+      <Controls isPlaying={isPlaying}
         onPressPlay={togglePlayback}
         onPressPause={togglePlayback}
         theme={theme}
@@ -138,14 +122,8 @@ export default function App(): JSX.Element {
         year={songMetadata?.year || ''}
         theme={theme}
       />
-      <VolumeControl
-        volume={volume}
-        setVolume={changeVolume}
-        toggleMute={toggleMute}
-        volumeDown={volumeDown}
-        volumeUp={volumeUp}
-        theme={theme}
-      />
+      <VolumeControl volume={volume} setVolume={changeVolume} toggleMute={toggleMute} volumeDown={volumeDown} volumeUp={volumeUp} theme={theme} />
+
     </ScrollView>
   );
 }

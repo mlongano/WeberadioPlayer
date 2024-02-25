@@ -1,6 +1,6 @@
 import React, {useEffect, useState} from 'react';
 import {episodesFetchAll, queryEpisodes} from '../api/fetch';
-import Config from 'react-native-config';
+import {Config} from '../utils/config';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EpisodeCard from '../components/EpisodeCard';
 

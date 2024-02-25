@@ -1,5 +1,5 @@
 import qs from "qs";
-import Config from "react-native-config";
+import { Config } from "../utils/config";
 import { checkEnvVars, checkStatus } from "../utils/errorHandling";
 
 const headers = {

@@ -15,7 +15,7 @@ import {
   ActivityIndicator,
 } from 'react-native-paper';
 import {episodesFetchAll, queryEpisodes} from '../api/fetch';
-import Config from 'react-native-config';
+import {Config} from '../utils/config';
 import Fuse from 'fuse.js';
 import Video from 'react-native-video';
 import LoadingSpinner from '../components/LoadingSpinner';
@@ -176,7 +176,7 @@ const ExploreScreen: React.FC = () => {
 
   return (
     <ScrollView>
-      <View style={{marginBottom: 20}} />
+      <View style={{marginBottom: 20}}></View>
       <Searchbar
         style={{margin: 10}}
         value={searchQuery}

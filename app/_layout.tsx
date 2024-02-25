@@ -1,0 +1,84 @@
+import FontAwesome from '@expo/vector-icons/FontAwesome';
+import {DarkTheme, DefaultTheme, ThemeProvider} from '@react-navigation/native';
+import {useFonts} from 'expo-font';
+import {Stack} from 'expo-router';
+import * as SplashScreen from 'expo-splash-screen';
+
+import {useColorScheme} from 'react-native';
+import {PlaybackService} from './services/PlaybackService';
+import TrackPlayer from 'react-native-track-player';
+import React, {useEffect, useState} from 'react';
+import {View, StyleSheet} from 'react-native';
+import {BottomNavigation, Provider as PaperProvider} from 'react-native-paper';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+import {MD3DarkTheme, MD3LightTheme} from 'react-native-paper';
+
+export {
+  // Catch any errors thrown by the Layout component.
+  ErrorBoundary,
+} from 'expo-router';
+
+export const unstable_settings = {
+  // Ensure that reloading on `/modal` keeps a back button present.
+  initialRouteName: '(tabs)',
+};
+
+// Prevent the splash screen from auto-hiding before asset loading is complete.
+SplashScreen.preventAutoHideAsync();
+
+export default function RootLayout() {
+  const [loaded, error] = useFonts({
+    SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
+    ...FontAwesome.font,
+  });
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const setupTrackPlayer = async () => {
+      const isRegistered = await TrackPlayer.isServiceRunning();
+      if (!isRegistered) {
+        TrackPlayer.registerPlaybackService(() => PlaybackService);
+      }
+      // Other initialization logic if needed
+    };
+    setupTrackPlayer();
+  }, []);
+
+  // Expo Router uses Error Boundaries to catch errors in the navigation tree.
+  useEffect(() => {
+    if (error) throw error;
+  }, [error]);
+
+  useEffect(() => {
+    if (loaded) {
+      SplashScreen.hideAsync();
+      //      SplashScreenExpo.hideAsync();
+    }
+  }, [loaded]);
+
+  if (!loaded) {
+    return null;
+  }
+
+  return <RootLayoutNav />;
+}
+
+function RootLayoutNav() {
+  const colorScheme = useColorScheme();
+  console.log('colorScheme: ', colorScheme);
+  const isDarkMode = colorScheme === 'dark';
+  const theme = isDarkMode ? MD3DarkTheme : MD3LightTheme;
+  return (
+    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+      <PaperProvider theme={theme}>
+        <Stack>
+          <Stack.Screen name="(tabs)" options={{headerShown: false}} />
+          <Stack.Screen
+            name="about"
+            options={{title: 'About', presentation: 'modal'}}
+          />
+        </Stack>
+      </PaperProvider>
+    </ThemeProvider>
+  );
+}

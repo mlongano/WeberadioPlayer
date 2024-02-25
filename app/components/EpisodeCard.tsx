@@ -1,8 +1,8 @@
 import Markdown from 'react-native-marked';
-import {getCover, getFriendlyDate} from '../utils/helpers';
-import {Image, ScrollView, StyleSheet, View} from 'react-native';
-import {Button, Text, useTheme} from 'react-native-paper';
-import {Fragment, useRef, useState} from 'react';
+import { getCover, getFriendlyDate } from "../utils/helpers";
+import { Image, ScrollView, StyleSheet, View } from "react-native";
+import { Button, Text, useTheme } from "react-native-paper";
+import { Fragment, useRef, useState } from "react";
 import Video from 'react-native-video';
 import SeekBar from './SeekBar';
 
@@ -13,12 +13,9 @@ interface Props {
   imageUrl: string;
 }
 
-export default function EpisodeCard({
-  title,
-  description,
-  audioUrl,
-  imageUrl,
-}: any) {
+export default function EpisodeCard(
+  { title, description, audioUrl, imageUrl  }: any
+) {
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
   const [currentTime, setCurrentTime] = useState<number>(0);
@@ -26,7 +23,7 @@ export default function EpisodeCard({
 
   const audioElement = useRef<Video>(null);
 
-  function seek(time: number, isPlaying = true) {
+  function seek(time:number, isPlaying=true) {
     time = Math.round(time);
     audioElement.current && audioElement.current.seek(time);
     setCurrentTime(time);
@@ -51,8 +48,10 @@ export default function EpisodeCard({
       fontWeight: 'bold',
       marginBottom: 10,
     },
-    titlePodcast: {},
-    description: {},
+    titlePodcast: {
+    },
+    description: {
+    },
     button: {
       fontSize: 28,
       fontWeight: 'bold',
@@ -73,40 +72,29 @@ export default function EpisodeCard({
     },
   });
 
-  const isValidMarkdown = description && !/<(.|\n)*?>/gm.test(description);
+  const isValidMarkdown = description && ! /<(.|\n)*?>/gm.test(description);
 
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Benvenuto su WeBe Radio</Text>
-      <Text style={styles.subtitle}>
-        Il fato ha voluto donarti questo podcast:
-      </Text>
-      <Image
-        source={{uri: `${imageUrl}`}}
-        style={{
-          width: 300,
-          height: 300,
-          backgroundColor: '#6b21a8',
-          borderRadius: 20,
-          alignSelf: 'center',
-        }}
-      />
+      <Text style={styles.subtitle}>Il fato ha voluto donarti questo podcast:</Text>
+      <Image source={{ uri: `${imageUrl}` }} style={{ width: 300, height: 300, backgroundColor: "#6b21a8", borderRadius: 20, alignSelf: 'center' }} />
       <Video
         ref={audioElement}
-        source={{uri: `${audioUrl}`}}
-        style={{width: 0, height: 0}}
+        source={{ uri: `${audioUrl}` }}
+        style={{ width: 0, height: 0 }}
         audioOnly={true}
         paused={!isPlaying}
-        onProgress={e => {
-          setCurrentTime(e.currentTime);
-          setDuration(e.seekableDuration);
+        onProgress={(e) => {
+          setCurrentTime(e.currentTime)
+          setDuration(e.seekableDuration)
           //console.log("current time", e.currentTime);
           //console.log("duration", e.seekableDuration);
         }}
         onEnd={() => {
-          setIsPlaying(false);
-          seek(0, false);
+          setIsPlaying(false)
+          seek(0, false)
         }}
       />
       <SeekBar
@@ -121,11 +109,10 @@ export default function EpisodeCard({
         style={styles.button}
         mode="contained"
         onPress={() => setIsPlaying(!isPlaying)}
-        icon={isPlaying ? 'pause' : 'play'}
-        Play
-      </Button>
-      <Text style={styles.titlePodcast} variant="titleMedium">{title}</Text>
-      {isValidMarkdown ? (
+        icon={isPlaying ? "pause" : "play"}
+      >Play</Button>
+      <Text style={styles.titlePodcast} variant='titleMedium'>{title}</Text>
+      {isValidMarkdown ?
         <Markdown
           value={description}
           flatListProps={{
@@ -136,16 +123,12 @@ export default function EpisodeCard({
             },
             alwaysBounceVertical: false,
             showsVerticalScrollIndicator: false,
+
           }}
         />
-      ) : (
-        <Text style={styles.description} variant="bodyMedium">
-          {description}
-        </Text>
-      )}
+        : (<Text style={styles.description} variant='bodyMedium'>{description}</Text>)}
 
-      <View style={{height: 0, marginTop: 0}} />
+      <View style={{ height: 0, marginTop: 0 }} ></View>
     </View>
-  );
+  )
 }
-

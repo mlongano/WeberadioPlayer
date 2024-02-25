@@ -1,4 +1,42 @@
 {
-  "name": "WeBeRadioApp",
-  "displayName": "WeBeRadioApp"
+  "expo": {
+    "name": "WeBeRadioApp",
+    "slug": "webe-radio-app",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./app/assets/logo.png",
+    "scheme": "webe",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./app/assets/logo.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "radio.webe.app"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./app/assets/logo.png",
+        "backgroundColor": "#ffffff"
+      },
+      "package": "radio.webe.app"
+    },
+    "web": {
+      "bundler": "metro",
+      "output": "static",
+      "favicon": "./app/assets/logo.png"
+    },
+    "plugins": ["expo-router"],
+    "experiments": {
+      "typedRoutes": true
+    },
+    "extra": {
+      "eas": {
+        "projectId": "32102b06-aef8-43cc-b8b9-e178583b3274"
+      }
+    }
+  }
 }

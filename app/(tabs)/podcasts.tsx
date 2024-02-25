@@ -2,7 +2,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import {StyleSheet, ScrollView, View} from 'react-native';
 import Video from 'react-native-video';
 import {Button, Card, Text, useTheme} from 'react-native-paper';
-import Config from 'react-native-config';
+import {Config} from '../utils/config';
 import {queryEpisodes, schoolsFetchAllBasic, strapiFetch} from '../api/fetch';
 import LoadingSpinner from '../components/LoadingSpinner';
 import SeekBar from '../components/SeekBar';
@@ -73,7 +73,7 @@ const PodcastsScreen: React.FC = () => {
           queriesSchoolsLastEpisode.map(async (querySchool: any) => {
             try {
               const episode = await strapiFetch(
-                '/api/episodes',
+                `/api/episodes`,
                 querySchool.query,
                 false,
                 1,

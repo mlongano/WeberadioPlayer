@@ -14,17 +14,23 @@ interface Props {
   theme?: any;
 }
 
-const AlbumArt: React.FC<Props> = ({url, onPress}) => (
+const AlbumArt: React.FC<Props> = ({
+  url,
+  onPress
+}) => (
   <View style={styles.container}>
     <TouchableOpacity onPress={onPress}>
-      <Image style={styles.image} source={{uri: url}} />
+      <Image
+        style={styles.image}
+        source={{uri: url}}
+      />
     </TouchableOpacity>
   </View>
 );
 
 export default AlbumArt;
 
-const {width, height} = Dimensions.get('window');
+const { width, height } = Dimensions.get('window');
 const imageSize = width - 48;
 
 const styles = StyleSheet.create({
@@ -38,4 +44,4 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     alignSelf: 'center',
   },
-});
+})
