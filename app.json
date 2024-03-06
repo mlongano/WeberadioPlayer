@@ -12,7 +12,9 @@
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "radio.webe.app"
@@ -22,14 +24,17 @@
         "foregroundImage": "./app/assets/logo.png",
         "backgroundColor": "#ffffff"
       },
-      "package": "radio.webe.app"
+      "package": "radio.webe.app",
+      "versionCode": 5
     },
     "web": {
       "bundler": "metro",
       "output": "static",
       "favicon": "./app/assets/logo.png"
     },
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router"
+    ],
     "experiments": {
       "typedRoutes": true
     },
@@ -37,6 +42,12 @@
       "eas": {
         "projectId": "32102b06-aef8-43cc-b8b9-e178583b3274"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/32102b06-aef8-43cc-b8b9-e178583b3274"
     }
   }
 }

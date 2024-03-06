@@ -49,3 +49,6 @@ android/
 .env.json
 ios-old/
 .idea/
+webe-radio-415421-ac81618ca34a.json
+*.apk
+*.aab

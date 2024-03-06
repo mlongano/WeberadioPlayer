@@ -1,0 +1,7 @@
+# run :RestSelectEnv .env.json
+### Get all tasks
+
+GET {{HOST}}/api/posts?populate=*
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
