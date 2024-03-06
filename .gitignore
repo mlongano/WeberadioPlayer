@@ -7,6 +7,7 @@ node_modules/
 .expo/
 dist/
 web-build/
+credentials.json
 
 # Native
 *.orig.*
@@ -44,3 +45,7 @@ expo-env.d.ts
 ios/
 android/
 
+.env
+.env.json
+ios-old/
+.idea/
