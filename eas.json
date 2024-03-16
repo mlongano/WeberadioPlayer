@@ -5,12 +5,18 @@
   "build": {
     "development": {
       "developmentClient": true,
-      "distribution": "internal"
+      "distribution": "internal",
+      "env": {
+        "EXPO_PUBLIC_STRAPI_URL_BASE": "https://apiv4.webe.radio",
+        "EXPO_PUBLIC_DEFAULT_PAGE_SIZE": "50",
+        "EXPO_PUBLIC_COVER_SERVER_URL": "https://cover.webe.radio"
+      }
     },
     "preview": {
       "distribution": "internal"
     },
     "production": {
+      "channel": "production",
       "env": {
         "EXPO_PUBLIC_STRAPI_URL_BASE": "https://apiv4.webe.radio",
         "EXPO_PUBLIC_DEFAULT_PAGE_SIZE": "50",
