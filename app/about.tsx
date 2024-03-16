@@ -1,8 +1,9 @@
 import React, {useEffect, useState} from 'react';
-import {View, StyleSheet, Image} from 'react-native';
+import {View, StyleSheet, Image, TouchableOpacity} from 'react-native';
 import {useTheme} from 'react-native-paper';
 import Markdown from 'react-native-marked';
-import {heroImageFetch, strapiFetch} from './api/fetch';
+import { heroImageFetch, strapiFetch } from './api/fetch';
+import * as Linking from 'expo-linking';
 
 const AboutScreen: React.FC = () => {
   const [title, setTitle] = useState<string>('');
@@ -50,10 +51,12 @@ const AboutScreen: React.FC = () => {
 
   return (
     <View style={styles.container}>
+      <TouchableOpacity onPress={()  => Linking.openURL('https://webe.radio')}>
       <Image
         source={require('./assets/logo.png')}
         style={{width: 200, height: 200}}
-      />
+        />
+      </TouchableOpacity>
       <Markdown
         value={about}
         flatListProps={{
