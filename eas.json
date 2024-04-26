@@ -21,12 +21,16 @@
         "EXPO_PUBLIC_STRAPI_URL_BASE": "https://apiv4.webe.radio",
         "EXPO_PUBLIC_DEFAULT_PAGE_SIZE": "50",
         "EXPO_PUBLIC_COVER_SERVER_URL": "https://cover.webe.radio"
+      },
+      "android": {
+        "image": "latest"
+      },
+      "ios": {
+        "image": "latest"
       }
     }
   },
   "submit": {
-    "production": {
-      "releaseNotes": "Corregge la ricerca degli episodi e la loro visualizzazione. Cambia il componente per Markdown. Piccole correzioni di testo e codice."
-    }
+    "production": {}
   }
 }
