@@ -3,6 +3,7 @@ import {Config} from '../utils/config';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EpisodeCard from '../components/EpisodeCard';
 import {FlatList, RefreshControl} from 'react-native';
+import {flattenEpisode} from '../api/fetch';
 
 const RandomEpisode: React.FC<{episodes: any[]}> = ({
   episodes,
@@ -17,12 +18,12 @@ const RandomEpisode: React.FC<{episodes: any[]}> = ({
     if (!episodes || episodes.length === 0) return; // Guard against missing episodes
     const numberOfEpisodes = episodes?.length ?? 0;
     const selectedEpisodeIndex = Math.floor(Math.random() * numberOfEpisodes);
-    let randomEpisode = episodes[selectedEpisodeIndex]?.attributes;
+    let randomEpisode = flattenEpisode(episodes[selectedEpisodeIndex]);
 
     // TODO: Find a better way to handle missing audio URLs
-    while (!randomEpisode?.audio?.data?.attributes?.url) {
+    while (!randomEpisode.audioUrl) {
       const randomIndex = Math.floor(Math.random() * numberOfEpisodes);
-      randomEpisode = episodes[randomIndex]?.attributes;
+      randomEpisode = flattenEpisode(episodes[randomIndex]);
     }
 
     setSelectedEpisode(randomEpisode);
@@ -40,16 +41,17 @@ const RandomEpisode: React.FC<{episodes: any[]}> = ({
   const renderItem = (): React.JSX.Element | null => {
     if (!selectedEpisode) return null; // Guard against missing episode
 
-    const audioUrl = `${Config.STRAPI_URL_BASE}${selectedEpisode?.audio?.data?.attributes?.url}`;
-    const imageUrl = `${Config.STRAPI_URL_BASE}${selectedEpisode?.cover?.data?.attributes?.url}`;
-    //console.log("audioUrl", audioUrl);
-    //console.log("imageUrl", imageUrl);
     return (
       <EpisodeCard
-        title={selectedEpisode?.title}
-        description={selectedEpisode?.description}
-        audioUrl={audioUrl}
-        imageUrl={imageUrl}
+        title={selectedEpisode.title}
+        description={selectedEpisode.description}
+        audioUrl={selectedEpisode.audioUrl}
+        imageUrl={selectedEpisode.coverImageUrl}
+        cardTitle={selectedEpisode.podcast.title}
+        cardSubtitle={selectedEpisode.schools.reduce(
+          (acc: string, school: any) => `${acc} ${school.short_name}`,
+          '',
+        )}
       />
     );
   };

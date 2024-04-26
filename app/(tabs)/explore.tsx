@@ -1,37 +1,44 @@
 import React, {useState, useEffect, useRef} from 'react';
-import {
-  View,
-  StyleSheet,
-  ScrollView,
-  useColorScheme,
-  Image,
-} from 'react-native';
+
+import {View, Image, StyleSheet} from 'react-native';
 import {
   Text,
   useTheme,
   Card,
   Searchbar,
   Button,
-  ActivityIndicator,
+  IconButton,
 } from 'react-native-paper';
-import {episodesFetchAll, queryEpisodes} from '../api/fetch';
-import {Config} from '../utils/config';
+import Colors from '@/constants/Colors';
+import {useColorScheme} from '@/components/useColorScheme';
+import {episodesFetchAll, flattenEpisode, queryEpisodes} from '../api/fetch';
 import Fuse from 'fuse.js';
-import Video from 'react-native-video';
 import LoadingSpinner from '../components/LoadingSpinner';
-import SeekBar from '../components/SeekBar';
-import {useNavigation} from '@react-navigation/native';
+
+import {useRouter} from 'expo-router';
+import Markdown from 'react-native-markdown-display';
+import {EpisodeQuery} from '../api/types';
+import {FlatList, GestureHandlerRootView} from 'react-native-gesture-handler';
+import {SafeAreaProvider} from 'react-native-safe-area-context';
+
+type Episode = {
+  title: string;
+  description: string;
+  audioUrl: string;
+  imageUrl: string;
+  schools: string;
+  podcastTitle: string;
+};
 
 const ExploreScreen: React.FC = () => {
   const [episodes, setEpisodes] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const listRef = useRef<FlatList>(null);
+  const [contentVerticalOffset, setContentVerticalOffset] = useState(0);
+  const CONTENT_OFFSET_THRESHOLD = 300;
+  const colorScheme = useColorScheme();
 
-  const [playingIndex, setPlayingIndex] = useState(-1);
-  const audioElements = useRef<Video[]>([]);
-  const [currentTime, setCurrentTime] = useState<number[]>([]);
-  const [duration, setDuration] = useState<number[]>([]);
-
-  const navigation = useNavigation();
+  const router = useRouter();
 
   useEffect(() => {
     const fetchPosts = async () => {
@@ -51,89 +58,12 @@ const ExploreScreen: React.FC = () => {
     setLoading(false);
   }, []);
 
-  function seek(index: number, time: number, isPlaying = true) {
-    time = Math.round(time);
-    audioElements.current[index] && audioElements.current[index].seek(time);
-    const newCurrentTime = [...currentTime];
-    newCurrentTime[index] = time;
-    setCurrentTime(newCurrentTime);
-    setPlaying(index, isPlaying);
-  }
-
-  function onSeeking(index: number) {
-    return (time: number) => {
-      seek(index, time, true);
-    };
-  }
-
-  const setPlaying = (index: number, isPlaying: boolean) => {
-    if (playingIndex === index && !isPlaying) {
-      setPlayingIndex(-1);
-    } else {
-      setPlayingIndex(index);
-    }
-  };
-
-  const handlePlay = (index: number) => {
-    if (playingIndex !== -1 && playingIndex !== index) {
-      setPlayingIndex(index);
-    } else if (playingIndex !== -1) {
-      setPlayingIndex(-1);
-    } else {
-      setPlayingIndex(index);
-    }
-  };
   const theme = useTheme();
   const styles = StyleSheet.create({
-    container: {
-      flex: 1,
-      padding: 20,
-      backgroundColor: theme.colors.background,
-    },
-    item: {
-      flexDirection: 'row',
-      alignItems: 'center',
-      marginBottom: 20,
-      paddingVertical: 10,
-      paddingHorizontal: 20,
-      borderWidth: 1,
-      borderColor: theme.colors.primary,
-      borderRadius: 10,
-    },
-    coverImage: {
-      width: 80,
-      height: 80,
-      marginRight: 20,
-      borderRadius: 10,
-    },
-    itemContent: {
-      flex: 1,
-    },
-    itemTitle: {
-      color: theme.colors.onBackground,
-      fontSize: 18,
-      fontWeight: 'bold',
-      marginBottom: 10,
-    },
-    itemDescription: {
-      fontSize: 14,
-      color: theme.colors.onBackground,
-      marginBottom: 10,
-    },
-    itemButton: {
-      width: 80,
-    },
-    audioPlayerButton: {
-      marginLeft: 10,
-      width: 80,
-    },
-    audioPlayer: {
-      width: 0,
-      height: 0,
-      marginBottom: 0,
-    },
-    card: {
-      marginBottom: 20,
+    scrollTopButton: {
+      position: 'absolute',
+      bottom: 0,
+      right: 0,
     },
   });
 
@@ -174,67 +104,112 @@ const ExploreScreen: React.FC = () => {
     return <LoadingSpinner />;
   }
 
+  const renderItem = ({item}: {item: EpisodeQuery}) => {
+    const flatEpisode = flattenEpisode(item);
+    const episodeParams: Episode = {
+      title: flatEpisode.title,
+      description: flatEpisode.description,
+      audioUrl: flatEpisode.audioUrl,
+      imageUrl: flatEpisode.coverImageUrl,
+      schools: flatEpisode.schools.reduce(
+        (acc: string, school: any) => `${acc} ${school.short_name}`,
+        '',
+      ),
+      podcastTitle: flatEpisode.podcast.title,
+    };
+
+    return (
+      <Card style={{margin: 10}} onPress={() => {}}>
+        <Card.Cover source={{uri: flatEpisode.coverImageUrl}} />
+        <Card.Content>
+          <Text style={{marginTop: 15}} variant="titleMedium">
+            {flatEpisode.podcast.title}
+          </Text>
+          {flatEpisode.schools.map((school: any) => (
+            <Text key={school.id} variant="titleMedium">
+              {school.short_name}
+            </Text>
+          ))}
+          <Text variant="bodySmall">{flatEpisode.date}</Text>
+          <Text
+            style={{marginBottom: 5, marginTop: 10}}
+            variant="headlineSmall">
+            {flatEpisode.title}
+          </Text>
+          <Markdown
+            style={{
+              body: {
+                backgroundColor: theme.colors.background,
+                color: theme.colors.onBackground,
+                fontSize: 14,
+              },
+            }}>
+            {flatEpisode.description ?? ''}
+          </Markdown>
+        </Card.Content>
+        <Card.Actions>
+          <Button
+            icon={'play'}
+            mode="elevated"
+            onPress={() => {
+              router.push({
+                pathname: '/episode',
+                params: episodeParams,
+              });
+            }}
+            buttonColor={theme.colors.primary}
+            textColor={theme.colors.onPrimary}>
+            Apri
+          </Button>
+        </Card.Actions>
+      </Card>
+    );
+  };
+
   return (
-    <ScrollView>
-      <View style={{marginBottom: 20}}></View>
-      <Searchbar
-        style={{margin: 10}}
-        value={searchQuery}
-        onChangeText={text => setSearchQuery(text)}
-        icon="magnify"
-        placeholder="Cerca..."
-      />
+    <GestureHandlerRootView style={{flex: 1}}>
+      <SafeAreaProvider>
+        <Searchbar
+          style={{marginBottom: 10, marginTop: 10}}
+          value={searchQuery}
+          onChangeText={text => setSearchQuery(text)}
+          icon="magnify"
+          placeholder="Cerca..."
+        />
 
-      <View>
         {fusePosts?.length > 0 ? (
-          fusePosts.map((episode: any, index) => {
-            const coverImageUrl =
-              Config.STRAPI_URL_BASE +
-              episode?.attributes?.cover?.data?.attributes?.url;
-            const audioUrl =
-              Config.STRAPI_URL_BASE +
-              episode?.attributes?.audio?.data?.attributes?.url;
-            //console.log("episode:", JSON.stringify(episode, null, 2));
-            const isPlaying = index === playingIndex;
-
-            return (
-              <Card key={episode.id} style={{margin: 10}} onPress={() => {}}>
-                <Card.Cover source={{uri: coverImageUrl}} />
-                <Card.Content>
-                  <Text variant="headlineSmall">
-                    {episode.attributes.title}
-                  </Text>
-                  <Text variant="bodySmall">
-                    {episode.attributes.description}
-                  </Text>
-                  <Text variant="bodySmall">{episode.attributes.date}</Text>
-                </Card.Content>
-                <Card.Actions>
-                  <Button
-                    icon={isPlaying ? 'stop' : 'play'}
-                    mode="elevated"
-                    onPress={() =>
-                      navigation.navigate('EpisodeCard', {episode})
-                    }
-                    buttonColor={theme.colors.primary}
-                    textColor={theme.colors.onPrimary}>
-                    Play
-                  </Button>
-                </Card.Actions>
-              </Card>
-            );
-          })
+          <FlatList
+            data={fusePosts}
+            renderItem={renderItem}
+            keyExtractor={item => item.id.toString()}
+            ref={listRef}
+            onScroll={event => {
+              setContentVerticalOffset(event.nativeEvent.contentOffset.y);
+            }}
+          />
         ) : (
           <View>
-            <Text>Nessuna notizia trovata</Text>
+            <Text>Nessun episodio trovato</Text>
             <Image
               source={require('../assets/undraw_page_not_found_su7k.png')}
               style={{resizeMode: 'contain', width: '100%', height: '100%'}}
             />
           </View>
         )}
-      </View>
-    </ScrollView>
+        {contentVerticalOffset > CONTENT_OFFSET_THRESHOLD && (
+          <IconButton
+            icon="arrow-up-bold-circle"
+            iconColor={Colors[colorScheme ?? 'light'].tint}
+            size={40}
+            // previously configured Icon props
+            style={styles.scrollTopButton}
+            onPress={() => {
+              listRef.current!.scrollToOffset({offset: 0, animated: true});
+            }}
+          />
+        )}
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 };
 
