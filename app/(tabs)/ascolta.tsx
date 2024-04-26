@@ -1,9 +1,6 @@
-import React, {useCallback, useEffect, useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {episodesFetchAll, queryEpisodes} from '../api/fetch';
-import {Config} from '../utils/config';
 import LoadingSpinner from '../components/LoadingSpinner';
-import EpisodeCard from '../components/EpisodeCard';
-import {FlatList, RefreshControl} from 'react-native';
 import RandomEpisode from '../components/RandomEpisode';
 
 const HomeScreen: React.FC = () => {

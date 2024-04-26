@@ -1,9 +1,7 @@
 import React, {useState, useEffect} from 'react';
-import {View, StyleSheet, ScrollView, FlatList} from 'react-native';
-import {Text, useTheme, Card} from 'react-native-paper';
+import {View, StyleSheet, FlatList} from 'react-native';
+import {useTheme} from 'react-native-paper';
 import {postsFetchAll, queryPosts} from '../api/fetch';
-import {Config} from '../utils/config';
-import Markdown from 'react-native-marked';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ArticleCard from '../components/ArticleCard';
 
@@ -59,44 +57,6 @@ const NewsScreen: React.FC = () => {
       marginVertical: 10,
     },
   });
-
-  const renderItem = ({item}: {item: any}) => {
-    const post = item.attributes;
-    const hash = post?.image?.data?.attributes?.hash;
-    const ext = post?.image?.data?.attributes?.ext;
-    const image = `${Config.STRAPI_URL_BASE}/uploads/small_${hash}${ext}`;
-    const date = new Intl.DateTimeFormat('it-IT', {
-      year: 'numeric',
-      month: 'long',
-      day: '2-digit',
-    }).format(new Date(post.date));
-
-    const isValid = !/<(.|\n)*?>/gm.test(post.article);
-    //console.log("isValid:", isValid);
-    return (
-      <Card key={item.id}>
-        <Card.Cover source={{uri: image}} />
-        <Card.Content>
-          <Text variant="headlineSmall">{post.title}</Text>
-          {isValid ? (
-            <Markdown
-              value={post.article}
-              flatListProps={{
-                initialNumToRender: 8,
-                contentContainerStyle: {
-                  padding: 10,
-                  marginRight: 0,
-                  backgroundColor: theme.colors.background,
-                },
-              }}
-            />
-          ) : (
-            <Text>{post.article}</Text>
-          )}
-        </Card.Content>
-      </Card>
-    );
-  };
 
   if (loading) {
     return <LoadingSpinner />;
