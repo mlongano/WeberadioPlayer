@@ -25,6 +25,8 @@
     }
   },
   "submit": {
-    "production": {}
+    "production": {
+      "releaseNotes": "Corregge la ricerca degli episodi e la loro visualizzazione. Cambia il componente per Markdown. Piccole correzioni di testo e codice."
+    }
   }
 }

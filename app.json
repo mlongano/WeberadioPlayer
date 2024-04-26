@@ -2,7 +2,7 @@
   "expo": {
     "name": "WeBeRadioApp",
     "slug": "webe-radio-app",
-    "version": "5.0.1",
+    "version": "5.0.2",
     "orientation": "portrait",
     "icon": "./app/assets/logo.png",
     "scheme": "webe",
@@ -16,7 +16,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "radio.webe.app",
-      "buildNumber": "2.0.1"
+      "buildNumber": "2.0.2"
     },
     "android": {
       "adaptiveIcon": {
@@ -24,7 +24,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "radio.webe.app",
-      "versionCode": 7
+      "versionCode": 8
     },
     "web": {
       "bundler": "metro",
