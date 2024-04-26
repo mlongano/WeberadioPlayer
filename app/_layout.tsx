@@ -7,10 +7,8 @@ import * as SplashScreen from 'expo-splash-screen';
 import {useColorScheme} from 'react-native';
 import {PlaybackService} from './services/PlaybackService';
 import TrackPlayer from 'react-native-track-player';
-import React, {useEffect, useState} from 'react';
-import {View, StyleSheet} from 'react-native';
-import {BottomNavigation, Provider as PaperProvider} from 'react-native-paper';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
+import React, {useEffect} from 'react';
+import {Provider as PaperProvider} from 'react-native-paper';
 import {MD3DarkTheme, MD3LightTheme} from 'react-native-paper';
 
 export {
@@ -31,7 +29,6 @@ export default function RootLayout() {
     SpaceMono: require('../assets/fonts/SpaceMono-Regular.ttf'),
     ...FontAwesome.font,
   });
-  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const setupTrackPlayer = async () => {
@@ -75,7 +72,11 @@ function RootLayoutNav() {
           <Stack.Screen name="(tabs)" options={{headerShown: false}} />
           <Stack.Screen
             name="about"
-            options={{title: 'About', presentation: 'modal'}}
+            options={{title: 'Informazioni', presentation: 'modal'}}
+          />
+          <Stack.Screen
+            name="episode"
+            options={{title: 'Episodio', presentation: 'modal'}}
           />
         </Stack>
       </PaperProvider>

@@ -64,21 +64,21 @@ export default function TabLayout() {
       <Tabs.Screen
         name="podcasts"
         options={{
-          title: 'Podcasts',
+          title: 'Novità',
           tabBarIcon: ({color}) => <TabBarIcon name="podcast" color={color} />,
         }}
       />
       <Tabs.Screen
         name="explore"
         options={{
-          title: 'Explore',
+          title: 'Ricerca',
           tabBarIcon: ({color}) => <TabBarIcon name="search" color={color} />,
         }}
       />
       <Tabs.Screen
         name="news"
         options={{
-          title: 'News',
+          title: 'Notizie',
           tabBarIcon: ({color}) => (
             <TabBarIcon name="newspaper-o" color={color} />
           ),
