@@ -1,8 +1,14 @@
 import React, {useEffect, useState} from 'react';
-import {View, StyleSheet, Image, TouchableOpacity} from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  ScrollView,
+} from 'react-native';
 import {useTheme} from 'react-native-paper';
-import Markdown from 'react-native-marked';
-import { heroImageFetch, strapiFetch } from './api/fetch';
+import Markdown from 'react-native-markdown-display';
+import {heroImageFetch, strapiFetch} from './api/fetch';
 import * as Linking from 'expo-linking';
 
 const AboutScreen: React.FC = () => {
@@ -34,8 +40,10 @@ const AboutScreen: React.FC = () => {
     container: {
       flex: 1,
       padding: 20,
-      alignItems: 'center',
       backgroundColor: theme.colors.background,
+    },
+    contentContainer: {
+      alignItems: 'center',
     },
     title: {
       fontSize: 24,
@@ -50,25 +58,26 @@ const AboutScreen: React.FC = () => {
   });
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity onPress={()  => Linking.openURL('https://webe.radio')}>
-      <Image
-        source={require('./assets/logo.png')}
-        style={{width: 200, height: 200}}
+    <ScrollView
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}>
+      <TouchableOpacity onPress={() => Linking.openURL('https://webe.radio')}>
+        <Image
+          source={require('./assets/logo.png')}
+          style={{width: 200, height: 200}}
         />
       </TouchableOpacity>
       <Markdown
-        value={about}
-        flatListProps={{
-          initialNumToRender: 8,
-          contentContainerStyle: {
-            padding: 16,
-            marginRight: 10,
+        style={{
+          body: {
             backgroundColor: theme.colors.background,
+            color: theme.colors.onBackground,
+            fontSize: 12,
           },
-        }}
-      />
-    </View>
+        }}>
+        {about}
+      </Markdown>
+    </ScrollView>
   );
 };
 

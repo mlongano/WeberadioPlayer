@@ -1,11 +1,12 @@
 import React, {useState, useEffect, useRef} from 'react';
-import {StyleSheet, ScrollView, View} from 'react-native';
+import {StyleSheet, ScrollView} from 'react-native';
 import Video from 'react-native-video';
 import {Button, Card, Text, useTheme} from 'react-native-paper';
 import {Config} from '../utils/config';
 import {queryEpisodes, schoolsFetchAllBasic, strapiFetch} from '../api/fetch';
 import LoadingSpinner from '../components/LoadingSpinner';
 import SeekBar from '../components/SeekBar';
+import Markdown from 'react-native-markdown-display';
 
 const PodcastsScreen: React.FC = () => {
   const [lastSchoolsEpisode, setLastSchoolsEpisode] = useState<any[]>([]);
@@ -193,7 +194,16 @@ const PodcastsScreen: React.FC = () => {
             <Card.Content>
               <Text variant="headlineSmall">{school.short_name}</Text>
               <Text variant="titleMedium">{episode.title}</Text>
-              <Text variant="bodyMedium">{episode.description}</Text>
+              <Markdown
+                style={{
+                  body: {
+                    backgroundColor: theme.colors.background,
+                    color: theme.colors.onBackground,
+                    fontSize: 14,
+                  },
+                }}>
+                {episode.description ?? ''}
+              </Markdown>
               <Video
                 ref={(ref: any) => {
                   audioElements.current[index] = ref;

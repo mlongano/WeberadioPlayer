@@ -1,7 +1,6 @@
 import React from 'react';
-import {StyleSheet} from 'react-native';
 import {Text, useTheme, Card} from 'react-native-paper';
-import Markdown from 'react-native-marked';
+import Markdown from 'react-native-markdown-display';
 import {Config} from '../utils/config';
 
 const ArticleCard: React.FC<ArticleCardProps> = ({post}) => {
@@ -14,30 +13,23 @@ const ArticleCard: React.FC<ArticleCardProps> = ({post}) => {
     day: '2-digit',
   }).format(new Date(post.date));
 
-  const isValid = !/<(.|\n)*?>/gm.test(post.article);
-
-  const theme = useTheme(); // Assuming you use useTheme() in your main component
+  const theme = useTheme();
 
   return (
     <Card key={post.slug}>
       <Card.Cover source={{uri: image}} />
       <Card.Content>
         <Text variant="headlineSmall">{post.title}</Text>
-        {isValid ? (
-          <Markdown
-            value={post.article}
-            flatListProps={{
-              initialNumToRender: 8,
-              contentContainerStyle: {
-                padding: 10,
-                marginRight: 0,
-                backgroundColor: theme.colors.background,
-              },
-            }}
-          />
-        ) : (
-          <Text>{post.article}</Text>
-        )}
+        <Markdown
+          style={{
+            body: {
+              backgroundColor: theme.colors.background,
+              color: theme.colors.onBackground,
+              fontSize: 14,
+            },
+          }}>
+          {post.article}
+        </Markdown>
       </Card.Content>
     </Card>
   );
