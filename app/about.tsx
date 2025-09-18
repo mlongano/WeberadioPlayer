@@ -67,6 +67,7 @@ const AboutScreen: React.FC = () => {
           style={{width: 200, height: 200}}
         />
       </TouchableOpacity>
+      <Text>About</Text>
       <Markdown
         style={{
           body: {
