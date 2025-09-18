@@ -54,6 +54,7 @@ const AboutScreen: React.FC = () => {
         source={require('./assets/logo.png')}
         style={{width: 200, height: 200}}
       />
+      <Text>About</Text>
       <Markdown
         value={about}
         flatListProps={{
