@@ -10,10 +10,21 @@
         "EXPO_PUBLIC_STRAPI_URL_BASE": "https://apiv4.webe.radio",
         "EXPO_PUBLIC_DEFAULT_PAGE_SIZE": "50",
         "EXPO_PUBLIC_COVER_SERVER_URL": "https://cover.webe.radio"
+      "android": {
+        "image": "latest",
+        "env": {
+          "ANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES": "ON"
+        }
       }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "android": {
+        "image": "latest",
+        "env": {
+          "ANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES": "ON"
+        }
+      }
     },
     "production": {
       "channel": "production",
@@ -23,7 +34,12 @@
         "EXPO_PUBLIC_COVER_SERVER_URL": "https://cover.webe.radio"
       },
       "android": {
-        "image": "latest"
+        "image": "latest",
+        "buildType": "app-bundle",
+        "gradleCommand": ":app:bundleRelease",
+        "env": {
+          "ANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES": "ON"
+        }
       },
       "ios": {
         "image": "latest"

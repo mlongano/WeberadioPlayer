@@ -35,7 +35,28 @@
       "favicon": "./app/assets/logo.png"
     },
     "plugins": [
-      "expo-router"
+      "expo-router",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableProguardInReleaseBuilds": false,
+            "proguardMinifyEnabled": false,
+            "packagingOptions": {
+              "pickFirst": [
+                "**/libc++_shared.so",
+                "**/libjsc.so"
+              ]
+            },
+            "compileSdkVersion": 35,
+            "targetSdkVersion": 35,
+            "buildToolsVersion": "35.0.0",
+            "supportLargeHeap": true,
+            "enableSeparateBuildPerCPUArchitecture": false,
+            "universalApk": false
+          }
+        }
+      ]
     ],
     "experiments": {
       "typedRoutes": true
