@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 7.3.0"
+    "version": ">= 7.3.0",
+    "appVersionSource": "local"
   },
   "build": {
     "development": {
@@ -9,9 +10,12 @@
       "env": {
         "EXPO_PUBLIC_STRAPI_URL_BASE": "https://apiv4.webe.radio",
         "EXPO_PUBLIC_DEFAULT_PAGE_SIZE": "50",
-        "EXPO_PUBLIC_COVER_SERVER_URL": "https://cover.webe.radio"
+        "EXPO_PUBLIC_COVER_SERVER_URL": "https://cover.webe.radio",
+        "EXPO_PUBLIC_STRAPI_API_TOKEN": "your-token-here"
+      },
       "android": {
         "image": "latest",
+        "autoIncrement": "versionCode",
         "env": {
           "ANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES": "ON"
         }
@@ -21,6 +25,7 @@
       "distribution": "internal",
       "android": {
         "image": "latest",
+        "autoIncrement": "versionCode",
         "env": {
           "ANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES": "ON"
         }
@@ -31,12 +36,14 @@
       "env": {
         "EXPO_PUBLIC_STRAPI_URL_BASE": "https://apiv4.webe.radio",
         "EXPO_PUBLIC_DEFAULT_PAGE_SIZE": "50",
-        "EXPO_PUBLIC_COVER_SERVER_URL": "https://cover.webe.radio"
+        "EXPO_PUBLIC_COVER_SERVER_URL": "https://cover.webe.radio",
+        "EXPO_PUBLIC_STRAPI_API_TOKEN": "your-token-here"
       },
       "android": {
         "image": "latest",
         "buildType": "app-bundle",
         "gradleCommand": ":app:bundleRelease",
+        "autoIncrement": "versionCode",
         "env": {
           "ANDROID_SUPPORT_FLEXIBLE_PAGE_SIZES": "ON"
         }
