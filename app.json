@@ -26,8 +26,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "radio.webe.app",
-      "versionCode": 10,
-      "targetSdkVersion": 35
+      "versionCode": 11
     },
     "web": {
       "bundler": "metro",
