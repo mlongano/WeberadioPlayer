@@ -1,15 +1,15 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome';
-import {DarkTheme, DefaultTheme, ThemeProvider} from '@react-navigation/native';
-import {useFonts} from 'expo-font';
-import {Stack} from 'expo-router';
+import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
+import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 
-import {useColorScheme} from 'react-native';
-import {PlaybackService} from './services/PlaybackService';
 import TrackPlayer from 'react-native-track-player';
-import React, {useEffect} from 'react';
-import {Provider as PaperProvider} from 'react-native-paper';
-import {MD3DarkTheme, MD3LightTheme} from 'react-native-paper';
+import { useColorScheme } from 'react-native';
+import { PlaybackService } from './services/PlaybackService';
+import React, { useEffect } from 'react';
+import { Provider as PaperProvider } from 'react-native-paper';
+import { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -69,14 +69,14 @@ function RootLayoutNav() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <PaperProvider theme={theme}>
         <Stack>
-          <Stack.Screen name="(tabs)" options={{headerShown: false}} />
+          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen
             name="about"
-            options={{title: 'Informazioni', presentation: 'modal'}}
+            options={{ title: 'Informazioni', presentation: 'modal' }}
           />
           <Stack.Screen
             name="episode"
-            options={{title: 'Episodio', presentation: 'modal'}}
+            options={{ title: 'Episodio', presentation: 'modal' }}
           />
         </Stack>
       </PaperProvider>

@@ -4,7 +4,7 @@ interface Props {
   ascoltatori: number;
   titleSize: number;
   subtitleSize: number;
-  color : string;
+  color: string;
 }
 
 export default function Header(

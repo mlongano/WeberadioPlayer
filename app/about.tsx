@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   View,
   StyleSheet,
@@ -6,9 +6,9 @@ import {
   TouchableOpacity,
   ScrollView,
 } from 'react-native';
-import {useTheme} from 'react-native-paper';
+import { useTheme } from 'react-native-paper';
 import Markdown from 'react-native-markdown-display';
-import {heroImageFetch, strapiFetch} from './api/fetch';
+import { heroImageFetch, strapiFetch } from './api/fetch';
 import * as Linking from 'expo-linking';
 
 const AboutScreen: React.FC = () => {
@@ -20,12 +20,12 @@ const AboutScreen: React.FC = () => {
     const fetchHomeScreenInfo = async () => {
       const {
         data: {
-          attributes: {title},
+          attributes: { title },
         },
         data: {
-          attributes: {about},
+          attributes: { about },
         },
-      } = await strapiFetch('/api/about-us', {fields: ['title', 'about']});
+      } = await strapiFetch('/api/about-us', { fields: ['title', 'about'] });
       const heroImage = await heroImageFetch('home_page');
       setTitle(title);
       setAbout(about);
@@ -64,10 +64,9 @@ const AboutScreen: React.FC = () => {
       <TouchableOpacity onPress={() => Linking.openURL('https://webe.radio')}>
         <Image
           source={require('./assets/logo.png')}
-          style={{width: 200, height: 200}}
+          style={{ width: 200, height: 200 }}
         />
       </TouchableOpacity>
-      <Text>About</Text>
       <Markdown
         style={{
           body: {
