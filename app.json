@@ -18,7 +18,10 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "radio.webe.app",
-      "buildNumber": "2.0.2"
+      "buildNumber": "2.0.3",
+      "infoPlist": {
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -26,7 +29,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "radio.webe.app",
-      "versionCode": 11
+      "versionCode": 13
     },
     "web": {
       "bundler": "metro",
@@ -52,7 +55,8 @@
             "buildToolsVersion": "35.0.0",
             "supportLargeHeap": true,
             "enableSeparateBuildPerCPUArchitecture": false,
-            "universalApk": false
+            "universalApk": false,
+            "enableMinifyInReleaseBuilds": false
           }
         }
       ]
