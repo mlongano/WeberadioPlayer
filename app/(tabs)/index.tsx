@@ -1,4 +1,4 @@
-import {useEffect, useState} from 'react';
+import { useEffect, useState } from 'react';
 import AlbumArt from '../components/AlbumArt';
 import TrackDetails from '../components/TrackDetails';
 import Controls from '../components/Controls';
@@ -10,15 +10,16 @@ import TrackPlayer, {
   AppKilledPlaybackBehavior,
 } from 'react-native-track-player';
 
-import {ScrollView, StyleSheet} from 'react-native';
+import { ScrollView, StyleSheet } from 'react-native';
 import VolumeControl from '../components/VolumeControl';
 import Header from '../components/Header';
 import useSongMetadata from '../hooks/useSongMetadata';
 import useAudioControls from '../hooks/useAudioControls';
-import {useTheme} from 'react-native-paper';
+import { useTheme } from 'react-native-paper';
+import React from 'react';
 
-export default function App(): JSX.Element {
-  const {songMetadata, cover} = useSongMetadata();
+export default function App(): React.JSX.Element {
+  const { songMetadata, cover } = useSongMetadata();
   const playbackState = usePlaybackState();
   //console.log("playbackState: ", playbackState);
   const [isPlayingTrackPlayer, setIsPlayingTrackPlayer] = useState(false);

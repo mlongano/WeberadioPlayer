@@ -1,7 +1,7 @@
 import qs from 'qs';
-import {Config} from '../utils/config';
-import {checkEnvVars, checkStatus} from '../utils/errorHandling';
-import {Episode, EpisodeQuery} from './types';
+import { Config } from '../utils/config';
+import { checkEnvVars, checkStatus } from '../utils/errorHandling';
+import { Episode, EpisodeQuery } from './types';
 
 const headers = {
   Authorization: `Bearer ${Config.STRAPI_API_TOKEN}`,
@@ -172,25 +172,26 @@ export const strapiFetch = async (
 ) => {
   const localFetch = async (queryPages: any) => {
     checkEnvVars();
+    // console.log(`Fetching from Strapi: ${Config.STRAPI_URL_BASE}${endpoint}?${qs.stringify(queryPages)}`, endpoint, queryPages);
     const response = await fetch(
       `${Config.STRAPI_URL_BASE}${endpoint}?${qs.stringify(queryPages)}`,
       {
         method: 'GET',
-        headers: headers,
+        // headers: headers,
       },
     );
-    checkStatus(response);
+    // checkStatus(response);
     const data = await response.json();
-
+    // console.log('Fetched data:', JSON.stringify(data, null, 2));
     if (data.error) {
-      throw new Response('Error getting data from Strapi', {status: 500});
+      throw new Response('Error getting data from Strapi', { status: 500 });
     }
     if (data?.data?.length === 0) {
       throw new Response(
         `No data for endpoint ${endpoint} with query "${JSON.stringify(
           query,
         )}" found`,
-        {status: 404},
+        { status: 404 },
       );
     }
 
@@ -330,7 +331,7 @@ export const postFetchFirst = async (slug: string) => {
 };
 
 export const flattenEpisode = (episode: EpisodeQuery): Episode => {
-  const {id, attributes} = episode;
+  const { id, attributes } = episode;
   return {
     id,
     title: attributes.title,
@@ -347,7 +348,7 @@ export const flattenEpisode = (episode: EpisodeQuery): Episode => {
       Config.STRAPI_URL_BASE + attributes.cover?.data?.attributes?.url,
     audioUrl: Config.STRAPI_URL_BASE + attributes.audio?.data?.attributes?.url,
     schools: attributes.schools?.data?.map((school: any) => {
-      const {id, attributes} = school;
+      const { id, attributes } = school;
       return {
         id,
         name: attributes.name,
@@ -367,7 +368,7 @@ export const flattenEpisode = (episode: EpisodeQuery): Episode => {
         attributes.podcast.data.attributes.cover?.data?.attributes?.url,
       schools: attributes.podcast.data.attributes.schools?.data?.map(
         (school: any) => {
-          const {id, attributes} = school;
+          const { id, attributes } = school;
           return {
             id,
             name: attributes.name,
