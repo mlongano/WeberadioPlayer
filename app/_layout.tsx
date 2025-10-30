@@ -4,9 +4,9 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 
-import TrackPlayer from 'react-native-track-player';
 import { useColorScheme } from 'react-native';
 import { PlaybackService } from './services/PlaybackService';
+import TrackPlayer, { Capability } from 'react-native-track-player';
 import React, { useEffect } from 'react';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
@@ -32,11 +32,32 @@ export default function RootLayout() {
 
   useEffect(() => {
     const setupTrackPlayer = async () => {
-      const isRegistered = await TrackPlayer.isServiceRunning();
-      if (!isRegistered) {
-        TrackPlayer.registerPlaybackService(() => PlaybackService);
+      try {
+        // In v5.x, just call setupPlayer directly
+        // The library handles service registration internally
+        await TrackPlayer.setupPlayer({
+          // Add any player options here if needed
+        });
+
+        // Optional: Set up capabilities
+        await TrackPlayer.updateOptions({
+          capabilities: [
+            Capability.Play,
+            Capability.Pause,
+            Capability.SkipToNext,
+            Capability.SkipToPrevious,
+            Capability.Stop,
+          ],
+        });
+
+      } catch (error) {
+        console.log('Error setting up TrackPlayer:', error);
       }
-      // Other initialization logic if needed
+      // const isRegistered = await TrackPlayer.isServiceRunning();
+      // if (!isRegistered) {
+      //   TrackPlayer.registerPlaybackService(() => PlaybackService);
+      // }
+      // // Other initialization logic if needed
     };
     setupTrackPlayer();
   }, []);
