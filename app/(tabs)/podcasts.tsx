@@ -12,7 +12,7 @@ const PodcastsScreen: React.FC = () => {
   const [lastSchoolsEpisode, setLastSchoolsEpisode] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [playingIndex, setPlayingIndex] = useState(-1);
-  const audioElements = useRef<Video[]>([]);
+  const audioElements = useRef<React.ComponentRef<typeof Video>[]>([]);
   const [currentTime, setCurrentTime] = useState<number[]>([]);
   const [duration, setDuration] = useState<number[]>([]);
 
@@ -208,7 +208,7 @@ const PodcastsScreen: React.FC = () => {
                 ref={(ref: any) => {
                   audioElements.current[index] = ref;
                 }}
-                audioOnly={true}
+                // audioOnly={true}
                 source={{uri: audioUrl}}
                 style={styles.audioPlayer}
                 paused={!isPlaying}
