@@ -1,9 +1,9 @@
 import React from 'react';
-import {Text, useTheme, Card} from 'react-native-paper';
+import { Text, useTheme, Card } from 'react-native-paper';
 import Markdown from 'react-native-markdown-display';
-import {Config} from '../utils/config';
+import { Config } from '../../src/utils/config';
 
-const ArticleCard: React.FC<ArticleCardProps> = ({post}) => {
+const ArticleCard: React.FC<ArticleCardProps> = ({ post }) => {
   const hash = post.image?.data?.attributes?.hash;
   const ext = post.image?.data?.attributes?.ext;
   const image = `${Config.STRAPI_URL_BASE}/uploads/small_${hash}${ext}`;
@@ -17,7 +17,7 @@ const ArticleCard: React.FC<ArticleCardProps> = ({post}) => {
 
   return (
     <Card key={post.slug}>
-      <Card.Cover source={{uri: image}} />
+      <Card.Cover source={{ uri: image }} />
       <Card.Content>
         <Text variant="headlineSmall">{post.title}</Text>
         <Markdown

@@ -1,6 +1,6 @@
 // hooks/useAudioControls.ts
 import { useState } from 'react';
-import { clamp } from '../utils/helpers';
+import { clamp } from '../../src/utils/helpers';
 import TrackPlayer from 'react-native-track-player';
 
 export default function useAudioControls() {

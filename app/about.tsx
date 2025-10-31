@@ -8,7 +8,7 @@ import {
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import Markdown from 'react-native-markdown-display';
-import { heroImageFetch, strapiFetch } from './api/fetch';
+import { heroImageFetch, strapiFetch } from '../src/api/fetch';
 import * as Linking from 'expo-linking';
 
 const AboutScreen: React.FC = () => {

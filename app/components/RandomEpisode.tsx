@@ -1,11 +1,11 @@
-import React, {useEffect, useState} from 'react';
-import {Config} from '../utils/config';
+import React, { useEffect, useState } from 'react';
+import { Config } from '../../src/utils/config';
 import LoadingSpinner from '../components/LoadingSpinner';
 import EpisodeCard from '../components/EpisodeCard';
-import {FlatList, RefreshControl} from 'react-native';
-import {flattenEpisode} from '../api/fetch';
+import { FlatList, RefreshControl } from 'react-native';
+import { flattenEpisode } from '../../src/api/fetch';
 
-const RandomEpisode: React.FC<{episodes: any[]}> = ({
+const RandomEpisode: React.FC<{ episodes: any[] }> = ({
   episodes,
 }: {
   episodes: any[];

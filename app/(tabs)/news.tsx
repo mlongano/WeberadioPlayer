@@ -1,7 +1,7 @@
-import React, {useState, useEffect} from 'react';
-import {View, StyleSheet, FlatList} from 'react-native';
-import {useTheme} from 'react-native-paper';
-import {postsFetchAll, queryPosts} from '../api/fetch';
+import React, { useState, useEffect } from 'react';
+import { View, StyleSheet, FlatList } from 'react-native';
+import { useTheme } from 'react-native-paper';
+import { postsFetchAll, queryPosts } from '../../src/api/fetch';
 import LoadingSpinner from '../components/LoadingSpinner';
 import ArticleCard from '../components/ArticleCard';
 
@@ -66,7 +66,7 @@ const NewsScreen: React.FC = () => {
     <FlatList
       style={styles.container}
       data={posts}
-      renderItem={({item}) => <ArticleCard post={item.attributes} />}
+      renderItem={({ item }) => <ArticleCard post={item.attributes} />}
       ListHeaderComponent={() => (
         <>
           {posts.map(item => (

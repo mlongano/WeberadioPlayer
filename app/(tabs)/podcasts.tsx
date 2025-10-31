@@ -1,9 +1,9 @@
-import React, {useState, useEffect, useRef} from 'react';
-import {StyleSheet, ScrollView} from 'react-native';
+import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, ScrollView } from 'react-native';
 import Video from 'react-native-video';
-import {Button, Card, Text, useTheme} from 'react-native-paper';
-import {Config} from '../utils/config';
-import {queryEpisodes, schoolsFetchAllBasic, strapiFetch} from '../api/fetch';
+import { Button, Card, Text, useTheme } from 'react-native-paper';
+import { Config } from '../../src/utils/config';
+import { queryEpisodes, schoolsFetchAllBasic, strapiFetch } from '../../src/api/fetch';
 import LoadingSpinner from '../components/LoadingSpinner';
 import SeekBar from '../components/SeekBar';
 import Markdown from 'react-native-markdown-display';
@@ -190,7 +190,7 @@ const PodcastsScreen: React.FC = () => {
         //console.log('isPlaying: ', index, isPlaying);
         return (
           <Card key={school.slug} style={styles.card}>
-            <Card.Cover source={{uri: coverImageUrl}} />
+            <Card.Cover source={{ uri: coverImageUrl }} />
             <Card.Content>
               <Text variant="headlineSmall">{school.short_name}</Text>
               <Text variant="titleMedium">{episode.title}</Text>
@@ -209,7 +209,7 @@ const PodcastsScreen: React.FC = () => {
                   audioElements.current[index] = ref;
                 }}
                 // audioOnly={true}
-                source={{uri: audioUrl}}
+                source={{ uri: audioUrl }}
                 style={styles.audioPlayer}
                 paused={!isPlaying}
                 onProgress={e => {

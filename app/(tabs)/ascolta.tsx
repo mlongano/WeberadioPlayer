@@ -1,5 +1,5 @@
-import React, {useEffect, useState} from 'react';
-import {episodesFetchAll, queryEpisodes} from '../api/fetch';
+import React, { useEffect, useState } from 'react';
+import { episodesFetchAll, queryEpisodes } from '../../src/api/fetch';
 import LoadingSpinner from '../components/LoadingSpinner';
 import RandomEpisode from '../components/RandomEpisode';
 

@@ -1,6 +1,6 @@
-import React, {useState, useEffect, useRef} from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
-import {View, Image, StyleSheet} from 'react-native';
+import { View, Image, StyleSheet } from 'react-native';
 import {
   Text,
   useTheme,
@@ -10,16 +10,16 @@ import {
   IconButton,
 } from 'react-native-paper';
 import Colors from '@/constants/Colors';
-import {useColorScheme} from '@/components/useColorScheme';
-import {episodesFetchAll, flattenEpisode, queryEpisodes} from '../api/fetch';
+import { useColorScheme } from '@/components/useColorScheme';
+import { episodesFetchAll, flattenEpisode, queryEpisodes } from '../../src/api/fetch';
 import Fuse from 'fuse.js';
 import LoadingSpinner from '../components/LoadingSpinner';
 
-import {useRouter} from 'expo-router';
+import { useRouter } from 'expo-router';
 import Markdown from 'react-native-markdown-display';
-import {EpisodeQuery} from '../api/types';
-import {FlatList, GestureHandlerRootView} from 'react-native-gesture-handler';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
+import { EpisodeQuery } from '../../src/api/types';
+import { FlatList, GestureHandlerRootView } from 'react-native-gesture-handler';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 type Episode = {
   title: string;
@@ -104,7 +104,7 @@ const ExploreScreen: React.FC = () => {
     return <LoadingSpinner />;
   }
 
-  const renderItem = ({item}: {item: EpisodeQuery}) => {
+  const renderItem = ({ item }: { item: EpisodeQuery }) => {
     const flatEpisode = flattenEpisode(item);
     const episodeParams: Episode = {
       title: flatEpisode.title,
@@ -119,10 +119,10 @@ const ExploreScreen: React.FC = () => {
     };
 
     return (
-      <Card style={{margin: 10}} onPress={() => {}}>
-        <Card.Cover source={{uri: flatEpisode.coverImageUrl}} />
+      <Card style={{ margin: 10 }} onPress={() => { }}>
+        <Card.Cover source={{ uri: flatEpisode.coverImageUrl }} />
         <Card.Content>
-          <Text style={{marginTop: 15}} variant="titleMedium">
+          <Text style={{ marginTop: 15 }} variant="titleMedium">
             {flatEpisode.podcast.title}
           </Text>
           {flatEpisode.schools.map((school: any) => (
@@ -132,7 +132,7 @@ const ExploreScreen: React.FC = () => {
           ))}
           <Text variant="bodySmall">{flatEpisode.date}</Text>
           <Text
-            style={{marginBottom: 5, marginTop: 10}}
+            style={{ marginBottom: 5, marginTop: 10 }}
             variant="headlineSmall">
             {flatEpisode.title}
           </Text>
@@ -167,10 +167,10 @@ const ExploreScreen: React.FC = () => {
   };
 
   return (
-    <GestureHandlerRootView style={{flex: 1}}>
+    <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
         <Searchbar
-          style={{marginBottom: 10, marginTop: 10}}
+          style={{ marginBottom: 10, marginTop: 10 }}
           value={searchQuery}
           onChangeText={text => setSearchQuery(text)}
           icon="magnify"
@@ -192,7 +192,7 @@ const ExploreScreen: React.FC = () => {
             <Text>Nessun episodio trovato</Text>
             <Image
               source={require('../assets/undraw_page_not_found_su7k.png')}
-              style={{resizeMode: 'contain', width: '100%', height: '100%'}}
+              style={{ resizeMode: 'contain', width: '100%', height: '100%' }}
             />
           </View>
         )}
@@ -204,7 +204,7 @@ const ExploreScreen: React.FC = () => {
             // previously configured Icon props
             style={styles.scrollTopButton}
             onPress={() => {
-              listRef.current!.scrollToOffset({offset: 0, animated: true});
+              listRef.current!.scrollToOffset({ offset: 0, animated: true });
             }}
           />
         )}
