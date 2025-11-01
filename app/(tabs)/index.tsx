@@ -7,6 +7,7 @@ import TrackPlayer, {
   State,
   Capability,
   RepeatMode,
+  Event,
   usePlaybackState,
   AppKilledPlaybackBehavior,
 } from 'react-native-track-player';
@@ -19,15 +20,29 @@ import useSongMetadata from '../hooks/useSongMetadata';
 import useAudioControls from '../hooks/useAudioControls';
 import { useTheme } from 'react-native-paper';
 import React from 'react';
+import { audioManager, AudioSource } from '../../src/services/AudioManager';
 
 export default function App(): React.JSX.Element {
   const { songMetadata, cover } = useSongMetadata();
   const playbackState = Platform.OS === 'android' ? usePlaybackState() : { state: State.Stopped };
-  //console.log("playbackState: ", playbackState);
   const [isPlayingTrackPlayer, setIsPlayingTrackPlayer] = useState(false);
   const [isPlayingIOS, setIsPlayingIOS] = useState(false);
+  const [currentSource, setCurrentSource] = useState<AudioSource | null>(null);
   const videoRef = useRef(null);
-  //const { position, buffered, duration } = useProgress();
+
+  // Listen for audio source changes
+  useEffect(() => {
+    const unsubscribe = audioManager.onSourceChange((source) => {
+      setCurrentSource(source);
+    });
+    return unsubscribe;
+  }, []);
+
+  useEffect(() => {
+    if (Platform.OS === 'android') {
+      setIsPlaying();
+    }
+  }, [playbackState]);
 
   useEffect(() => {
     if (Platform.OS === 'android' && songMetadata.title && songMetadata.artist) {
@@ -80,21 +95,21 @@ export default function App(): React.JSX.Element {
     volumeUp,
   } = useAudioControls();
 
-  const webeRadioStream = {
+  const webeRadioStream: AudioSource = {
     id: 'webe-radio-stream',
     url: 'https://stream.webe.radio/live',
     title: songMetadata.title || 'WeBe Radio',
     artist: songMetadata.artist || 'WeBe Radio',
     artwork: cover,
-    isLiveStream: true,
+    type: 'radio',
   };
 
-  const radioParadiseStream = {
+  const radioParadiseStream: AudioSource = {
     id: 'radio-paradise-stream',
     url: 'http://stream-uk1.radioparadise.com/aac-320',
     title: 'Radio Paradise',
     artist: 'Radio Paradise',
-    isLiveStream: true,
+    type: 'radio',
   };
 
   const tracks = [webeRadioStream];
@@ -102,20 +117,31 @@ export default function App(): React.JSX.Element {
   useEffect(() => {
     if (Platform.OS === 'android') {
       setupTrackPlayer();
+      // Also set up event listeners in the main app for notification controls
+      setupNotificationListeners();
     }
   }, []);
+
+  async function setupNotificationListeners() {
+    if (Platform.OS === 'android') {
+      // Add event listeners in the main app as backup
+      TrackPlayer.addEventListener(Event.RemotePlay, () => {
+        console.log('Main app: remote play triggered');
+        TrackPlayer.play();
+      });
+      TrackPlayer.addEventListener(Event.RemotePause, () => {
+        console.log('Main app: remote pause triggered');
+        TrackPlayer.pause();
+      });
+    }
+  }
 
   async function setupTrackPlayer() {
     if (Platform.OS === 'android') {
       try {
         // TrackPlayer is already set up globally in _layout.tsx
-        // Just add tracks and configure for this screen
-        await TrackPlayer.add([webeRadioStream]);
-        await TrackPlayer.setRepeatMode(RepeatMode.Queue);
-        // Start with volume at 50% instead of muted
-        await TrackPlayer.setVolume(0.5);
-        // Don't auto-play here, let user control playback
-        // await TrackPlayer.play();
+        // Just ensure we have the radio stream ready
+        // The AudioManager will handle the actual playback
       } catch (error) {
         console.log('Error setting up TrackPlayer: ', error);
       }
@@ -124,11 +150,11 @@ export default function App(): React.JSX.Element {
 
   async function togglePlayback() {
     if (Platform.OS === 'android') {
-      const currentState = await TrackPlayer.getPlaybackState();
-      if (currentState.state === State.Playing) {
-        await TrackPlayer.pause();
+      const isPlaying = await audioManager.isPlaying();
+      if (isPlaying) {
+        await audioManager.stop();
       } else {
-        await TrackPlayer.play();
+        await audioManager.playRadio(webeRadioStream);
       }
     } else {
       // iOS: toggle video playback
@@ -161,12 +187,12 @@ export default function App(): React.JSX.Element {
         onPressPause={togglePlayback}
         theme={theme}
       />
-      <AlbumArt url={cover} />
+      <AlbumArt url={currentSource?.artwork || cover} />
       <TrackDetails
-        title={songMetadata.title}
-        artist={songMetadata.artist}
-        album={songMetadata?.album || ''}
-        year={songMetadata?.year || ''}
+        title={currentSource?.title || songMetadata.title}
+        artist={currentSource?.artist || songMetadata.artist}
+        album={currentSource?.metadata?.album || songMetadata?.album || ''}
+        year={currentSource?.metadata?.year || songMetadata?.year || ''}
         theme={theme}
       />
       <VolumeControl

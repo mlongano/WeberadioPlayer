@@ -8,15 +8,32 @@ import LoadingSpinner from '../components/LoadingSpinner';
 import SeekBar from '../components/SeekBar';
 import Markdown from 'react-native-markdown-display';
 import TrackPlayer, { State, usePlaybackState, useProgress } from 'react-native-track-player';
+import { audioManager, AudioSource } from '../../src/services/AudioManager';
 
 const PodcastsScreen: React.FC = () => {
   const [lastSchoolsEpisode, setLastSchoolsEpisode] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState(-1);
   const [playingIndexIOS, setPlayingIndexIOS] = useState(-1);
+  const [currentSource, setCurrentSource] = useState<AudioSource | null>(null);
   const playbackState = Platform.OS === 'android' ? usePlaybackState() : { state: State.Stopped };
   const { position, duration } = Platform.OS === 'android' ? useProgress() : { position: 0, duration: 1 };
   const videoRefs = useRef<(React.ComponentRef<typeof Video> | null)[]>([]);
+
+  // Listen for audio source changes
+  useEffect(() => {
+    const unsubscribe = audioManager.onSourceChange((source) => {
+      setCurrentSource(source);
+      // Update current episode index based on playing source
+      if (source && source.type === 'podcast') {
+        const episodeIndex = parseInt(source.id.split('-')[1]);
+        setCurrentEpisodeIndex(episodeIndex);
+      } else {
+        setCurrentEpisodeIndex(-1);
+      }
+    });
+    return unsubscribe;
+  }, []);
 
   const handlePlay = async (index: number) => {
     if (Platform.OS === 'android') {
@@ -26,24 +43,29 @@ const PodcastsScreen: React.FC = () => {
 
       if (currentEpisodeIndex === index) {
         // Same episode - toggle play/pause
-        if (playbackState.state === State.Playing) {
-          await TrackPlayer.pause();
+        const isPlaying = await audioManager.isPlaying();
+        if (isPlaying) {
+          await audioManager.stop();
         } else {
-          await TrackPlayer.play();
+          // Resume the current episode
+          const currentSource = audioManager.getCurrentSource();
+          if (currentSource) {
+            await audioManager.playPodcast(currentSource);
+          }
         }
       } else {
         // Different episode - load and play
-        const track = {
+        const podcastSource: AudioSource = {
           id: `podcast-${index}`,
           url: audioUrl,
           title: episode.title,
           artist: school.short_name,
           artwork: Config.STRAPI_URL_BASE + episode?.cover?.data?.attributes?.url,
+          type: 'podcast',
+          isLiveStream: false,
         };
 
-        await TrackPlayer.reset();
-        await TrackPlayer.add([track]);
-        await TrackPlayer.play();
+        await audioManager.playPodcast(podcastSource);
         setCurrentEpisodeIndex(index);
       }
     } else {
@@ -191,7 +213,7 @@ const PodcastsScreen: React.FC = () => {
         const audioUrl =
           Config.STRAPI_URL_BASE + episode?.audio?.data?.attributes?.url;
         const isPlaying = Platform.OS === 'android'
-          ? (index === currentEpisodeIndex && playbackState.state === State.Playing)
+          ? (currentSource && currentSource.id === `podcast-${index}` && playbackState.state === State.Playing)
           : (index === playingIndexIOS);
         //console.log('isPlaying: ', index, isPlaying);
         return (

@@ -38,7 +38,8 @@ export default function RootLayout() {
       const setupTrackPlayer = async () => {
         try {
           // In v5.x, register the playback service
-          TrackPlayer.registerPlaybackService(() => PlaybackService);
+          console.log('Registering PlaybackService...');
+          TrackPlayer.registerPlaybackService(() => require('../src/services/PlaybackService').PlaybackService);
 
           await TrackPlayer.setupPlayer({
             // Add any player options here if needed
