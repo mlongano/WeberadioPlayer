@@ -64,5 +64,15 @@
     "react-test-renderer": "19.1.1",
     "typescript": "^5.1.3"
   },
+  "expo": {
+    "doctor": {
+      "reactNativeDirectoryCheck": {
+        "exclude": [
+          "react-native-track-player",
+          "react-native-vector-icons"
+        ]
+      }
+    }
+  },
   "private": true
 }
