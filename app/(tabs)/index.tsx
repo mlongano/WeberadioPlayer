@@ -56,10 +56,10 @@ export default function App(): React.JSX.Element {
   }, [playbackState]);
 
   useEffect(() => {
-    if (Platform.OS === 'android' && songMetadata.title && songMetadata.artist) {
+    if (Platform.OS === 'android' && songMetadata.title && songMetadata.artist && currentSource?.id === webeRadioStream.id) {
       updateTrackPlayerMetadata();
     }
-  }, [songMetadata, cover]);
+  }, [songMetadata, cover, currentSource]);
 
   useEffect(() => {
     if (Platform.OS === 'android') {

@@ -22,6 +22,8 @@ class AudioManager {
   // Subscribe to source changes
   onSourceChange(callback: (source: AudioSource | null) => void) {
     this.listeners.push(callback);
+    // Immediately notify with current source
+    callback(this.currentSource);
     return () => {
       this.listeners = this.listeners.filter(listener => listener !== callback);
     };
