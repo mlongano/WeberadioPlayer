@@ -32,7 +32,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "radio.webe.app",
-      "versionCode": 17,
+      "versionCode": 18,
       "resizableActivity": true,
       "edgeToEdgeEnabled": true,
       "permissions": [
