@@ -2,7 +2,7 @@
   "expo": {
     "name": "WeBeRadioApp",
     "slug": "webe-radio-app",
-    "version": "5.0.3",
+    "version": "5.1.0",
     "orientation": "portrait",
     "icon": "./app/assets/logo.png",
     "scheme": "webe",
@@ -18,7 +18,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "radio.webe.app",
-      "buildNumber": "2.0.3",
+      "buildNumber": "2.1.0",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "UIBackgroundModes": [
@@ -32,7 +32,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "radio.webe.app",
-      "versionCode": 14,
+      "versionCode": 17,
       "permissions": [
         "android.permission.WAKE_LOCK",
         "android.permission.FOREGROUND_SERVICE",
