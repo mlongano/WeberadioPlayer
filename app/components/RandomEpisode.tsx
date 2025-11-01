@@ -16,15 +16,23 @@ const RandomEpisode: React.FC<{ episodes: any[] }> = ({
   const selectRandomEpisode = () => {
     //console.log('fetchedEpisodes', JSON.stringify(episodes, null, 2));
     if (!episodes || episodes.length === 0) return; // Guard against missing episodes
-    const numberOfEpisodes = episodes?.length ?? 0;
-    const selectedEpisodeIndex = Math.floor(Math.random() * numberOfEpisodes);
-    let randomEpisode = flattenEpisode(episodes[selectedEpisodeIndex]);
 
-    // TODO: Find a better way to handle missing audio URLs
-    while (!randomEpisode.audioUrl) {
-      const randomIndex = Math.floor(Math.random() * numberOfEpisodes);
-      randomEpisode = flattenEpisode(episodes[randomIndex]);
+    // Pre-filter episodes with valid audio URLs
+    const episodesWithAudio = episodes.filter(ep => {
+      const flattened = flattenEpisode(ep);
+      return flattened.audioUrl && flattened.audioUrl.trim() !== '';
+    });
+
+    // Fallback if no episodes have audio
+    if (episodesWithAudio.length === 0) {
+      console.warn('No episodes with valid audio URLs found');
+      setSelectedEpisode(null);
+      return;
     }
+
+    // Select random episode from filtered list
+    const randomIndex = Math.floor(Math.random() * episodesWithAudio.length);
+    const randomEpisode = flattenEpisode(episodesWithAudio[randomIndex]);
 
     setSelectedEpisode(randomEpisode);
   };
