@@ -5,8 +5,8 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 
 import { useColorScheme } from 'react-native';
-import { PlaybackService } from './services/PlaybackService';
-import TrackPlayer, { Capability } from 'react-native-track-player';
+import TrackPlayer, { Capability, AppKilledPlaybackBehavior } from 'react-native-track-player';
+import { PlaybackService } from '../src/services/PlaybackService';
 import React, { useEffect } from 'react';
 import { Provider as PaperProvider } from 'react-native-paper';
 import { MD3DarkTheme, MD3LightTheme } from 'react-native-paper';
@@ -33,14 +33,19 @@ export default function RootLayout() {
   useEffect(() => {
     const setupTrackPlayer = async () => {
       try {
-        // In v5.x, just call setupPlayer directly
-        // The library handles service registration internally
+        // In v5.x, register the playback service
+        TrackPlayer.registerPlaybackService(() => PlaybackService);
+
         await TrackPlayer.setupPlayer({
           // Add any player options here if needed
         });
 
         // Optional: Set up capabilities
         await TrackPlayer.updateOptions({
+          android: {
+            appKilledPlaybackBehavior:
+              AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
+          },
           capabilities: [
             Capability.Play,
             Capability.Pause,

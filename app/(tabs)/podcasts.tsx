@@ -1,51 +1,46 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { StyleSheet, ScrollView } from 'react-native';
-import Video from 'react-native-video';
 import { Button, Card, Text, useTheme } from 'react-native-paper';
 import { Config } from '../../src/utils/config';
 import { queryEpisodes, schoolsFetchAllBasic, strapiFetch } from '../../src/api/fetch';
 import LoadingSpinner from '../components/LoadingSpinner';
 import SeekBar from '../components/SeekBar';
 import Markdown from 'react-native-markdown-display';
+import TrackPlayer, { State, usePlaybackState, useProgress } from 'react-native-track-player';
 
 const PodcastsScreen: React.FC = () => {
   const [lastSchoolsEpisode, setLastSchoolsEpisode] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [playingIndex, setPlayingIndex] = useState(-1);
-  const audioElements = useRef<React.ComponentRef<typeof Video>[]>([]);
-  const [currentTime, setCurrentTime] = useState<number[]>([]);
-  const [duration, setDuration] = useState<number[]>([]);
+  const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState(-1);
+  const playbackState = usePlaybackState();
+  const { position, duration } = useProgress();
 
-  function seek(index: number, time: number, isPlaying = true) {
-    time = Math.round(time);
-    audioElements.current[index] && audioElements.current[index].seek(time);
-    const newCurrentTime = [...currentTime];
-    newCurrentTime[index] = time;
-    setCurrentTime(newCurrentTime);
-    setPlaying(index, isPlaying);
-  }
+  const handlePlay = async (index: number) => {
+    const episode = lastSchoolsEpisode[index]?.episode?.attributes;
+    const school = lastSchoolsEpisode[index]?.school;
+    const audioUrl = Config.STRAPI_URL_BASE + episode?.audio?.data?.attributes?.url;
 
-  function onSeeking(index: number) {
-    return (time: number) => {
-      seek(index, time, true);
-    };
-  }
-
-  const setPlaying = (index: number, isPlaying: boolean) => {
-    if (playingIndex === index && !isPlaying) {
-      setPlayingIndex(-1);
+    if (currentEpisodeIndex === index) {
+      // Same episode - toggle play/pause
+      if (playbackState.state === State.Playing) {
+        await TrackPlayer.pause();
+      } else {
+        await TrackPlayer.play();
+      }
     } else {
-      setPlayingIndex(index);
-    }
-  };
+      // Different episode - load and play
+      const track = {
+        id: `podcast-${index}`,
+        url: audioUrl,
+        title: episode.title,
+        artist: school.short_name,
+        artwork: Config.STRAPI_URL_BASE + episode?.cover?.data?.attributes?.url,
+      };
 
-  const handlePlay = (index: number) => {
-    if (playingIndex !== -1 && playingIndex !== index) {
-      setPlayingIndex(index);
-    } else if (playingIndex !== -1) {
-      setPlayingIndex(-1);
-    } else {
-      setPlayingIndex(index);
+      await TrackPlayer.reset();
+      await TrackPlayer.add([track]);
+      await TrackPlayer.play();
+      setCurrentEpisodeIndex(index);
     }
   };
 
@@ -105,9 +100,6 @@ const PodcastsScreen: React.FC = () => {
           }
           return 0;
         });
-
-        setCurrentTime(episodes.map(() => 0));
-        setDuration(episodes.map(() => 1));
 
         setLastSchoolsEpisode(episodes);
         setLoading(false);
@@ -186,7 +178,7 @@ const PodcastsScreen: React.FC = () => {
           Config.STRAPI_URL_BASE + episode?.cover?.data?.attributes?.url;
         const audioUrl =
           Config.STRAPI_URL_BASE + episode?.audio?.data?.attributes?.url;
-        const isPlaying = index === playingIndex;
+        const isPlaying = index === currentEpisodeIndex && playbackState.state === State.Playing;
         //console.log('isPlaying: ', index, isPlaying);
         return (
           <Card key={school.slug} style={styles.card}>
@@ -204,38 +196,17 @@ const PodcastsScreen: React.FC = () => {
                 }}>
                 {episode.description ?? ''}
               </Markdown>
-              <Video
-                ref={(ref: any) => {
-                  audioElements.current[index] = ref;
-                }}
-                // audioOnly={true}
-                source={{ uri: audioUrl }}
-                style={styles.audioPlayer}
-                paused={!isPlaying}
-                onProgress={e => {
-                  setCurrentTime(prev => {
-                    const newCurrentTime = [...prev];
-                    newCurrentTime[index] = e.currentTime;
-                    return newCurrentTime;
-                  });
-                  setDuration(prev => {
-                    const newDuration = [...prev];
-                    newDuration[index] = e.seekableDuration;
-                    return newDuration;
-                  });
-                }}
-                onEnd={() => {
-                  setPlayingIndex(-1);
-                  seek(index, 0);
-                }}
-              />
-              <SeekBar
-                onSeek={onSeeking(index)}
-                trackLength={duration[index]}
-                onSlidingStart={() => setPlaying(index, true)}
-                currentPosition={currentTime[index]}
-                theme={theme}
-              />
+              {index === currentEpisodeIndex && (
+                <SeekBar
+                  onSeek={async (time: number) => {
+                    await TrackPlayer.seekTo(time);
+                  }}
+                  trackLength={duration}
+                  onSlidingStart={() => { }}
+                  currentPosition={position}
+                  theme={theme}
+                />
+              )}
             </Card.Content>
             <Card.Actions>
               <Button

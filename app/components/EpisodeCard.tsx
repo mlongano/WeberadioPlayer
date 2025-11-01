@@ -1,10 +1,10 @@
 import Markdown from 'react-native-markdown-display';
-import {Image, ScrollView, StyleSheet} from 'react-native';
-import {Button, Text, useTheme} from 'react-native-paper';
-import {useRef, useState} from 'react';
-import Video from 'react-native-video';
+import { Image, ScrollView, StyleSheet } from 'react-native';
+import { Button, Text, useTheme } from 'react-native-paper';
+import { useRef, useState } from 'react';
+import Video, { VideoRef } from 'react-native-video';
 import SeekBar from './SeekBar';
-import {EpisodeCardProps} from '@/types';
+import { EpisodeCardProps } from '@/types';
 
 export default function EpisodeCard({
   title,
@@ -19,7 +19,7 @@ export default function EpisodeCard({
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [duration, setDuration] = useState<number>(0);
 
-  const audioElement = useRef<Video>(null);
+  const audioElement = useRef<VideoRef>(null);
 
   function seek(time: number, isPlaying = true) {
     time = Math.round(time);
@@ -85,7 +85,7 @@ export default function EpisodeCard({
       <Text style={styles.title}>{cardTitle}</Text>
       <Text style={styles.subtitle}>{cardSubtitle}</Text>
       <Image
-        source={{uri: `${imageUrl}`}}
+        source={{ uri: `${imageUrl}` }}
         style={{
           width: 300,
           height: 300,
@@ -96,10 +96,11 @@ export default function EpisodeCard({
       />
       <Video
         ref={audioElement}
-        source={{uri: `${audioUrl}`}}
-        style={{width: 0, height: 0}}
-        audioOnly={true}
+        source={{ uri: `${audioUrl}` }}
+        style={{ width: 0, height: 0 }}
         paused={!isPlaying}
+        playInBackground={true}
+        playWhenInactive={true}
         onProgress={e => {
           setCurrentTime(e.currentTime);
           setDuration(e.seekableDuration);

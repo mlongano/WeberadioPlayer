@@ -20,7 +20,10 @@
       "bundleIdentifier": "radio.webe.app",
       "buildNumber": "2.0.3",
       "infoPlist": {
-        "ITSAppUsesNonExemptEncryption": false
+        "ITSAppUsesNonExemptEncryption": false,
+        "UIBackgroundModes": [
+          "audio"
+        ]
       }
     },
     "android": {
@@ -29,7 +32,21 @@
         "backgroundColor": "#ffffff"
       },
       "package": "radio.webe.app",
-      "versionCode": 13
+      "versionCode": 14,
+      "permissions": [
+        "android.permission.WAKE_LOCK",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK"
+      ],
+      "intentFilters": [
+        {
+          "action": "android.intent.action.MEDIA_BUTTON",
+          "category": "android.intent.category.DEFAULT"
+        },
+        {
+          "action": "android.intent.action.HEADSET_PLUG"
+        }
+      ]
     },
     "web": {
       "bundler": "metro",
@@ -38,6 +55,7 @@
     },
     "plugins": [
       "expo-router",
+      "./plugins/withTrackPlayer.js",
       [
         "expo-build-properties",
         {
