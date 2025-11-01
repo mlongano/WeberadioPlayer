@@ -30,10 +30,31 @@ export default function App(): React.JSX.Element {
   //const { position, buffered, duration } = useProgress();
 
   useEffect(() => {
+    if (Platform.OS === 'android' && songMetadata.title && songMetadata.artist) {
+      updateTrackPlayerMetadata();
+    }
+  }, [songMetadata, cover]);
+
+  useEffect(() => {
     if (Platform.OS === 'android') {
       setIsPlaying();
     }
   }, [playbackState]);
+
+  async function updateTrackPlayerMetadata() {
+    if (Platform.OS === 'android') {
+      try {
+        await TrackPlayer.updateNowPlayingMetadata({
+          title: songMetadata.title,
+          artist: songMetadata.artist,
+          album: songMetadata.album || 'WeBe Radio',
+          artwork: cover,
+        });
+      } catch (error) {
+        console.log('Error updating TrackPlayer metadata: ', error);
+      }
+    }
+  }
 
   async function setIsPlaying() {
     if (Platform.OS === 'android') {
@@ -62,8 +83,9 @@ export default function App(): React.JSX.Element {
   const webeRadioStream = {
     id: 'webe-radio-stream',
     url: 'https://stream.webe.radio/live',
-    title: 'WeBe Radio',
-    artist: 'WeBe Radio',
+    title: songMetadata.title || 'WeBe Radio',
+    artist: songMetadata.artist || 'WeBe Radio',
+    artwork: cover,
     isLiveStream: true,
   };
 
@@ -88,7 +110,7 @@ export default function App(): React.JSX.Element {
       try {
         // TrackPlayer is already set up globally in _layout.tsx
         // Just add tracks and configure for this screen
-        await TrackPlayer.add(tracks);
+        await TrackPlayer.add([webeRadioStream]);
         await TrackPlayer.setRepeatMode(RepeatMode.Queue);
         // Start with volume at 50% instead of muted
         await TrackPlayer.setVolume(0.5);

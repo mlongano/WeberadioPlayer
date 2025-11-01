@@ -58,7 +58,7 @@ const Controls: React.FC<Props> = ({
         </TouchableOpacity> :
         <TouchableOpacity onPress={onPressPause}>
           <View style={styles.playButton}>
-            <Icon name={'stop'} size={50} color={theme ? theme.colors.primary : 'rgb(253 224 71)'} />
+            <Icon name={'pause'} size={50} color={theme ? theme.colors.primary : 'rgb(253 224 71)'} />
           </View>
         </TouchableOpacity>
       }

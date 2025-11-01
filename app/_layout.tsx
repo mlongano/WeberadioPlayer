@@ -104,6 +104,7 @@ function RootLayoutNav() {
             name="episode"
             options={{ title: 'Episodio', presentation: 'modal' }}
           />
+          <Stack.Screen name="+not-found" options={{ title: 'Not Found' }} />
         </Stack>
       </PaperProvider>
     </ThemeProvider>
