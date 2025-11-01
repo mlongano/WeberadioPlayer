@@ -5,31 +5,30 @@ import {
   Image,
   TouchableOpacity,
   ScrollView,
+  Text,
 } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import Markdown from 'react-native-markdown-display';
-import { heroImageFetch, strapiFetch } from '../src/api/fetch';
+import { strapiFetch } from '../src/api/fetch';
 import * as Linking from 'expo-linking';
 
 const AboutScreen: React.FC = () => {
   const [title, setTitle] = useState<string>('');
   const [about, setAbout] = useState<string>('');
-  const [heroImage, setHeroImage] = useState<string>('');
 
   useEffect(() => {
     const fetchHomeScreenInfo = async () => {
-      const {
-        data: {
-          attributes: { title },
-        },
-        data: {
-          attributes: { about },
-        },
-      } = await strapiFetch('/api/about-us', { fields: ['title', 'about'] });
-      const heroImage = await heroImageFetch('home_page');
-      setTitle(title);
-      setAbout(about);
-      setHeroImage(heroImage);
+      try {
+        const result = await strapiFetch('/api/about-us', { fields: ['title', 'about'] });
+        const { title, about } = result.data.attributes;
+        setTitle(title);
+        setAbout(about);
+      } catch (error) {
+        console.error('Error fetching about data:', error);
+        // Set default values if fetch fails
+        setTitle('WeBe Radio');
+        setAbout('Welcome to WeBe Radio - your favorite radio station!');
+      }
     };
 
     fetchHomeScreenInfo();
@@ -67,6 +66,9 @@ const AboutScreen: React.FC = () => {
           style={{ width: 200, height: 200 }}
         />
       </TouchableOpacity>
+      {title ? (
+        <Text style={styles.title}>{title}</Text>
+      ) : null}
       <Markdown
         style={{
           body: {
