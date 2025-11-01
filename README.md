@@ -15,7 +15,7 @@ A cross-platform React Native radio player app built with Expo, featuring live r
 
 ### Audio Management System
 
-The app uses a sophisticated **AudioManager** architecture to handle multiple audio sources seamlessly:
+The app uses a sophisticated **AudioManager** architecture to handle multiple audio sources seamlessly across both Android and iOS platforms:
 
 #### Core Components
 
@@ -24,7 +24,9 @@ The app uses a sophisticated **AudioManager** architecture to handle multiple au
 - Central coordinator for all audio playback operations
 - Manages source switching between radio and podcasts
 - Provides observer pattern for real-time updates
-- Handles platform-specific implementations (TrackPlayer for Android, Video for iOS)
+- **Unified cross-platform support**: TrackPlayer for Android, Video components for iOS
+- **Video ref management**: Registers and controls Video components on iOS
+- **Platform-aware playback**: Automatic detection and appropriate audio implementation
 
 #### AudioSource Interface
 
@@ -60,6 +62,7 @@ interface AudioSource {
 - Observer pattern keeps all UI components in sync
 - Platform-aware playback (TrackPlayer vs Video component)
 - Unified play/pause controls across different sources
+- **Cross-platform consistency**: Same API and behavior on Android and iOS
 
 ### Component Structure
 
@@ -101,24 +104,33 @@ app/
 
 ## 🔧 Technical Implementation
 
-### Android (TrackPlayer v5)
+### Unified AudioManager Architecture
+
+The AudioManager provides a single API for audio playback across both platforms:
+
+#### Android Implementation (TrackPlayer v5)
 
 - Background service for persistent playback
 - Notification controls (play/pause/skip)
 - Live metadata updates
 - Proper audio focus management
 
-### iOS (react-native-video)
+#### iOS Streaming Considerations
 
-- Background audio support
-- Native video component for audio playback
-- Platform-specific optimizations
+iOS uses the Video component for audio playback, which may show MediaToolbox warnings for streaming audio. These are typically non-critical and don't affect functionality:
 
-### Cross-Platform Features
+- **ICY Protocol Warnings**: Expected for streams with metadata (like WeBe Radio)
+- **AAC Codec Warnings**: May appear for AAC-encoded streams (like Radio Paradise)
+- **HLS Streaming Warnings**: Can occur with adaptive bitrate streams
 
-- Unified AudioManager interface
-- Platform detection and conditional logic
-- Shared UI components with platform adaptations
+The app is configured with optimized Video component settings for streaming audio.
+
+#### Cross-Platform Features
+
+- **Unified API**: Same `audioManager.playRadio()` and `audioManager.playPodcast()` calls work on both platforms
+- **Video Ref Management**: Components register Video refs with AudioManager for iOS control
+- **Platform Detection**: Automatic selection of appropriate audio implementation
+- **State Synchronization**: Consistent `isPlaying()` and `currentSource` across platforms
 
 ## 📱 Usage
 
@@ -152,6 +164,24 @@ const podcastSource = {
 };
 
 await audioManager.playPodcast(podcastSource);
+```
+
+### iOS Video Component Registration
+
+For iOS, components must register their Video refs with AudioManager:
+
+```typescript
+// In component useEffect
+useEffect(() => {
+  if (Platform.OS === 'ios') {
+    audioManager.registerVideoRef('unique-video-id', videoRef.current);
+  }
+  return () => {
+    if (Platform.OS === 'ios') {
+      audioManager.unregisterVideoRef('unique-video-id');
+    }
+  };
+}, []);
 ```
 
 ### Listening for Changes
@@ -239,11 +269,22 @@ npx expo build:ios
 - **Solution**: Dual event listeners (background service + main app)
 - **Fallback**: String-based event names for compatibility
 
-### Source Switching Conflicts
+### iOS MediaToolbox Errors
 
-- **Problem**: Multiple audio sources interfering
-- **Solution**: AudioManager with reset() before new playback
-- **Result**: Clean transitions between radio and podcasts
+The following MediaToolbox errors are expected when playing streaming audio on iOS and don't affect functionality:
+
+- `err=-12640 (ICY PUMP)`: ICY metadata protocol warnings
+- `err=-15514 (HLS-FASB)`: HLS streaming protocol warnings
+- `err=-12864 (FigFilePlayer)`: Audio codec negotiation warnings
+- `err=-16020 (Fig)`: Audio format detection warnings
+
+These occur because iOS Video component expects standard video formats, but we're using it for streaming audio. The errors are logged but playback continues normally.
+
+### Cross-Platform AudioManager Integration ✅ RESOLVED
+
+- **Previous Problem**: AudioManager only worked on Android, iOS used separate Video implementations
+- **Solution**: Extended AudioManager with Video ref management for unified iOS support
+- **Result**: Single AudioManager API works across both Android and iOS platforms
 
 ## 🤝 Contributing
 
