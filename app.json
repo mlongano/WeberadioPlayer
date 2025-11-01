@@ -18,7 +18,7 @@
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "radio.webe.app",
-      "buildNumber": "2.1.0",
+      "buildNumber": "2.1.1",
       "infoPlist": {
         "ITSAppUsesNonExemptEncryption": false,
         "UIBackgroundModes": [
@@ -32,8 +32,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "radio.webe.app",
-      "versionCode": 18,
-      "resizableActivity": true,
+      "versionCode": 20,
       "edgeToEdgeEnabled": true,
       "permissions": [
         "android.permission.WAKE_LOCK",
@@ -76,7 +75,8 @@
             "supportLargeHeap": true,
             "enableSeparateBuildPerCPUArchitecture": false,
             "universalApk": false,
-            "enableMinifyInReleaseBuilds": false
+            "enableMinifyInReleaseBuilds": false,
+            "resizableActivity": true
           }
         }
       ],
