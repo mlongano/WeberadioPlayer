@@ -2,6 +2,7 @@
 import { useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
 import { io } from 'socket.io-client';
+import { fixEncoding } from '../../src/utils/helpers';
 
 interface SongMetadata {
   title: string;
@@ -44,8 +45,18 @@ export default function useSongMetadata() {
 
       socket.on('metadata', (data) => {
         //console.log("metadata: ", data);
-        setSongMetadata(data);
-        setCover(data.coverUrl || defaultCover);
+        // Fix character encoding issues from radio streams
+        const fixedData = {
+          ...data,
+          title: fixEncoding(data.title || ''),
+          artist: fixEncoding(data.artist || ''),
+          album: fixEncoding(data.album || ''),
+          year: data.year, // Year is usually numeric, no encoding issues
+          coverUrl: data.coverUrl,
+          listeners: data.listeners,
+        };
+        setSongMetadata(fixedData);
+        setCover(fixedData.coverUrl || defaultCover);
       });
     } catch (e) {
       console.log("Error: ", e);
