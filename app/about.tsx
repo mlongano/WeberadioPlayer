@@ -58,6 +58,7 @@ const AboutScreen: React.FC = () => {
       alignItems: 'center',
     },
     title: {
+      color: theme.colors.onBackground,
       fontSize: 24,
       fontWeight: 'bold',
       marginTop: 20,
