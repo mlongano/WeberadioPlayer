@@ -26,9 +26,20 @@ export default function App(): React.JSX.Element {
   const { songMetadata, cover } = useSongMetadata();
   const playbackState = Platform.OS === 'android' ? usePlaybackState() : { state: State.Stopped };
   const [isPlayingTrackPlayer, setIsPlayingTrackPlayer] = useState(false);
-  const [isPlayingIOS, setIsPlayingIOS] = useState(false);
   const [currentSource, setCurrentSource] = useState<AudioSource | null>(null);
   const videoRef = useRef(null);
+
+  // Register Video ref with AudioManager for iOS
+  useEffect(() => {
+    if (Platform.OS === 'ios') {
+      audioManager.registerVideoRef(webeRadioStream.id, videoRef.current);
+    }
+    return () => {
+      if (Platform.OS === 'ios') {
+        audioManager.unregisterVideoRef(webeRadioStream.id);
+      }
+    };
+  }, []);
 
   // Listen for audio source changes
   useEffect(() => {
@@ -149,16 +160,11 @@ export default function App(): React.JSX.Element {
   }
 
   async function togglePlayback() {
-    if (Platform.OS === 'android') {
-      const isPlaying = await audioManager.isPlaying();
-      if (isPlaying) {
-        await audioManager.stop();
-      } else {
-        await audioManager.playRadio(webeRadioStream);
-      }
+    const isPlaying = await audioManager.isPlaying();
+    if (isPlaying) {
+      await audioManager.stop();
     } else {
-      // iOS: toggle video playback
-      setIsPlayingIOS(!isPlayingIOS);
+      await audioManager.playRadio(webeRadioStream);
     }
   }
   const theme = useTheme();
@@ -182,7 +188,7 @@ export default function App(): React.JSX.Element {
         subtitleSize={10}
       />
       <Controls
-        isPlaying={Platform.OS === 'android' ? isPlayingTrackPlayer : isPlayingIOS}
+        isPlaying={Platform.OS === 'android' ? isPlayingTrackPlayer : (currentSource !== null)}
         onPressPlay={togglePlayback}
         onPressPause={togglePlayback}
         theme={theme}
@@ -206,13 +212,45 @@ export default function App(): React.JSX.Element {
       {Platform.OS === 'ios' && (
         <Video
           ref={videoRef}
-          source={{ uri: webeRadioStream.url }}
+          source={{
+            uri: webeRadioStream.url,
+            headers: {
+              'User-Agent': 'WeBeRadioApp/1.0',
+              'Accept': '*/*',
+              'Icy-MetaData': '1',
+            },
+            type: 'mp3', // Specify stream type
+          }}
           style={styles.audioElement}
-          paused={!isPlayingIOS}
+          paused={currentSource?.id !== webeRadioStream.id}
           repeat={true}
           playInBackground={true}
           playWhenInactive={true}
           ignoreSilentSwitch="ignore"
+          disableFocus={true}
+          resizeMode="cover"
+          controls={false}
+          muted={false}
+          volume={1.0}
+          rate={1.0}
+          bufferConfig={{
+            minBufferMs: 15000,
+            maxBufferMs: 50000,
+            bufferForPlaybackMs: 2500,
+            bufferForPlaybackAfterRebufferMs: 5000,
+          }}
+          onError={(error) => {
+            console.log('iOS Video Error:', error);
+          }}
+          onLoadStart={() => {
+            console.log('iOS Video Load Start');
+          }}
+          onLoad={() => {
+            console.log('iOS Video Loaded');
+          }}
+          onBuffer={(buffer) => {
+            console.log('iOS Video Buffer:', buffer);
+          }}
         />
       )}
     </ScrollView>

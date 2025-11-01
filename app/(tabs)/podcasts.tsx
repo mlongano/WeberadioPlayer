@@ -14,7 +14,6 @@ const PodcastsScreen: React.FC = () => {
   const [lastSchoolsEpisode, setLastSchoolsEpisode] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState(-1);
-  const [playingIndexIOS, setPlayingIndexIOS] = useState(-1);
   const [currentSource, setCurrentSource] = useState<AudioSource | null>(null);
   const playbackState = Platform.OS === 'android' ? usePlaybackState() : { state: State.Stopped };
   const { position, duration } = Platform.OS === 'android' ? useProgress() : { position: 0, duration: 1 };
@@ -36,45 +35,36 @@ const PodcastsScreen: React.FC = () => {
   }, []);
 
   const handlePlay = async (index: number) => {
-    if (Platform.OS === 'android') {
-      const episode = lastSchoolsEpisode[index]?.episode?.attributes;
-      const school = lastSchoolsEpisode[index]?.school;
-      const audioUrl = Config.STRAPI_URL_BASE + episode?.audio?.data?.attributes?.url;
+    const episode = lastSchoolsEpisode[index]?.episode?.attributes;
+    const school = lastSchoolsEpisode[index]?.school;
+    const audioUrl = Config.STRAPI_URL_BASE + episode?.audio?.data?.attributes?.url;
 
-      if (currentEpisodeIndex === index) {
-        // Same episode - toggle play/pause
-        const isPlaying = await audioManager.isPlaying();
-        if (isPlaying) {
-          await audioManager.stop();
-        } else {
-          // Resume the current episode
-          const currentSource = audioManager.getCurrentSource();
-          if (currentSource) {
-            await audioManager.playPodcast(currentSource);
-          }
-        }
+    if (currentEpisodeIndex === index) {
+      // Same episode - toggle play/pause
+      const isPlaying = await audioManager.isPlaying();
+      if (isPlaying) {
+        await audioManager.stop();
       } else {
-        // Different episode - load and play
-        const podcastSource: AudioSource = {
-          id: `podcast-${index}`,
-          url: audioUrl,
-          title: episode.title,
-          artist: school.short_name,
-          artwork: Config.STRAPI_URL_BASE + episode?.cover?.data?.attributes?.url,
-          type: 'podcast',
-          isLiveStream: false,
-        };
-
-        await audioManager.playPodcast(podcastSource);
-        setCurrentEpisodeIndex(index);
+        // Resume the current episode
+        const currentSource = audioManager.getCurrentSource();
+        if (currentSource) {
+          await audioManager.playPodcast(currentSource);
+        }
       }
     } else {
-      // iOS: toggle video playback
-      if (playingIndexIOS === index) {
-        setPlayingIndexIOS(-1);
-      } else {
-        setPlayingIndexIOS(index);
-      }
+      // Different episode - load and play
+      const podcastSource: AudioSource = {
+        id: `podcast-${index}`,
+        url: audioUrl,
+        title: episode.title,
+        artist: school.short_name,
+        artwork: Config.STRAPI_URL_BASE + episode?.cover?.data?.attributes?.url,
+        type: 'podcast',
+        isLiveStream: false,
+      };
+
+      await audioManager.playPodcast(podcastSource);
+      setCurrentEpisodeIndex(index);
     }
   };
 
@@ -214,7 +204,7 @@ const PodcastsScreen: React.FC = () => {
           Config.STRAPI_URL_BASE + episode?.audio?.data?.attributes?.url;
         const isPlaying = Platform.OS === 'android'
           ? (currentSource && currentSource.id === `podcast-${index}` && playbackState.state === State.Playing)
-          : (index === playingIndexIOS);
+          : (currentSource && currentSource.id === `podcast-${index}`);
         //console.log('isPlaying: ', index, isPlaying);
         return (
           <Card key={school.slug} style={styles.card}>
@@ -236,13 +226,37 @@ const PodcastsScreen: React.FC = () => {
                 <Video
                   ref={(ref) => {
                     videoRefs.current[index] = ref;
+                    if (Platform.OS === 'ios') {
+                      audioManager.registerVideoRef(`podcast-${index}`, ref);
+                    }
                   }}
-                  source={{ uri: audioUrl }}
+                  source={{
+                    uri: audioUrl,
+                    headers: {
+                      'User-Agent': 'WeBeRadioApp/1.0',
+                      'Accept': '*/*',
+                    }
+                  }}
                   style={styles.audioPlayer}
-                  paused={playingIndexIOS !== index}
+                  paused={currentSource?.id !== `podcast-${index}`}
                   playInBackground={true}
                   playWhenInactive={true}
                   ignoreSilentSwitch="ignore"
+                  disableFocus={true}
+                  resizeMode="cover"
+                  controls={false}
+                  muted={false}
+                  volume={1.0}
+                  rate={1.0}
+                  onError={(error) => {
+                    console.log(`iOS Podcast Video Error (${index}):`, error);
+                  }}
+                  onLoadStart={() => {
+                    console.log(`iOS Podcast Load Start (${index})`);
+                  }}
+                  onLoad={() => {
+                    console.log(`iOS Podcast Loaded (${index})`);
+                  }}
                 />
               )}
               {Platform.OS === 'android' && index === currentEpisodeIndex && (
