@@ -3,7 +3,7 @@
     "name": "WeBeRadioApp",
     "slug": "webe-radio-app",
     "version": "5.1.0",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./app/assets/logo.png",
     "scheme": "webe",
     "userInterfaceStyle": "automatic",
@@ -33,6 +33,8 @@
       },
       "package": "radio.webe.app",
       "versionCode": 17,
+      "resizableActivity": true,
+      "edgeToEdgeEnabled": true,
       "permissions": [
         "android.permission.WAKE_LOCK",
         "android.permission.FOREGROUND_SERVICE",
