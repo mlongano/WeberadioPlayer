@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { StyleSheet, ScrollView } from 'react-native';
+import { StyleSheet, ScrollView, Platform } from 'react-native';
+import Video from 'react-native-video';
 import { Button, Card, Text, useTheme } from 'react-native-paper';
 import { Config } from '../../src/utils/config';
 import { queryEpisodes, schoolsFetchAllBasic, strapiFetch } from '../../src/api/fetch';
@@ -12,35 +13,46 @@ const PodcastsScreen: React.FC = () => {
   const [lastSchoolsEpisode, setLastSchoolsEpisode] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState(-1);
-  const playbackState = usePlaybackState();
-  const { position, duration } = useProgress();
+  const [playingIndexIOS, setPlayingIndexIOS] = useState(-1);
+  const playbackState = Platform.OS === 'android' ? usePlaybackState() : { state: State.Stopped };
+  const { position, duration } = Platform.OS === 'android' ? useProgress() : { position: 0, duration: 1 };
+  const videoRefs = useRef<(React.ComponentRef<typeof Video> | null)[]>([]);
 
   const handlePlay = async (index: number) => {
-    const episode = lastSchoolsEpisode[index]?.episode?.attributes;
-    const school = lastSchoolsEpisode[index]?.school;
-    const audioUrl = Config.STRAPI_URL_BASE + episode?.audio?.data?.attributes?.url;
+    if (Platform.OS === 'android') {
+      const episode = lastSchoolsEpisode[index]?.episode?.attributes;
+      const school = lastSchoolsEpisode[index]?.school;
+      const audioUrl = Config.STRAPI_URL_BASE + episode?.audio?.data?.attributes?.url;
 
-    if (currentEpisodeIndex === index) {
-      // Same episode - toggle play/pause
-      if (playbackState.state === State.Playing) {
-        await TrackPlayer.pause();
+      if (currentEpisodeIndex === index) {
+        // Same episode - toggle play/pause
+        if (playbackState.state === State.Playing) {
+          await TrackPlayer.pause();
+        } else {
+          await TrackPlayer.play();
+        }
       } else {
+        // Different episode - load and play
+        const track = {
+          id: `podcast-${index}`,
+          url: audioUrl,
+          title: episode.title,
+          artist: school.short_name,
+          artwork: Config.STRAPI_URL_BASE + episode?.cover?.data?.attributes?.url,
+        };
+
+        await TrackPlayer.reset();
+        await TrackPlayer.add([track]);
         await TrackPlayer.play();
+        setCurrentEpisodeIndex(index);
       }
     } else {
-      // Different episode - load and play
-      const track = {
-        id: `podcast-${index}`,
-        url: audioUrl,
-        title: episode.title,
-        artist: school.short_name,
-        artwork: Config.STRAPI_URL_BASE + episode?.cover?.data?.attributes?.url,
-      };
-
-      await TrackPlayer.reset();
-      await TrackPlayer.add([track]);
-      await TrackPlayer.play();
-      setCurrentEpisodeIndex(index);
+      // iOS: toggle video playback
+      if (playingIndexIOS === index) {
+        setPlayingIndexIOS(-1);
+      } else {
+        setPlayingIndexIOS(index);
+      }
     }
   };
 
@@ -178,7 +190,9 @@ const PodcastsScreen: React.FC = () => {
           Config.STRAPI_URL_BASE + episode?.cover?.data?.attributes?.url;
         const audioUrl =
           Config.STRAPI_URL_BASE + episode?.audio?.data?.attributes?.url;
-        const isPlaying = index === currentEpisodeIndex && playbackState.state === State.Playing;
+        const isPlaying = Platform.OS === 'android'
+          ? (index === currentEpisodeIndex && playbackState.state === State.Playing)
+          : (index === playingIndexIOS);
         //console.log('isPlaying: ', index, isPlaying);
         return (
           <Card key={school.slug} style={styles.card}>
@@ -196,7 +210,20 @@ const PodcastsScreen: React.FC = () => {
                 }}>
                 {episode.description ?? ''}
               </Markdown>
-              {index === currentEpisodeIndex && (
+              {Platform.OS === 'ios' && (
+                <Video
+                  ref={(ref) => {
+                    videoRefs.current[index] = ref;
+                  }}
+                  source={{ uri: audioUrl }}
+                  style={styles.audioPlayer}
+                  paused={playingIndexIOS !== index}
+                  playInBackground={true}
+                  playWhenInactive={true}
+                  ignoreSilentSwitch="ignore"
+                />
+              )}
+              {Platform.OS === 'android' && index === currentEpisodeIndex && (
                 <SeekBar
                   onSeek={async (time: number) => {
                     await TrackPlayer.seekTo(time);

@@ -5,6 +5,7 @@ import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 
 import { useColorScheme } from 'react-native';
+import { Platform } from 'react-native';
 import TrackPlayer, { Capability, AppKilledPlaybackBehavior } from 'react-native-track-player';
 import { PlaybackService } from '../src/services/PlaybackService';
 import React, { useEffect } from 'react';
@@ -31,40 +32,39 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    const setupTrackPlayer = async () => {
-      try {
-        // In v5.x, register the playback service
-        TrackPlayer.registerPlaybackService(() => PlaybackService);
+    // Only initialize TrackPlayer on Android for now
+    // iOS support in TrackPlayer v5 alpha is limited
+    if (Platform.OS === 'android') {
+      const setupTrackPlayer = async () => {
+        try {
+          // In v5.x, register the playback service
+          TrackPlayer.registerPlaybackService(() => PlaybackService);
 
-        await TrackPlayer.setupPlayer({
-          // Add any player options here if needed
-        });
+          await TrackPlayer.setupPlayer({
+            // Add any player options here if needed
+          });
 
-        // Optional: Set up capabilities
-        await TrackPlayer.updateOptions({
-          android: {
-            appKilledPlaybackBehavior:
-              AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
-          },
-          capabilities: [
-            Capability.Play,
-            Capability.Pause,
-            Capability.SkipToNext,
-            Capability.SkipToPrevious,
-            Capability.Stop,
-          ],
-        });
+          // Optional: Set up capabilities
+          await TrackPlayer.updateOptions({
+            android: {
+              appKilledPlaybackBehavior:
+                AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
+            },
+            capabilities: [
+              Capability.Play,
+              Capability.Pause,
+              Capability.SkipToNext,
+              Capability.SkipToPrevious,
+              Capability.Stop,
+            ],
+          });
 
-      } catch (error) {
-        console.log('Error setting up TrackPlayer:', error);
-      }
-      // const isRegistered = await TrackPlayer.isServiceRunning();
-      // if (!isRegistered) {
-      //   TrackPlayer.registerPlaybackService(() => PlaybackService);
-      // }
-      // // Other initialization logic if needed
-    };
-    setupTrackPlayer();
+        } catch (error) {
+          console.log('Error setting up TrackPlayer:', error);
+        }
+      };
+      setupTrackPlayer();
+    }
   }, []);
 
   // Expo Router uses Error Boundaries to catch errors in the navigation tree.

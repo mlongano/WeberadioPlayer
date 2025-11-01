@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
+import { Platform } from 'react-native';
 import AlbumArt from '../components/AlbumArt';
 import TrackDetails from '../components/TrackDetails';
 import Controls from '../components/Controls';
@@ -9,6 +10,7 @@ import TrackPlayer, {
   usePlaybackState,
   AppKilledPlaybackBehavior,
 } from 'react-native-track-player';
+import Video from 'react-native-video';
 
 import { ScrollView, StyleSheet } from 'react-native';
 import VolumeControl from '../components/VolumeControl';
@@ -20,23 +22,29 @@ import React from 'react';
 
 export default function App(): React.JSX.Element {
   const { songMetadata, cover } = useSongMetadata();
-  const playbackState = usePlaybackState();
+  const playbackState = Platform.OS === 'android' ? usePlaybackState() : { state: State.Stopped };
   //console.log("playbackState: ", playbackState);
   const [isPlayingTrackPlayer, setIsPlayingTrackPlayer] = useState(false);
+  const [isPlayingIOS, setIsPlayingIOS] = useState(false);
+  const videoRef = useRef(null);
   //const { position, buffered, duration } = useProgress();
 
   useEffect(() => {
-    setIsPlaying();
+    if (Platform.OS === 'android') {
+      setIsPlaying();
+    }
   }, [playbackState]);
 
   async function setIsPlaying() {
-    if (
-      playbackState.state === State.Playing &&
-      (await TrackPlayer.getVolume()) > 0
-    ) {
-      setIsPlayingTrackPlayer(true);
-    } else {
-      setIsPlayingTrackPlayer(false);
+    if (Platform.OS === 'android') {
+      if (
+        playbackState.state === State.Playing &&
+        (await TrackPlayer.getVolume()) > 0
+      ) {
+        setIsPlayingTrackPlayer(true);
+      } else {
+        setIsPlayingTrackPlayer(false);
+      }
     }
   }
 
@@ -70,30 +78,39 @@ export default function App(): React.JSX.Element {
   const tracks = [webeRadioStream];
 
   useEffect(() => {
-    setupTrackPlayer();
+    if (Platform.OS === 'android') {
+      setupTrackPlayer();
+    }
   }, []);
 
   async function setupTrackPlayer() {
-    try {
-      // TrackPlayer is already set up globally in _layout.tsx
-      // Just add tracks and configure for this screen
-      await TrackPlayer.add(tracks);
-      await TrackPlayer.setRepeatMode(RepeatMode.Queue);
-      // Start with volume at 50% instead of muted
-      await TrackPlayer.setVolume(0.5);
-      // Don't auto-play here, let user control playback
-      // await TrackPlayer.play();
-    } catch (error) {
-      console.log('Error setting up TrackPlayer: ', error);
+    if (Platform.OS === 'android') {
+      try {
+        // TrackPlayer is already set up globally in _layout.tsx
+        // Just add tracks and configure for this screen
+        await TrackPlayer.add(tracks);
+        await TrackPlayer.setRepeatMode(RepeatMode.Queue);
+        // Start with volume at 50% instead of muted
+        await TrackPlayer.setVolume(0.5);
+        // Don't auto-play here, let user control playback
+        // await TrackPlayer.play();
+      } catch (error) {
+        console.log('Error setting up TrackPlayer: ', error);
+      }
     }
   }
 
   async function togglePlayback() {
-    const currentState = await TrackPlayer.getPlaybackState();
-    if (currentState.state === State.Playing) {
-      await TrackPlayer.pause();
+    if (Platform.OS === 'android') {
+      const currentState = await TrackPlayer.getPlaybackState();
+      if (currentState.state === State.Playing) {
+        await TrackPlayer.pause();
+      } else {
+        await TrackPlayer.play();
+      }
     } else {
-      await TrackPlayer.play();
+      // iOS: toggle video playback
+      setIsPlayingIOS(!isPlayingIOS);
     }
   }
   const theme = useTheme();
@@ -117,7 +134,7 @@ export default function App(): React.JSX.Element {
         subtitleSize={10}
       />
       <Controls
-        isPlaying={isPlayingTrackPlayer}
+        isPlaying={Platform.OS === 'android' ? isPlayingTrackPlayer : isPlayingIOS}
         onPressPlay={togglePlayback}
         onPressPause={togglePlayback}
         theme={theme}
@@ -138,6 +155,18 @@ export default function App(): React.JSX.Element {
         volumeUp={volumeUp}
         theme={theme}
       />
+      {Platform.OS === 'ios' && (
+        <Video
+          ref={videoRef}
+          source={{ uri: webeRadioStream.url }}
+          style={styles.audioElement}
+          paused={!isPlayingIOS}
+          repeat={true}
+          playInBackground={true}
+          playWhenInactive={true}
+          ignoreSilentSwitch="ignore"
+        />
+      )}
     </ScrollView>
   );
 }

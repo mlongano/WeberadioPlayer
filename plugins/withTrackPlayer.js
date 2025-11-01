@@ -2,8 +2,15 @@ const { withMainApplication, withAndroidManifest } = require('@expo/config-plugi
 
 /**
  * Config plugin to configure react-native-track-player for proper notification support
+ * Currently only supports Android - iOS support coming in future versions
  */
 const withTrackPlayer = (config) => {
+  // Only apply TrackPlayer configuration for Android
+  // TrackPlayer v5 alpha currently has limited iOS support
+  if (config.platform !== 'android') {
+    return config;
+  }
+
   // Add MusicService initialization to MainApplication
   config = withMainApplication(config, (config) => {
     const mainApplication = config.modResults;
