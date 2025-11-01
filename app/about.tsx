@@ -15,6 +15,7 @@ import * as Linking from 'expo-linking';
 const AboutScreen: React.FC = () => {
   const [title, setTitle] = useState<string>('');
   const [about, setAbout] = useState<string>('');
+  const [heroImageUrl, setHeroImageUrl] = useState<string>('');
 
   useEffect(() => {
     const fetchHomeScreenInfo = async () => {
@@ -31,7 +32,19 @@ const AboutScreen: React.FC = () => {
       }
     };
 
+    const fetchHeroImage = async () => {
+      try {
+        const result = await strapiFetch('/api/hero-image', { populate: 'chi_siamo' });
+        const imageUrl = result.data.attributes.chi_siamo.data.attributes.formats.small.url;
+        setHeroImageUrl(`https://api.webe.radio${imageUrl}`);
+      } catch (error) {
+        console.error('Error fetching hero image:', error);
+        // Keep default logo if fetch fails
+      }
+    };
+
     fetchHomeScreenInfo();
+    fetchHeroImage();
   }, []);
 
   const theme = useTheme();
@@ -62,7 +75,7 @@ const AboutScreen: React.FC = () => {
       contentContainerStyle={styles.contentContainer}>
       <TouchableOpacity onPress={() => Linking.openURL('https://webe.radio')}>
         <Image
-          source={require('./assets/logo.png')}
+          source={heroImageUrl ? { uri: heroImageUrl } : require('./assets/logo.png')}
           style={{ width: 200, height: 200 }}
         />
       </TouchableOpacity>
