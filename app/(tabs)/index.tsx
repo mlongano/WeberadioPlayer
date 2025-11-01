@@ -75,34 +75,26 @@ export default function App(): React.JSX.Element {
 
   async function setupTrackPlayer() {
     try {
-      await TrackPlayer.setupPlayer();
+      // TrackPlayer is already set up globally in _layout.tsx
+      // Just add tracks and configure for this screen
+      await TrackPlayer.add(tracks);
+      await TrackPlayer.setRepeatMode(RepeatMode.Queue);
+      // Start with volume at 50% instead of muted
+      await TrackPlayer.setVolume(0.5);
+      // Don't auto-play here, let user control playback
+      // await TrackPlayer.play();
     } catch (error) {
       console.log('Error setting up TrackPlayer: ', error);
     }
-    await TrackPlayer.updateOptions({
-      android: {
-        appKilledPlaybackBehavior:
-          AppKilledPlaybackBehavior.StopPlaybackAndRemoveNotification,
-      },
-      capabilities: [
-        Capability.Play,
-        Capability.Pause,
-        Capability.Stop,
-        Capability.SeekTo,
-        Capability.SkipToNext,
-        Capability.SkipToPrevious,
-        Capability.JumpForward,
-      ],
-    });
-    await TrackPlayer.add(tracks);
-    await TrackPlayer.setRepeatMode(RepeatMode.Queue);
-    await toggleMute();
-    await TrackPlayer.play();
-    //console.log("Setup done: ", await TrackPlayer.getQueue());
   }
 
   async function togglePlayback() {
-    await toggleMute();
+    const currentState = await TrackPlayer.getPlaybackState();
+    if (currentState.state === State.Playing) {
+      await TrackPlayer.pause();
+    } else {
+      await TrackPlayer.play();
+    }
   }
   const theme = useTheme();
   const styles = StyleSheet.create({
@@ -125,7 +117,7 @@ export default function App(): React.JSX.Element {
         subtitleSize={10}
       />
       <Controls
-        isPlaying={isPlaying}
+        isPlaying={isPlayingTrackPlayer}
         onPressPlay={togglePlayback}
         onPressPause={togglePlayback}
         theme={theme}
