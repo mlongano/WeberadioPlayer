@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.2.1] - 2025-11-02
+
+### 🔧 Changed
+
+- **Volume Control Coordination**: Unified volume control across all audio sources through AudioManager
+- **AudioManager Volume API**: Added `setVolume()`, `getVolume()`, and `onVolumeChange()` methods for centralized volume management
+- **Cross-Screen Volume Sync**: Volume changes on main radio screen now automatically apply to podcasts and episodes
+
+### 🐛 Fixed
+
+- **iOS Podcast Volume**: Fixed volume control not working for podcast playback on iOS
+- **iOS Episode Seeker**: Added missing `onProgress` and `onLoad` callbacks for SeekBar functionality
+- **Volume State Management**: Volume now properly synchronized through AudioManager instead of isolated component states
+- **Podcast Seeker Progress**: Fixed SeekBar showing 0/0 by implementing Video component progress tracking
+
+### 🔨 Technical Improvements
+
+- **AudioManager Volume Listeners**: Added observer pattern for volume changes across components
+- **Unified Volume Control**: All audio sources (radio, podcasts, episodes) now use same volume state
+- **Component Cleanup**: Proper subscription/unsubscription for volume listeners to prevent memory leaks
+
 ## [5.2.0] - 2025-11-02
 
 ### 🎵 Added
