@@ -18,6 +18,7 @@ export default function EpisodeCard({
 }: EpisodeCardProps) {
   const [currentSource, setCurrentSource] = useState<AudioSource | null>(null);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  const [volume, setVolume] = useState<number>(0.5);
 
   // Listen for audio source changes
   useEffect(() => {
@@ -29,6 +30,14 @@ export default function EpisodeCard({
     });
     return unsubscribe;
   }, [audioUrl]);
+
+  // Listen for volume changes from AudioManager
+  useEffect(() => {
+    const unsubscribe = audioManager.onVolumeChange((newVolume) => {
+      setVolume(newVolume);
+    });
+    return unsubscribe;
+  }, []);
 
   // TrackPlayer progress for Android
   const { position, duration } = Platform.OS === 'android' ? useProgress() : { position: 0, duration: 1 };
@@ -52,7 +61,11 @@ export default function EpisodeCard({
 
   function seek(time: number, isPlaying = true) {
     if (Platform.OS === 'android') {
-      TrackPlayer.seekTo(time);
+      try {
+        TrackPlayer.seekTo(time);
+      } catch (error) {
+        console.log('Error seeking on Android:', error);
+      }
     } else {
       // iOS: Use AudioManager to seek
       audioManager.seekVideoOnIOS(time);
@@ -162,7 +175,7 @@ export default function EpisodeCard({
           resizeMode="cover"
           controls={false}
           muted={false}
-          volume={1.0}
+          volume={volume}
           rate={1.0}
           onError={(error) => {
             console.log('iOS EpisodeCard Video Error:', error);
@@ -170,8 +183,12 @@ export default function EpisodeCard({
           onLoadStart={() => {
             console.log('iOS EpisodeCard Load Start');
           }}
-          onLoad={() => {
-            console.log('iOS EpisodeCard Loaded');
+          onLoad={(data) => {
+            console.log('iOS EpisodeCard Loaded, duration:', data.duration);
+            setVideoDuration(data.duration);
+          }}
+          onProgress={(data) => {
+            setCurrentTime(data.currentTime);
           }}
           onEnd={() => {
             audioManager.stop();
@@ -182,10 +199,7 @@ export default function EpisodeCard({
         onSeek={seek}
         trackLength={Platform.OS === 'android' ? duration : videoDuration}
         onSlidingStart={() => {
-          // Pause during seeking on both platforms
-          if (isPlaying) {
-            audioManager.stop();
-          }
+          // Don't stop playback during seeking - just seeking is enough
         }}
         currentPosition={Platform.OS === 'android' ? position : currentTime}
         theme={theme}

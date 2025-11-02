@@ -15,6 +15,7 @@ const PodcastsScreen: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState(-1);
   const [currentSource, setCurrentSource] = useState<AudioSource | null>(null);
+  const [volume, setVolume] = useState<number>(0.5);
   const playbackState = Platform.OS === 'android' ? usePlaybackState() : { state: State.Stopped };
   const { position, duration } = Platform.OS === 'android' ? useProgress() : { position: 0, duration: 1 };
   const videoRefs = useRef<(React.ComponentRef<typeof Video> | null)[]>([]);
@@ -30,6 +31,14 @@ const PodcastsScreen: React.FC = () => {
       } else {
         setCurrentEpisodeIndex(-1);
       }
+    });
+    return unsubscribe;
+  }, []);
+
+  // Listen for volume changes from AudioManager
+  useEffect(() => {
+    const unsubscribe = audioManager.onVolumeChange((newVolume) => {
+      setVolume(newVolume);
     });
     return unsubscribe;
   }, []);
@@ -246,7 +255,7 @@ const PodcastsScreen: React.FC = () => {
                   resizeMode="cover"
                   controls={false}
                   muted={false}
-                  volume={1.0}
+                  volume={volume}
                   rate={1.0}
                   onError={(error) => {
                     console.log(`iOS Podcast Video Error (${index}):`, error);

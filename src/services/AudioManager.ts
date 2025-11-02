@@ -16,8 +16,10 @@ export interface AudioSource {
 class AudioManager {
   private currentSource: AudioSource | null = null;
   private listeners: ((source: AudioSource | null) => void)[] = [];
+  private volumeListeners: ((volume: number) => void)[] = [];
   private videoRefs: Map<string, VideoRef | null> = new Map();
   private activeVideoId: string | null = null;
+  private currentVolume: number = 0.5;
 
   // Subscribe to source changes
   onSourceChange(callback: (source: AudioSource | null) => void) {
@@ -29,9 +31,24 @@ class AudioManager {
     };
   }
 
+  // Subscribe to volume changes
+  onVolumeChange(callback: (volume: number) => void) {
+    this.volumeListeners.push(callback);
+    // Immediately notify with current volume
+    callback(this.currentVolume);
+    return () => {
+      this.volumeListeners = this.volumeListeners.filter(listener => listener !== callback);
+    };
+  }
+
   // Notify all listeners of source change
   private notifyListeners() {
     this.listeners.forEach(callback => callback(this.currentSource));
+  }
+
+  // Notify all listeners of volume change
+  private notifyVolumeListeners() {
+    this.volumeListeners.forEach(callback => callback(this.currentVolume));
   }
 
   // Convert AudioSource to TrackPlayer Track
@@ -156,6 +173,27 @@ class AudioManager {
         videoRef.seek(time);
       }
     }
+  }
+
+  // Set volume for both Android and iOS
+  async setVolume(volume: number) {
+    this.currentVolume = volume;
+
+    if (Platform.OS === 'android') {
+      try {
+        await TrackPlayer.setVolume(volume);
+      } catch (error) {
+        console.log('Error setting TrackPlayer volume:', error);
+      }
+    }
+
+    // Notify all volume listeners (for iOS Video components)
+    this.notifyVolumeListeners();
+  }
+
+  // Get current volume
+  getVolume(): number {
+    return this.currentVolume;
   }
 }
 
