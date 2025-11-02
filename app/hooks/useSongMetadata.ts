@@ -1,6 +1,6 @@
 // hooks/useSongMetadata.ts
 import { useEffect, useState } from 'react';
-import { useColorScheme } from 'react-native';
+import { useColorScheme, AppState } from 'react-native';
 import { icecastMetadataService, SongMetadata as IcecastMetadata } from '../../src/services/IcecastMetadataService';
 
 interface SongMetadata {
@@ -52,6 +52,27 @@ export default function useSongMetadata() {
       icecastMetadataService.removeListener(handleEnrichedMetadata);
     };
   }, [defaultCover]);
+
+  // Restore metadata when app resumes from background
+  useEffect(() => {
+    const handleAppStateChange = (nextAppState: string) => {
+      if (nextAppState === 'active') {
+        // App came to foreground - restore last metadata if available
+        const lastMetadata = icecastMetadataService.getLastMetadata();
+        if (lastMetadata && (!songMetadata.title || songMetadata.title === '')) {
+          console.log("useSongMetadata: Restoring metadata on app resume:", lastMetadata);
+          setSongMetadata(lastMetadata);
+          setCover(lastMetadata.coverUrl || defaultCover);
+        }
+      }
+    };
+
+    const subscription = AppState.addEventListener('change', handleAppStateChange);
+
+    return () => {
+      subscription.remove();
+    };
+  }, [songMetadata.title, defaultCover]);
 
   return { songMetadata, cover };
 }
