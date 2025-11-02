@@ -21,8 +21,9 @@ const AlbumArt: React.FC<Props> = ({
   <View style={styles.container}>
     <TouchableOpacity onPress={onPress}>
       <Image
+        key={url}
         style={styles.image}
-        source={{uri: url}}
+        source={{ uri: url }}
       />
     </TouchableOpacity>
   </View>

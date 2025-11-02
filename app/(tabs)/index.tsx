@@ -21,6 +21,7 @@ import useAudioControls from '../hooks/useAudioControls';
 import { useTheme } from 'react-native-paper';
 import React from 'react';
 import { audioManager, AudioSource } from '../../src/services/AudioManager';
+import { icecastMetadataService } from '../../src/services/IcecastMetadataService';
 
 export default function App(): React.JSX.Element {
   const { songMetadata, cover } = useSongMetadata();
@@ -130,6 +131,8 @@ export default function App(): React.JSX.Element {
       setupTrackPlayer();
       // Also set up event listeners in the main app for notification controls
       setupNotificationListeners();
+      // Set up ICY metadata listener as backup
+      setupIcyMetadataListener();
     }
   }, []);
 
@@ -155,6 +158,78 @@ export default function App(): React.JSX.Element {
         // The AudioManager will handle the actual playback
       } catch (error) {
         console.log('Error setting up TrackPlayer: ', error);
+      }
+    }
+  }
+
+  async function setupIcyMetadataListener() {
+    if (Platform.OS === 'android') {
+      try {
+        console.log('Setting up ICY metadata listener...');
+
+        // Listen for ICY metadata from the stream
+        // MetadataTimedReceived gives us raw ICY metadata
+        const timedMetadataSubscription = TrackPlayer.addEventListener(
+          Event.MetadataTimedReceived,
+          async (event: any) => {
+            // Check if we're playing the radio stream (not a podcast)
+            const currentTrack = await TrackPlayer.getActiveTrack();
+            const isRadioStream = currentTrack?.url === 'https://stream.webe.radio/live';
+
+            if (!isRadioStream) {
+              // Silently ignore ICY metadata when not playing radio
+              return;
+            }
+
+            console.log('=== ICY Metadata Received ===');
+            console.log('Current track URL:', currentTrack?.url);
+
+            // Extract raw ICY StreamTitle from timed metadata
+            // Structure: event.metadata[0].title contains the full "Title - Artist - Year - Album"
+            let rawTitle = '';
+
+            if (event.metadata && Array.isArray(event.metadata) && event.metadata.length > 0) {
+              rawTitle = event.metadata[0].title || '';
+            }
+
+            console.log('Raw ICY StreamTitle:', rawTitle);
+
+            if (rawTitle && rawTitle !== 'WeBe Radio') {
+              console.log('Processing ICY metadata and fetching cover...');
+
+              // Use IcecastMetadataService to parse and enrich with cover
+              const enrichedMetadata = await icecastMetadataService.processIcyMetadata(rawTitle);
+
+              console.log('Enriched metadata:', {
+                title: enrichedMetadata.title,
+                artist: enrichedMetadata.artist,
+                album: enrichedMetadata.album,
+                year: enrichedMetadata.year,
+                coverUrl: enrichedMetadata.coverUrl,
+              });
+
+              // Also update TrackPlayer notification
+              try {
+                await TrackPlayer.updateNowPlayingMetadata({
+                  title: enrichedMetadata.title,
+                  artist: enrichedMetadata.artist,
+                  album: enrichedMetadata.album || 'WeBe Radio',
+                  artwork: enrichedMetadata.coverUrl,
+                });
+                console.log('TrackPlayer metadata updated successfully');
+              } catch (error) {
+                console.error('Error updating TrackPlayer metadata:', error);
+              }
+            } else {
+              console.log('Ignoring station name or empty metadata');
+            }
+          }
+        );
+
+        console.log('ICY metadata listener registered');
+        return timedMetadataSubscription;
+      } catch (error) {
+        console.log('Error setting up ICY metadata listener:', error);
       }
     }
   }
@@ -193,12 +268,12 @@ export default function App(): React.JSX.Element {
         onPressPause={togglePlayback}
         theme={theme}
       />
-      <AlbumArt url={currentSource?.artwork || cover} />
+      <AlbumArt url={(currentSource?.type === 'podcast' || currentSource?.type === 'episode') ? (currentSource.artwork || cover) : cover} />
       <TrackDetails
-        title={currentSource?.title || songMetadata.title}
-        artist={currentSource?.artist || songMetadata.artist}
-        album={currentSource?.metadata?.album || songMetadata?.album || ''}
-        year={currentSource?.metadata?.year || songMetadata?.year || ''}
+        title={(currentSource?.type === 'podcast' || currentSource?.type === 'episode') ? currentSource.title : (songMetadata.title || 'WeBe Radio')}
+        artist={(currentSource?.type === 'podcast' || currentSource?.type === 'episode') ? currentSource.artist : (songMetadata.artist || 'WeBe Radio')}
+        album={(currentSource?.type === 'podcast' || currentSource?.type === 'episode') ? (currentSource.metadata?.album || '') : (songMetadata.album || '')}
+        year={(currentSource?.type === 'podcast' || currentSource?.type === 'episode') ? (currentSource.metadata?.year || '') : (songMetadata.year || '')}
         theme={theme}
       />
       <VolumeControl

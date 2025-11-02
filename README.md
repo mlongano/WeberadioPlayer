@@ -15,7 +15,7 @@ A cross-platform React Native radio player app built with Expo, featuring live r
 
 ### Audio Management System
 
-The app uses a sophisticated **AudioManager** architecture to handle multiple audio sources seamlessly across both Android and iOS platforms:
+The app uses a sophisticated multi-layered architecture to handle audio playback and metadata enrichment seamlessly across both Android and iOS platforms:
 
 #### Core Components
 
@@ -27,6 +27,54 @@ The app uses a sophisticated **AudioManager** architecture to handle multiple au
 - **Unified cross-platform support**: TrackPlayer for Android, Video components for iOS
 - **Video ref management**: Registers and controls Video components on iOS
 - **Platform-aware playback**: Automatic detection and appropriate audio implementation
+
+**IcecastMetadataService** (`src/services/IcecastMetadataService.ts`)
+
+- **Direct ICY metadata extraction** from the live stream
+- **Real-time metadata parsing** from TrackPlayer events
+- **Automatic cover art enrichment** from iTunes and MusicBrainz APIs
+- **Smart caching** to minimize API calls and improve performance
+- **Always in sync** with the actual playing stream (no polling delays)
+
+#### Metadata Flow Architecture
+
+```text
+Live Stream (https://stream.webe.radio/live)
+          ↓ [ICY Protocol - metadata every 16KB]
+TrackPlayer (Android) / Video Component (iOS)
+          ↓ [Event.MetadataTimedReceived]
+          ↓ [Check: TrackPlayer.getActiveTrack() === radio URL?]
+          ├─→ NO: Ignore (playing podcast)
+          └─→ YES: Process ICY metadata
+          ↓ [Extract: event.metadata[0].title]
+          ↓ [Raw: "Title - Artist - Year - Album"]
+IcecastMetadataService.processIcyMetadata()
+          ↓ [Parse metadata parts]
+          ├─→ iTunes API (primary, <200ms)
+          └─→ MusicBrainz API (fallback)
+          ↓ [Cache cover (LRU 100 songs)]
+          ↓ [Notify all listeners via Observer pattern]
+useSongMetadata Hook
+          ↓ [Update state: songMetadata, cover]
+UI Components
+          ↓ [Check: currentSource.type?]
+          ├─→ 'podcast'/'episode': Show currentSource metadata
+          └─→ 'radio'/null: Show songMetadata (ICY enriched)
+Display (AlbumArt, TrackDetails, Notification)
+```
+
+#### Key Advantages
+
+✅ **Stream-Synced Metadata**: Metadata comes directly from the playing stream, not a separate endpoint
+✅ **No Polling Delays**: Real-time updates as TrackPlayer emits ICY events (every 16KB of audio)
+✅ **Play/Pause Safe**: Metadata only updates when audio is actually playing
+✅ **Raw Metadata Access**: Uses `MetadataTimedReceived` to get unparsed ICY data
+✅ **Smart Cover Fetching**: Automatic enrichment with album artwork from iTunes/MusicBrainz
+✅ **Efficient Caching**: Covers cached for up to 100 songs to minimize API calls
+✅ **Live UI Updates**: Components use hook state directly, not stale cached objects
+✅ **Podcast Protection**: ICY metadata ignored when playing podcasts to prevent interference
+✅ **Smart Source Switching**: UI automatically displays correct metadata based on audio source type
+✅ **Zero External Dependencies**: All metadata comes directly from ICY stream, no external services required
 
 #### AudioSource Interface
 
@@ -69,32 +117,39 @@ interface AudioSource {
 ```bash
 src/
 ├── services/
-│   ├── AudioManager.ts      # Central audio coordination
-│   └── PlaybackService.ts   # Background service for Android
+│   ├── AudioManager.ts           # Central audio coordination
+│   ├── IcecastMetadataService.ts # ICY metadata parsing & cover fetching
+│   └── PlaybackService.ts        # Background service for Android
 ├── api/
-│   └── fetch.ts            # Strapi API integration
+│   └── fetch.ts                  # Strapi API integration
 └── utils/
-    └── config.ts           # App configuration
+    └── config.ts                 # App configuration
 
 app/
-├── _layout.tsx             # Root layout with TrackPlayer setup
+├── _layout.tsx                   # Root layout with TrackPlayer setup
+├── hooks/
+│   └── useSongMetadata.ts        # Metadata hook with ICY enrichment
 ├── (tabs)/
-│   ├── index.tsx           # Main radio player
-│   ├── podcasts.tsx        # Podcast browser & player
+│   ├── index.tsx                 # Main radio player with ICY listener
+│   ├── podcasts.tsx              # Podcast browser & player
 │   └── [other tabs]
 └── components/
-    ├── Controls.tsx        # Play/pause controls
-    ├── TrackDetails.tsx    # Song/episode info display
-    └── AlbumArt.tsx        # Cover art display
+    ├── Controls.tsx              # Play/pause controls
+    ├── TrackDetails.tsx          # Song/episode info display
+    └── AlbumArt.tsx              # Cover art display
 ```
 
 ## 🎵 Audio Sources
 
 ### Radio Streaming
 
-- **WeBe Radio**: Live stream with real-time metadata via Socket.IO
+- **WeBe Radio**: Live stream at `https://stream.webe.radio/live`
+  - **ICY metadata protocol** embedded in stream
+  - **Real-time song updates** via TrackPlayer events
+  - **Automatic cover art** fetched from iTunes/MusicBrainz APIs
+  - **Format**: "Title - Artist - Year - Album"
 - **Radio Paradise**: Alternative radio stream
-- Dynamic metadata updates notification panel
+- Dynamic metadata updates in notification panel
 
 ### Podcast Episodes
 
@@ -196,6 +251,105 @@ useEffect(() => {
 }, []);
 ```
 
+### ICY Metadata Processing (Android)
+
+The app automatically listens for ICY metadata from the stream and enriches it with cover art:
+
+```typescript
+// Automatic setup in index.tsx - uses Event.MetadataTimedReceived
+TrackPlayer.addEventListener(
+  Event.MetadataTimedReceived,
+  async (event: any) => {
+    // Only process if playing the radio stream (not podcasts)
+    const currentTrack = await TrackPlayer.getActiveTrack();
+    const isRadioStream = currentTrack?.url === 'https://stream.webe.radio/live';
+
+    if (!isRadioStream) {
+      return; // Ignore ICY metadata when playing podcasts
+    }
+
+    // Extract raw ICY metadata: "Title - Artist - Year - Album"
+    if (event.metadata && Array.isArray(event.metadata) && event.metadata.length > 0) {
+      const rawTitle = event.metadata[0].title;
+
+      if (rawTitle && rawTitle !== 'WeBe Radio') {
+        // Parse and enrich metadata with cover art
+        const enrichedMetadata = await icecastMetadataService.processIcyMetadata(rawTitle);
+
+        // Update notification with cover art
+        await TrackPlayer.updateNowPlayingMetadata({
+          title: enrichedMetadata.title,
+          artist: enrichedMetadata.artist,
+          album: enrichedMetadata.album,
+          artwork: enrichedMetadata.coverUrl,
+        });
+      }
+    }
+  }
+);
+```
+
+**Key Implementation Details:**
+
+- Uses `Event.MetadataTimedReceived` to get raw unparsed ICY metadata
+- Checks `TrackPlayer.getActiveTrack()` to only process radio stream metadata
+- Ignores ICY events when playing podcasts to prevent metadata interference
+- Extracts from `event.metadata[0].title` (not pre-parsed title/artist fields)
+- Filters out station name "WeBe Radio" to avoid processing non-song metadata
+- Metadata format: "Title - Artist - Year - Album" (e.g., "Jump - Van Halen - 2022 - 1984")
+- IcecastMetadataService handles parsing and cover art enrichment
+- Listeners are notified automatically via observer pattern
+
+### UI Metadata Switching
+
+The UI automatically switches between podcast and radio metadata:
+
+```typescript
+// In index.tsx - conditional rendering based on source type
+<AlbumArt
+  url={(currentSource?.type === 'podcast' || currentSource?.type === 'episode')
+    ? (currentSource.artwork || cover)
+    : cover}
+/>
+<TrackDetails
+  title={(currentSource?.type === 'podcast' || currentSource?.type === 'episode')
+    ? currentSource.title
+    : (songMetadata.title || 'WeBe Radio')}
+  artist={(currentSource?.type === 'podcast' || currentSource?.type === 'episode')
+    ? currentSource.artist
+    : (songMetadata.artist || 'WeBe Radio')}
+  // ... album and year follow same pattern
+/>
+```
+
+This ensures:
+
+- **Podcasts**: Display static metadata from `currentSource` (title, artist, artwork from episode)
+- **Radio**: Display live ICY metadata from `songMetadata` (enriched with album covers)
+- **Seamless switching**: No metadata interference when changing between sources
+
+### Custom Metadata Enrichment
+
+You can also manually process ICY metadata:
+
+```typescript
+import { icecastMetadataService } from '../src/services/IcecastMetadataService';
+
+// Parse ICY title and fetch cover art
+const icyTitle = "Cosa mi manchi a fare - Calcutta - 2016 - Mainstream";
+const metadata = await icecastMetadataService.processIcyMetadata(icyTitle);
+
+console.log(metadata);
+// {
+//   title: "Cosa mi manchi a fare",
+//   artist: "Calcutta",
+//   year: "2016",
+//   album: "Mainstream",
+//   coverUrl: "https://is1-ssl.mzstatic.com/image/thumb/Music/...",
+//   listeners: 0
+// }
+```
+
 ## 🛠️ Development
 
 ### Prerequisites
@@ -239,7 +393,6 @@ npx expo build:ios
 ### Environment Variables
 
 - `EXPO_PUBLIC_STRAPI_URL`: Strapi CMS API URL
-- `EXPO_PUBLIC_SOCKET_URL`: Socket.IO server for metadata
 
 ### TrackPlayer Setup
 
@@ -255,11 +408,18 @@ npx expo build:ios
 - Hero images and content
 - School/podcaster information
 
-### Socket.IO
+### ICY Metadata Stream
 
-- Real-time song metadata for radio streams
-- Live listener counts
-- Current track information
+- **Primary metadata source**: Direct from audio stream
+- Real-time song information (title, artist, year, album)
+- No external server dependencies
+- Automatic metadata extraction every 16KB of audio
+
+### Cover Art APIs
+
+- **iTunes Search API**: Primary cover art source (fast, no authentication required)
+- **MusicBrainz + Cover Art Archive**: Fallback for additional coverage
+- Smart caching system (LRU, 100 songs)
 
 ## 🐛 Known Issues & Solutions
 

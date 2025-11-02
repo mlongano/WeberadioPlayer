@@ -1,8 +1,7 @@
 // hooks/useSongMetadata.ts
 import { useEffect, useState } from 'react';
 import { useColorScheme } from 'react-native';
-import { io } from 'socket.io-client';
-import { fixEncoding } from '../../src/utils/helpers';
+import { icecastMetadataService, SongMetadata as IcecastMetadata } from '../../src/services/IcecastMetadataService';
 
 interface SongMetadata {
   title: string;
@@ -33,39 +32,26 @@ export default function useSongMetadata() {
     setDefaultCover(nextDefaultCover);
   }, [colorMode]);
 
-  // Get current song metadata from the socket.io server
+  // Get current song metadata from ICY metadata enriched by IcecastMetadataService
   useEffect(() => {
-    console.log("Connecting...");
-    const socket = io("https://metadata.webe.radio");
+    console.log("Setting up metadata listeners...");
 
-    try {
-      socket.on('connect', () => {
-        console.log("Connected!");
-      });
+    // Listen to enriched ICY metadata from IcecastMetadataService
+    const handleEnrichedMetadata = (metadata: IcecastMetadata) => {
+      console.log("useSongMetadata: Received enriched metadata:", metadata);
+      setSongMetadata(metadata);
+      setCover(metadata.coverUrl || defaultCover);
+      console.log("useSongMetadata: Updated state - title:", metadata.title, "cover:", metadata.coverUrl);
+    };
 
-      socket.on('metadata', (data) => {
-        //console.log("metadata: ", data);
-        // Fix character encoding issues from radio streams
-        const fixedData = {
-          ...data,
-          title: fixEncoding(data.title || ''),
-          artist: fixEncoding(data.artist || ''),
-          album: fixEncoding(data.album || ''),
-          year: data.year, // Year is usually numeric, no encoding issues
-          coverUrl: data.coverUrl,
-          listeners: data.listeners,
-        };
-        setSongMetadata(fixedData);
-        setCover(fixedData.coverUrl || defaultCover);
-      });
-    } catch (e) {
-      console.log("Error: ", e);
-    }
+    icecastMetadataService.addListener(handleEnrichedMetadata);
+    console.log("useSongMetadata: Listener registered");
 
     return () => {
-      socket.disconnect();
+      console.log("useSongMetadata: Cleaning up listeners");
+      icecastMetadataService.removeListener(handleEnrichedMetadata);
     };
-  }, []);
+  }, [defaultCover]);
 
   return { songMetadata, cover };
 }
