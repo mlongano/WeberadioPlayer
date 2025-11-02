@@ -3,6 +3,16 @@
 /**
  * Test script to check if https://stream.webe.radio/live sends ICY metadata
  *
+ * ICY Metadata Protocol Explanation:
+ * ================================
+ * ICY (I Can Yell) is a protocol for streaming audio metadata alongside audio data.
+ * It works by:
+ * 1. Client sends "Icy-MetaData: 1" header in HTTP request
+ * 2. Server responds with "icy-metaint" header indicating metadata interval
+ * 3. Audio data is sent in chunks of 'metaint' bytes
+ * 4. After each audio chunk, metadata block is sent (length byte + data)
+ * 5. Metadata contains song information like "StreamTitle='Artist - Title'"
+ *
  * Usage: node test-icy-metadata.js
  */
 
@@ -19,6 +29,11 @@ console.log(`Stream URL: ${STREAM_URL}`);
 console.log('='.repeat(60));
 console.log();
 
+/**
+ * Parse stream URL into components for HTTP request
+ * @param {string} streamUrl - The streaming URL to parse
+ * @returns {object} Parsed URL components
+ */
 function parseStreamUrl(streamUrl) {
   const parsedUrl = url.parse(streamUrl);
   return {
@@ -29,12 +44,27 @@ function parseStreamUrl(streamUrl) {
   };
 }
 
+/**
+ * Parse ICY metadata from raw buffer
+ *
+ * ICY metadata format:
+ * - Raw data is null-terminated UTF-8 string
+ * - Contains key-value pairs like: StreamTitle='Artist - Title'
+ * - We extract the StreamTitle value using regex
+ *
+ * @param {Buffer} buffer - Raw metadata buffer
+ * @returns {string|null} Parsed stream title or null if invalid
+ */
 function parseIcyMetadata(buffer) {
   try {
+    // Convert buffer to string and remove null terminators
     const metadata = buffer.toString('utf8').replace(/\0/g, '');
+
+    // Extract StreamTitle using regex pattern
+    // Format: StreamTitle='Artist Name - Song Title'
     const matches = metadata.match(/StreamTitle='([^']*)'/);
     if (matches && matches[1]) {
-      return matches[1];
+      return matches[1]; // Return the captured group (content inside quotes)
     }
     return null;
   } catch (error) {
@@ -42,16 +72,26 @@ function parseIcyMetadata(buffer) {
   }
 }
 
+/**
+ * Main test function to check ICY metadata extraction
+ *
+ * Process:
+ * 1. Send HTTP request with ICY metadata headers
+ * 2. Check server response for metadata support
+ * 3. Parse incoming audio + metadata stream
+ * 4. Extract and display metadata updates
+ */
 function testIcyMetadata() {
   const { protocol, hostname, port, path } = parseStreamUrl(STREAM_URL);
 
+  // HTTP request options for ICY metadata
   const options = {
     hostname,
     port,
     path,
     method: 'GET',
     headers: {
-      'Icy-MetaData': '1',
+      'Icy-MetaData': '1',  // Request ICY metadata (required!)
       'User-Agent': 'WeBeRadioApp/1.0 (Metadata Test)',
       'Accept': '*/*',
     },
@@ -68,6 +108,7 @@ function testIcyMetadata() {
     console.log('📋 Response Headers:');
     console.log('-'.repeat(60));
 
+    // Display relevant ICY headers
     Object.keys(res.headers).forEach(header => {
       if (header.toLowerCase().startsWith('icy-') ||
         header.toLowerCase() === 'content-type' ||
@@ -79,6 +120,7 @@ function testIcyMetadata() {
     console.log();
 
     // Check for ICY metadata support
+    // icy-metaint header indicates bytes between metadata blocks
     const icyMetaInt = parseInt(res.headers['icy-metaint']);
     const icyName = res.headers['icy-name'];
     const icyDescription = res.headers['icy-description'];
@@ -110,20 +152,32 @@ function testIcyMetadata() {
     let audioDataCount = 0;
     let metadataCount = 0;
 
+    /**
+     * Process incoming stream data
+     *
+     * ICY Stream Structure:
+     * [Audio Data Chunk (metaint bytes)] [Metadata Length (1 byte)] [Metadata (length*16 bytes)] [Repeat...]
+     *
+     * Example with metaint=8192:
+     * Audio(8192) + MetaLen(1) + Metadata(N) + Audio(8192) + MetaLen(1) + Metadata(M) + ...
+     */
     res.on('data', (chunk) => {
+      // Accumulate incoming data in buffer
       buffer = Buffer.concat([buffer, chunk]);
 
+      // Process complete audio + metadata blocks
       while (buffer.length >= icyMetaInt) {
-        // Skip audio data
+        // Skip audio data (we don't play it, just count chunks)
         buffer = buffer.slice(icyMetaInt);
         audioDataCount++;
 
         if (buffer.length > 0) {
-          // Read metadata length (1 byte * 16 = actual length)
+          // Read metadata length byte
+          // ICY format: length byte * 16 = actual metadata length
           const metaLength = buffer[0] * 16;
 
           if (metaLength > 0 && buffer.length >= metaLength + 1) {
-            // Extract metadata
+            // Extract metadata (skip length byte, take metadata)
             const metaBuffer = buffer.slice(1, 1 + metaLength);
             const metadata = parseIcyMetadata(metaBuffer);
 
@@ -141,9 +195,10 @@ function testIcyMetadata() {
               }
             }
 
+            // Remove processed metadata from buffer
             buffer = buffer.slice(1 + metaLength);
           } else {
-            // Need more data
+            // Need more data for complete metadata block
             break;
           }
         }
