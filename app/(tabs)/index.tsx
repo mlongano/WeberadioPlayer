@@ -134,6 +134,7 @@ export default function App(): React.JSX.Element {
       // Set up ICY metadata listener as backup
       setupIcyMetadataListener();
     }
+    // iOS metadata is handled via Video component's onTimedMetadata callback
   }, []);
 
   async function setupNotificationListeners() {
@@ -242,6 +243,57 @@ export default function App(): React.JSX.Element {
       await audioManager.playRadio(webeRadioStream);
     }
   }
+
+  // Handle iOS Video ICY metadata
+  const handleIOSTimedMetadata = async (metadata: any) => {
+    if (Platform.OS === 'ios') {
+      console.log('=== iOS ICY Metadata Received ===');
+      console.log('Metadata:', JSON.stringify(metadata, null, 2));
+
+      // Check if we're playing the radio stream (not a podcast)
+      if (currentSource?.id !== webeRadioStream.id) {
+        console.log('Not playing radio stream, ignoring metadata');
+        return;
+      }
+
+      // Extract StreamTitle from timed metadata
+      // react-native-video provides metadata as an array of objects with identifier and value
+      let rawTitle = '';
+
+      if (metadata && metadata.metadata && Array.isArray(metadata.metadata)) {
+        // Find the StreamTitle in metadata array
+        const streamTitleItem = metadata.metadata.find((item: any) =>
+          item.identifier === 'icy/StreamTitle' ||
+          item.identifier === 'StreamTitle' ||
+          item.key === 'StreamTitle'
+        );
+
+        if (streamTitleItem) {
+          rawTitle = streamTitleItem.value || '';
+        }
+      }
+
+      console.log('Raw ICY StreamTitle:', rawTitle);
+
+      if (rawTitle && rawTitle !== 'WeBe Radio') {
+        console.log('Processing ICY metadata and fetching cover...');
+
+        // Use IcecastMetadataService to parse and enrich with cover
+        const enrichedMetadata = await icecastMetadataService.processIcyMetadata(rawTitle);
+
+        console.log('Enriched metadata:', {
+          title: enrichedMetadata.title,
+          artist: enrichedMetadata.artist,
+          album: enrichedMetadata.album,
+          year: enrichedMetadata.year,
+          coverUrl: enrichedMetadata.coverUrl,
+        });
+      } else {
+        console.log('Ignoring station name or empty metadata');
+      }
+    }
+  };
+
   const theme = useTheme();
   const styles = StyleSheet.create({
     container: {
@@ -306,7 +358,7 @@ export default function App(): React.JSX.Element {
           resizeMode="cover"
           controls={false}
           muted={false}
-          volume={1.0}
+          volume={volume}
           rate={1.0}
           bufferConfig={{
             minBufferMs: 15000,
@@ -326,6 +378,7 @@ export default function App(): React.JSX.Element {
           onBuffer={(buffer) => {
             console.log('iOS Video Buffer:', buffer);
           }}
+          onTimedMetadata={handleIOSTimedMetadata}
         />
       )}
     </ScrollView>

@@ -251,9 +251,11 @@ useEffect(() => {
 }, []);
 ```
 
-### ICY Metadata Processing (Android)
+### ICY Metadata Processing
 
-The app automatically listens for ICY metadata from the stream and enriches it with cover art:
+The app automatically listens for ICY metadata from the stream and enriches it with cover art on both platforms:
+
+#### Android (TrackPlayer)
 
 ```typescript
 // Automatic setup in index.tsx - uses Event.MetadataTimedReceived
@@ -289,16 +291,45 @@ TrackPlayer.addEventListener(
 );
 ```
 
-**Key Implementation Details:**
+#### iOS (Video Component)
 
-- Uses `Event.MetadataTimedReceived` to get raw unparsed ICY metadata
-- Checks `TrackPlayer.getActiveTrack()` to only process radio stream metadata
-- Ignores ICY events when playing podcasts to prevent metadata interference
-- Extracts from `event.metadata[0].title` (not pre-parsed title/artist fields)
-- Filters out station name "WeBe Radio" to avoid processing non-song metadata
-- Metadata format: "Title - Artist - Year - Album" (e.g., "Jump - Van Halen - 2022 - 1984")
-- IcecastMetadataService handles parsing and cover art enrichment
-- Listeners are notified automatically via observer pattern
+```typescript
+// iOS uses react-native-video's onTimedMetadata callback
+<Video
+  source={{
+    uri: 'https://stream.webe.radio/live',
+    headers: {
+      'Icy-MetaData': '1', // Enable ICY metadata
+    },
+  }}
+  onTimedMetadata={async (metadata) => {
+    // Extract StreamTitle from metadata array
+    const streamTitleItem = metadata.metadata.find(
+      (item) => item.identifier === 'icy/StreamTitle'
+    );
+
+    if (streamTitleItem && streamTitleItem.value !== 'WeBe Radio') {
+      // Parse and enrich metadata with cover art
+      const enrichedMetadata = await icecastMetadataService.processIcyMetadata(
+        streamTitleItem.value
+      );
+
+      // UI updates automatically via IcecastMetadataService listener
+    }
+  }}
+/>
+```**Key Implementation Details:**
+
+- **Android**: Uses `Event.MetadataTimedReceived` from TrackPlayer to get raw unparsed ICY metadata
+- **iOS**: Uses `onTimedMetadata` callback from react-native-video to receive ICY metadata
+- **Metadata Extraction**:
+  - Android: `event.metadata[0].title`
+  - iOS: Find item with `identifier === 'icy/StreamTitle'`
+- **Source Detection**: Checks if playing radio stream vs podcast to avoid metadata interference
+- **Filters**: Ignores station name "WeBe Radio" to avoid processing non-song metadata
+- **Format**: "Title - Artist - Year - Album" (e.g., "Jump - Van Halen - 2022 - 1984")
+- **Enrichment**: IcecastMetadataService handles parsing and cover art enrichment
+- **Cross-Platform**: Same unified processing for both platforms via observer pattern
 
 ### UI Metadata Switching
 

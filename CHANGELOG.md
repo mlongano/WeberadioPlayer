@@ -18,6 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **MusicBrainz/Cover Art Archive**: Fallback cover art source for better coverage
 - **Image Cache-Busting**: Added `key` prop to force Image re-renders on cover changes
 - **Source Type Detection**: UI now correctly switches between podcast and radio metadata based on `currentSource.type`
+- **iOS ICY Metadata Support**: Full ICY metadata extraction via Video component's `onTimedMetadata` callback
 
 ### 🔧 Changed
 
@@ -65,9 +66,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **TypeScript**: Full type safety for IcecastMetadataService
 - **Error Handling**: Graceful fallbacks for missing cover art with try-catch blocks
 - **Code Organization**: Separated metadata enrichment from audio playback logic
-- **Platform Support**: Works seamlessly on both Android (tested) and iOS
+- **Platform Support**: Full feature parity on both Android and iOS
 - **Observer Pattern**: Multiple listeners can subscribe to enriched metadata updates
 - **Comprehensive Logging**: Added detailed console logs for debugging metadata flow
+- **iOS Video Integration**: ICY metadata extraction via `onTimedMetadata` callback from react-native-video
+- **Cross-Platform Metadata**: Unified metadata processing for both TrackPlayer (Android) and Video (iOS)
 
 ### 🗑️ Removed
 
