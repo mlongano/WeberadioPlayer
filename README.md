@@ -50,8 +50,9 @@ TrackPlayer (Android) / Video Component (iOS)
           ↓ [Raw: "Title - Artist - Year - Album"]
 IcecastMetadataService.processIcyMetadata()
           ↓ [Parse metadata parts]
-          ├─→ iTunes API (primary, <200ms)
-          └─→ MusicBrainz API (fallback)
+          ├─→ iTunes API (primary, ~200ms)
+          ├─→ MusicBrainz API (secondary, ~800ms)
+          └─→ Discogs API (tertiary, ~1000ms, requires auth)
           ↓ [Cache cover (LRU 100 songs)]
           ↓ [Notify all listeners via Observer pattern]
 useSongMetadata Hook
@@ -423,7 +424,21 @@ npx expo build:ios
 
 ### Environment Variables
 
-- `EXPO_PUBLIC_STRAPI_URL`: Strapi CMS API URL
+Create a `.env` file in the root directory (see `.env.example` for template):
+
+```bash
+# Strapi CMS Configuration
+EXPO_PUBLIC_STRAPI_API_TOKEN=your_strapi_api_token
+EXPO_PUBLIC_STRAPI_URL_BASE=https://your-strapi-instance.com
+EXPO_PUBLIC_DEFAULT_PAGE_SIZE=10
+
+# Discogs API Configuration (optional - for enhanced cover art search)
+# Get credentials from: https://www.discogs.com/settings/developers
+EXPO_PUBLIC_DISCOGS_KEY=your_discogs_consumer_key
+EXPO_PUBLIC_DISCOGS_SECRET=your_discogs_consumer_secret
+```
+
+**Note**: Discogs credentials are optional. The app will use iTunes and MusicBrainz APIs if Discogs is not configured. Adding Discogs credentials improves cover art success rates for rare/vinyl releases.
 
 ### TrackPlayer Setup
 
@@ -448,9 +463,21 @@ npx expo build:ios
 
 ### Cover Art APIs
 
-- **iTunes Search API**: Primary cover art source (fast, no authentication required)
-- **MusicBrainz + Cover Art Archive**: Fallback for additional coverage
-- Smart caching system (LRU, 100 songs)
+- **iTunes Search API**: Primary cover art source (~200ms, no authentication)
+  - Fast response time
+  - High-quality covers (up to 600x600)
+  - Best for mainstream/popular music
+- **MusicBrainz + Cover Art Archive**: Secondary fallback (~800ms, no authentication)
+  - Comprehensive catalog for indie/niche music
+  - High-resolution covers
+  - Good metadata quality
+- **Discogs API**: Tertiary/final fallback (~1000ms, requires authentication)
+  - Excellent for rare/vinyl/physical releases
+  - Variable quality covers
+  - Requires API key and secret (optional)
+  - Filters out unofficial releases and placeholder images
+- **Smart caching system**: LRU cache (100 songs) with 24h expiry
+- **Negative caching**: Failed searches cached for 1h to avoid repeated API calls
 
 ## 🐛 Known Issues & Solutions
 
