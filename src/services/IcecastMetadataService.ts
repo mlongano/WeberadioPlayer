@@ -6,6 +6,8 @@
  * Metadata comes directly from TrackPlayer's ICY metadata events
  */
 
+import { Config, CoverArtAPIs } from '../utils/config';
+
 export interface SongMetadata {
   title: string;
   artist: string;
@@ -96,21 +98,35 @@ class IcecastMetadataService {
   }
 
   /**
-   * Fetch cover art from various sources
+   * Fetch cover art from various sources with three-tier fallback
    */
   private async fetchCoverArt(
     artist: string,
     title: string,
     album: string
   ): Promise<string | null> {
-    // Try iTunes first (fastest)
+    // Try iTunes first (fastest, ~200ms)
     const iTunesCover = await this.fetchITunesCover(artist, title);
-    if (iTunesCover) return iTunesCover;
+    if (iTunesCover) {
+      console.log('Cover found via iTunes API');
+      return iTunesCover;
+    }
 
-    // Try MusicBrainz
+    // Try MusicBrainz second (slower, ~800ms)
     const musicBrainzCover = await this.fetchMusicBrainzCover(artist, title);
-    if (musicBrainzCover) return musicBrainzCover;
+    if (musicBrainzCover) {
+      console.log('Cover found via MusicBrainz API');
+      return musicBrainzCover;
+    }
 
+    // Try Discogs as final fallback (slowest, ~1000ms, requires auth)
+    const discogsCover = await this.fetchDiscogsCover(artist, title);
+    if (discogsCover) {
+      console.log('Cover found via Discogs API');
+      return discogsCover;
+    }
+
+    console.log('No cover found for:', artist, '-', title);
     return null;
   }
 
@@ -120,7 +136,7 @@ class IcecastMetadataService {
   private async fetchITunesCover(artist: string, title: string): Promise<string | null> {
     try {
       const query = `${title} ${artist}`.trim();
-      const url = `https://itunes.apple.com/search?term=${encodeURIComponent(query)}&media=music&limit=1`;
+      const url = `${CoverArtAPIs.ITUNES_SEARCH}?term=${encodeURIComponent(query)}&media=music&limit=1`;
 
       const response = await fetch(url);
       const data = await response.json();
@@ -144,7 +160,7 @@ class IcecastMetadataService {
   private async fetchMusicBrainzCover(artist: string, title: string): Promise<string | null> {
     try {
       // Search for recording
-      const searchUrl = `https://musicbrainz.org/ws/2/recording/?query=artist:"${encodeURIComponent(artist)}" AND recording:"${encodeURIComponent(title)}"&fmt=json&limit=1`;
+      const searchUrl = `${CoverArtAPIs.MUSICBRAINZ_SEARCH}?query=artist:"${encodeURIComponent(artist)}" AND recording:"${encodeURIComponent(title)}"&fmt=json&limit=1`;
 
       const response = await fetch(searchUrl, {
         headers: {
@@ -160,7 +176,7 @@ class IcecastMetadataService {
 
         if (releaseId) {
           // Try to get cover art
-          const coverUrl = `https://coverartarchive.org/release/${releaseId}/front-500`;
+          const coverUrl = `${CoverArtAPIs.COVERART_ARCHIVE}/${releaseId}/front-500`;
 
           // Check if cover exists
           const coverResponse = await fetch(coverUrl, { method: 'HEAD' });
@@ -173,6 +189,69 @@ class IcecastMetadataService {
       console.log('MusicBrainz API error:', error);
     }
     return null;
+  }
+
+  /**
+   * Fetch cover from Discogs API (requires authentication)
+   */
+  private async fetchDiscogsCover(artist: string, title: string): Promise<string | null> {
+    // Check for required credentials
+    const discogsKey = Config.DISCOGS_KEY;
+    const discogsSecret = Config.DISCOGS_SECRET;
+
+    if (!discogsKey || !discogsSecret) {
+      console.log('Discogs API credentials not configured');
+      return null;
+    }
+
+    try {
+      // Search by artist and track
+      const query = `${CoverArtAPIs.DISCOGS_SEARCH}?artist=${encodeURIComponent(artist)}&track=${encodeURIComponent(title)}&type=release&per_page=1`;
+
+      const response = await fetch(query, {
+        headers: {
+          'Authorization': `Discogs key=${discogsKey}, secret=${discogsSecret}`,
+          'User-Agent': 'WeBeRadioApp/1.0',
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error(`Discogs API error: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (!data.results || data.results.length === 0) {
+        return null;
+      }
+
+      // Filter results for quality
+      const validReleases = data.results.filter((item: any) => {
+        // Skip Russian releases (often have quality issues)
+        if (item.country === 'Russia') return false;
+
+        // Skip unofficial releases
+        if (item.title?.includes('Unofficial Release')) return false;
+
+        // Skip placeholder images
+        if (item.cover_image?.endsWith('spacer.gif')) return false;
+
+        return true;
+      });
+
+      if (validReleases.length === 0) {
+        return null;
+      }
+
+      const coverImage = validReleases[0].cover_image;
+      console.log('Discogs cover found:', coverImage, '-', validReleases[0].title);
+
+      return coverImage;
+
+    } catch (error) {
+      console.log('Discogs API error:', error);
+      return null;
+    }
   }
 
   /**

@@ -8,10 +8,11 @@
       "developmentClient": true,
       "distribution": "internal",
       "env": {
-        "EXPO_PUBLIC_STRAPI_URL_BASE": "https://apiv4.webe.radio",
+        "EXPO_PUBLIC_STRAPI_URL_BASE": "https://api.webe.radio",
         "EXPO_PUBLIC_DEFAULT_PAGE_SIZE": "50",
-        "EXPO_PUBLIC_COVER_SERVER_URL": "https://cover.webe.radio",
-        "EXPO_PUBLIC_STRAPI_API_TOKEN": "your-token-here"
+        "EXPO_PUBLIC_STRAPI_API_TOKEN": "your-token-here",
+        "EXPO_PUBLIC_DISCOGS_KEY": "your-discogs-key",
+        "EXPO_PUBLIC_DISCOGS_SECRET": "your-discogs-secret"
       },
       "android": {
         "image": "latest",
@@ -34,10 +35,11 @@
     "production": {
       "channel": "production",
       "env": {
-        "EXPO_PUBLIC_STRAPI_URL_BASE": "https://apiv4.webe.radio",
+        "EXPO_PUBLIC_STRAPI_URL_BASE": "https://api.webe.radio",
         "EXPO_PUBLIC_DEFAULT_PAGE_SIZE": "50",
-        "EXPO_PUBLIC_COVER_SERVER_URL": "https://cover.webe.radio",
-        "EXPO_PUBLIC_STRAPI_API_TOKEN": "your-token-here"
+        "EXPO_PUBLIC_STRAPI_API_TOKEN": "your-token-here",
+        "EXPO_PUBLIC_DISCOGS_KEY": "your-discogs-key",
+        "EXPO_PUBLIC_DISCOGS_SECRET": "your-discogs-secret"
       },
       "android": {
         "image": "latest",
