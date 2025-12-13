@@ -1,7 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import { View, Animated, StyleSheet } from 'react-native';
 
-import Logo from '../components/Logo';
+import Logo from '@/src/components/Logo';
 import { useTheme } from 'react-native-paper';
 
 const SplashScreen: React.FC<{ onSplashEnd: () => void }> = ({ onSplashEnd }) => {

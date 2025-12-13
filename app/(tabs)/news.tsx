@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { postsFetchAll, queryPosts } from '../../src/api/fetch';
-import LoadingSpinner from '../components/LoadingSpinner';
-import ArticleCard from '../components/ArticleCard';
+import LoadingSpinner from '@/src/components/LoadingSpinner';
+import ArticleCard from '@/src/components/ArticleCard';
 
 const NewsScreen: React.FC = () => {
   const [posts, setPosts] = useState<any[]>([]);

@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { Config } from '../../src/utils/config';
-import LoadingSpinner from '../components/LoadingSpinner';
-import EpisodeCard from '../components/EpisodeCard';
+import { Config } from '@/src/utils/config';
+import LoadingSpinner from './LoadingSpinner';
+import EpisodeCard from './EpisodeCard';
 import { FlatList, RefreshControl } from 'react-native';
-import { flattenEpisode } from '../../src/api/fetch';
+import { flattenEpisode } from '@/src/api/fetch';
 
 const RandomEpisode: React.FC<{ episodes: any[] }> = ({
   episodes,

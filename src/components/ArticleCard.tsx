@@ -1,7 +1,7 @@
 import React from 'react';
 import { Text, useTheme, Card } from 'react-native-paper';
 import Markdown from 'react-native-markdown-display';
-import { Config } from '../../src/utils/config';
+import { Config } from '@/src/utils/config';
 
 const ArticleCard: React.FC<ArticleCardProps> = ({ post }) => {
   const hash = post.image?.data?.attributes?.hash;

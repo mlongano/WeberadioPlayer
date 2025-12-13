@@ -4,60 +4,38 @@ import Video from 'react-native-video';
 import { Button, Card, Text, useTheme } from 'react-native-paper';
 import { Config } from '../../src/utils/config';
 import { queryEpisodes, schoolsFetchAllBasic, strapiFetch } from '../../src/api/fetch';
-import LoadingSpinner from '../components/LoadingSpinner';
-import SeekBar from '../components/SeekBar';
+import LoadingSpinner from '@/src/components/LoadingSpinner';
+import SeekBar from '@/src/components/SeekBar';
 import Markdown from 'react-native-markdown-display';
 import TrackPlayer, { State, usePlaybackState, useProgress } from 'react-native-track-player';
 import { audioManager, AudioSource } from '../../src/services/AudioManager';
+import { useRadioPlayer } from '../../src/hooks/useRadioPlayer';
 
 const PodcastsScreen: React.FC = () => {
   const [lastSchoolsEpisode, setLastSchoolsEpisode] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [currentEpisodeIndex, setCurrentEpisodeIndex] = useState(-1);
-  const [currentSource, setCurrentSource] = useState<AudioSource | null>(null);
-  const [volume, setVolume] = useState<number>(0.5);
+  const { currentSource, isPlaying: isPlayerPlaying, volume, playPodcast, stop } = useRadioPlayer();
   const playbackState = Platform.OS === 'android' ? usePlaybackState() : { state: State.Stopped };
   const { position, duration } = Platform.OS === 'android' ? useProgress() : { position: 0, duration: 1 };
   const videoRefs = useRef<(React.ComponentRef<typeof Video> | null)[]>([]);
-
-  // Listen for audio source changes
-  useEffect(() => {
-    const unsubscribe = audioManager.onSourceChange((source) => {
-      setCurrentSource(source);
-      // Update current episode index based on playing source
-      if (source && source.type === 'podcast') {
-        const episodeIndex = parseInt(source.id.split('-')[1]);
-        setCurrentEpisodeIndex(episodeIndex);
-      } else {
-        setCurrentEpisodeIndex(-1);
-      }
-    });
-    return unsubscribe;
-  }, []);
-
-  // Listen for volume changes from AudioManager
-  useEffect(() => {
-    const unsubscribe = audioManager.onVolumeChange((newVolume) => {
-      setVolume(newVolume);
-    });
-    return unsubscribe;
-  }, []);
 
   const handlePlay = async (index: number) => {
     const episode = lastSchoolsEpisode[index]?.episode?.attributes;
     const school = lastSchoolsEpisode[index]?.school;
     const audioUrl = Config.STRAPI_URL_BASE + episode?.audio?.data?.attributes?.url;
 
-    if (currentEpisodeIndex === index) {
+    const isCurrentEpisode = currentSource?.id === `podcast-${index}`;
+
+    if (isCurrentEpisode) {
       // Same episode - toggle play/pause
-      const isPlaying = await audioManager.isPlaying();
-      if (isPlaying) {
-        await audioManager.stop();
+      if (isPlayerPlaying) {
+        await stop();
       } else {
         // Resume the current episode
-        const currentSource = audioManager.getCurrentSource();
+        // Note: playPodcast currently resets track player on Android, so it restarts.
+        // To support resume, AudioManager needs update, but keeping behavior consistent for now.
         if (currentSource) {
-          await audioManager.playPodcast(currentSource);
+          await playPodcast(currentSource);
         }
       }
     } else {
@@ -72,8 +50,7 @@ const PodcastsScreen: React.FC = () => {
         isLiveStream: false,
       };
 
-      await audioManager.playPodcast(podcastSource);
-      setCurrentEpisodeIndex(index);
+      await playPodcast(podcastSource);
     }
   };
 
@@ -211,9 +188,7 @@ const PodcastsScreen: React.FC = () => {
           Config.STRAPI_URL_BASE + episode?.cover?.data?.attributes?.url;
         const audioUrl =
           Config.STRAPI_URL_BASE + episode?.audio?.data?.attributes?.url;
-        const isPlaying = Platform.OS === 'android'
-          ? (currentSource && currentSource.id === `podcast-${index}` && playbackState.state === State.Playing)
-          : (currentSource && currentSource.id === `podcast-${index}`);
+        const isPlaying = isPlayerPlaying && currentSource?.id === `podcast-${index}`;
         //console.log('isPlaying: ', index, isPlaying);
         return (
           <Card key={school.slug} style={styles.card}>
@@ -268,7 +243,7 @@ const PodcastsScreen: React.FC = () => {
                   }}
                 />
               )}
-              {Platform.OS === 'android' && index === currentEpisodeIndex && (
+              {Platform.OS === 'android' && currentSource?.id === `podcast-${index}` && (
                 <SeekBar
                   onSeek={async (time: number) => {
                     await TrackPlayer.seekTo(time);

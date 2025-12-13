@@ -5,7 +5,8 @@ import { useRef, useState, useEffect } from 'react';
 import Video, { VideoRef } from 'react-native-video';
 import SeekBar from './SeekBar';
 import { EpisodeCardProps } from '@/types';
-import { audioManager, AudioSource } from '../../src/services/AudioManager';
+import { audioManager, AudioSource } from '@/src/services/AudioManager';
+import { useRadioPlayer } from '@/src/hooks/useRadioPlayer';
 import TrackPlayer, { useProgress } from 'react-native-track-player';
 
 export default function EpisodeCard({
@@ -16,28 +17,8 @@ export default function EpisodeCard({
   cardTitle = 'Benvenuto su WeBe Radio',
   cardSubtitle = 'Il fato ha voluto donarti questo episodio:',
 }: EpisodeCardProps) {
-  const [currentSource, setCurrentSource] = useState<AudioSource | null>(null);
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-  const [volume, setVolume] = useState<number>(0.5);
-
-  // Listen for audio source changes
-  useEffect(() => {
-    const unsubscribe = audioManager.onSourceChange((source) => {
-      setCurrentSource(source);
-      // Check if this episode is currently playing
-      const isThisEpisodePlaying = source && source.url === audioUrl;
-      setIsPlaying(!!isThisEpisodePlaying);
-    });
-    return unsubscribe;
-  }, [audioUrl]);
-
-  // Listen for volume changes from AudioManager
-  useEffect(() => {
-    const unsubscribe = audioManager.onVolumeChange((newVolume) => {
-      setVolume(newVolume);
-    });
-    return unsubscribe;
-  }, []);
+  const { currentSource, isPlaying: isPlayerPlaying, volume, playPodcast, stop } = useRadioPlayer();
+  const isPlaying = isPlayerPlaying && currentSource?.url === audioUrl;
 
   // TrackPlayer progress for Android
   const { position, duration } = Platform.OS === 'android' ? useProgress() : { position: 0, duration: 1 };
@@ -85,9 +66,9 @@ export default function EpisodeCard({
     };
 
     if (isPlaying) {
-      await audioManager.stop();
+      await stop();
     } else {
-      await audioManager.playPodcast(episodeSource);
+      await playPodcast(episodeSource);
     }
   }
   const theme = useTheme();

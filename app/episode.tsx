@@ -1,8 +1,8 @@
 import React from 'react';
-import {useLocalSearchParams} from 'expo-router';
-import EpisodeCard from './components/EpisodeCard';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
-import {useTheme} from 'react-native-paper';
+import { useLocalSearchParams } from 'expo-router';
+import EpisodeCard from '@/src/components/EpisodeCard';
+import { SafeAreaProvider } from 'react-native-safe-area-context';
+import { useTheme } from 'react-native-paper';
 
 type Episode = {
   title: string;
@@ -14,7 +14,7 @@ type Episode = {
 };
 
 const EpisodeScreen: React.FC = () => {
-  const {title, description, imageUrl, audioUrl, schools, podcastTitle} =
+  const { title, description, imageUrl, audioUrl, schools, podcastTitle } =
     useLocalSearchParams<Episode>();
 
   return (

@@ -3,14 +3,14 @@ import { Platform, ScrollView, StyleSheet } from 'react-native';
 import { useTheme, Button } from 'react-native-paper';
 import TrackPlayer, { Event } from 'react-native-track-player';
 
-import AlbumArt from '../components/AlbumArt';
-import TrackDetails from '../components/TrackDetails';
-import Controls from '../components/Controls';
-import VolumeControl from '../components/VolumeControl';
-import Header from '../components/Header';
-import HiddenAudioPlayer from '@/components/HiddenAudioPlayer';
+import AlbumArt from '@/src/components/AlbumArt';
+import TrackDetails from '@/src/components/TrackDetails';
+import Controls from '@/src/components/Controls';
+import VolumeControl from '@/src/components/VolumeControl';
+import Header from '@/src/components/Header';
+import HiddenAudioPlayer from '@/src/components/HiddenAudioPlayer';
 
-import useSongMetadata from '../hooks/useSongMetadata';
+import useSongMetadata from '@/src/hooks/useSongMetadata';
 import { useRadioPlayer } from '@/src/hooks/useRadioPlayer';
 import { Config } from '@/src/utils/config';
 import { AudioSource } from '@/src/services/AudioManager';

@@ -9,7 +9,7 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { useEffect } from "react";
 
-import { useColorScheme } from "@/components/useColorScheme";
+import { useColorScheme } from "@/src/components/useColorScheme";
 import { PlaybackService } from "../src/services/PlaybackService";
 import TrackPlayer from "react-native-track-player";
 

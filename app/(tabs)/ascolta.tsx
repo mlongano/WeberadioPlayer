@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { episodesFetchAll, queryEpisodes } from '../../src/api/fetch';
-import LoadingSpinner from '../components/LoadingSpinner';
-import RandomEpisode from '../components/RandomEpisode';
+import LoadingSpinner from '@/src/components/LoadingSpinner';
+import RandomEpisode from '@/src/components/RandomEpisode';
 
 const HomeScreen: React.FC = () => {
   const [episodes, setEpisodes] = useState<any[]>([]);

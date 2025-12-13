@@ -10,10 +10,10 @@ import {
   IconButton,
 } from 'react-native-paper';
 import Colors from '@/constants/Colors';
-import { useColorScheme } from '@/components/useColorScheme';
+import { useColorScheme } from '@/src/components/useColorScheme';
 import { episodesFetchAll, flattenEpisode, queryEpisodes } from '../../src/api/fetch';
 import Fuse from 'fuse.js';
-import LoadingSpinner from '../components/LoadingSpinner';
+import LoadingSpinner from '@/src/components/LoadingSpinner';
 
 import { useRouter } from 'expo-router';
 import Markdown from 'react-native-markdown-display';
@@ -191,7 +191,7 @@ const ExploreScreen: React.FC = () => {
           <View>
             <Text>Nessun episodio trovato</Text>
             <Image
-              source={require('../assets/undraw_page_not_found_su7k.png')}
+              source={require('@/assets/undraw_page_not_found_su7k.png')}
               style={{ resizeMode: 'contain', width: '100%', height: '100%' }}
             />
           </View>
