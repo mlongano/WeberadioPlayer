@@ -4,6 +4,7 @@ export const Config = {
   DEFAULT_PAGE_SIZE: process.env.EXPO_PUBLIC_DEFAULT_PAGE_SIZE,
   DISCOGS_KEY: process.env.EXPO_PUBLIC_DISCOGS_KEY,
   DISCOGS_SECRET: process.env.EXPO_PUBLIC_DISCOGS_SECRET,
+  WEBE_STREAM_URL: process.env.EXPO_PUBLIC_WEBE_STREAM_URL || 'https://stream.webe.radio/live',
 };
 
 // Cover Art API URLs (public APIs, no authentication needed except Discogs)
