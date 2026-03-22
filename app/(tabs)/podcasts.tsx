@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { StyleSheet, ScrollView, Platform } from 'react-native';
 import Video from 'react-native-video';
 import { Button, Card, Text, useTheme } from 'react-native-paper';
@@ -112,9 +112,10 @@ const PodcastsScreen: React.FC = () => {
         });
 
         setLastSchoolsEpisode(episodes);
-        setLoading(false);
       } catch (error) {
         console.error(error);
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -122,7 +123,7 @@ const PodcastsScreen: React.FC = () => {
   }, []);
 
   const theme = useTheme();
-  const styles = StyleSheet.create({
+  const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       padding: 20,
@@ -173,7 +174,7 @@ const PodcastsScreen: React.FC = () => {
     card: {
       marginBottom: 20,
     },
-  });
+  }), [theme.colors.background, theme.colors.primary, theme.colors.onBackground]);
 
   if (loading) {
     return <LoadingSpinner />;

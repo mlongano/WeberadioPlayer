@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 
 import { View, Image, StyleSheet } from 'react-native';
 import {
@@ -60,16 +60,16 @@ const ExploreScreen: React.FC = () => {
   }, []);
 
   const theme = useTheme();
-  const styles = StyleSheet.create({
+  const styles = useMemo(() => StyleSheet.create({
     scrollTopButton: {
       position: 'absolute',
       bottom: 0,
       right: 0,
     },
-  });
+  }), []);
 
   const [searchQuery, setSearchQuery] = useState('');
-  const options = {
+  const fuseOptions = useMemo(() => ({
     includeScore: true,
     keys: [
       'attributes.title',
@@ -93,9 +93,9 @@ const ExploreScreen: React.FC = () => {
     ignoreLocation: true,
     useExtendedSearch: true,
     findAllMatches: true,
-  };
+  }), []);
 
-  const fuse = new Fuse(episodes, options);
+  const fuse = useMemo(() => new Fuse(episodes, fuseOptions), [episodes, fuseOptions]);
   const fusePosts =
     searchQuery.length > 0
       ? fuse.search(searchQuery).map((result: any) => result.item)

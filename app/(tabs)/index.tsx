@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { Platform, ScrollView, StyleSheet } from 'react-native';
 import { useTheme, Button } from 'react-native-paper';
 import TrackPlayer, { Event } from 'react-native-track-player';
@@ -82,12 +82,12 @@ export default function App(): React.JSX.Element {
   // Handle initial play if needed or just let user control it
   // We don't auto-play.
 
-  const styles = StyleSheet.create({
+  const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
     },
-  });
+  }), [theme.colors.background]);
 
   return (
     <ScrollView style={styles.container}>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import {
   View,
   StyleSheet,
@@ -48,7 +48,7 @@ const AboutScreen: React.FC = () => {
   }, []);
 
   const theme = useTheme();
-  const styles = StyleSheet.create({
+  const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       padding: 20,
@@ -68,7 +68,7 @@ const AboutScreen: React.FC = () => {
       fontSize: 16,
       textAlign: 'center',
     },
-  });
+  }), [theme.colors.background, theme.colors.onBackground]);
 
   return (
     <ScrollView
