@@ -26,7 +26,6 @@ class MissingEnvironmentVariable extends Error {
 export const checkEnvVars = () => {
   const envVars = [
       'STRAPI_URL_BASE',
-      'STRAPI_API_TOKEN'
   ];
   for (const envVar of envVars) {
       if (!Config[envVar as keyof typeof Config]) {

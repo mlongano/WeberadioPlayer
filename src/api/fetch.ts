@@ -3,10 +3,7 @@ import { Config } from '../utils/config';
 import { checkEnvVars, checkStatus } from '../utils/errorHandling';
 import { Episode, EpisodeQuery } from './types';
 
-const headers = {
-  Authorization: `Bearer ${Config.STRAPI_API_TOKEN}`,
-  'Content-Type': 'application/json',
-};
+
 
 export const queryPodcasts = {
   fields: [

@@ -428,7 +428,6 @@ Create a `.env` file in the root directory (see `.env.example` for template):
 
 ```bash
 # Strapi CMS Configuration
-EXPO_PUBLIC_STRAPI_API_TOKEN=your_strapi_api_token
 EXPO_PUBLIC_STRAPI_URL_BASE=https://your-strapi-instance.com
 EXPO_PUBLIC_DEFAULT_PAGE_SIZE=10
 
