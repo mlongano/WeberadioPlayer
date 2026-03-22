@@ -12,10 +12,10 @@ export default function Header(
 ) {
   return (
     <>
-      <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20 }}>
-        <Icon name='radio-tower' color={color} size={titleSize} />
+      <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginTop: 20 }} accessibilityRole="header" accessibilityLabel="WeBe Radio">
+        <Icon name='radio-tower' color={color} size={titleSize} accessibilityElementsHidden={true} importantForAccessibility="no-hide-descendants" />
         <Text style={{ color: color, fontSize: titleSize, fontWeight: 'bold', marginTop: 0, marginLeft: 0, marginRight: 0 }}>WeBe Radio</Text>
-        <Icon name='radio-tower' color={color} size={20} />
+        <Icon name='radio-tower' color={color} size={20} accessibilityElementsHidden={true} importantForAccessibility="no-hide-descendants" />
       </View>
       <View style={{ flexDirection: 'row', justifyContent: 'center', alignItems: 'center', marginBottom: 20 }}>
       </View>

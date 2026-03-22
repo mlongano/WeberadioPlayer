@@ -9,7 +9,7 @@ export default function HeroHeader({ h1, h2, imgsrc }: any) {
           <Text style={{ fontWeight: 'bold', marginTop: 0, marginLeft: 0, marginRight: 0 }}>{h1}</Text>
           <Text style={{ fontWeight: 'bold', marginTop: 0, marginLeft: 0, marginRight: 0 }}>{h2}</Text>
         </View>
-        <Image source={imgsrc} alt='Testimonial' />
+        <Image source={imgsrc} alt='Testimonial' accessible={true} accessibilityLabel={h1 || 'Immagine di testata'} />
       </View>
     </View>
   )

@@ -131,6 +131,7 @@ export default function App(): React.JSX.Element {
           mode="contained"
           onPress={() => playRadio(webeRadioStream)}
           style={{ margin: 20, backgroundColor: theme.colors.primary }}
+          accessibilityLabel="Torna alla diretta radio"
         >
           Torna alla diretta
         </Button>

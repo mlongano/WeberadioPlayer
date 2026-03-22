@@ -30,6 +30,7 @@ const ErrorMessage: React.FC<ErrorMessageProps> = ({
           onPress={onRetry}
           style={styles.button}
           icon="refresh"
+          accessibilityLabel="Riprova a caricare"
         >
           Riprova
         </Button>

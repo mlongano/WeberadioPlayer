@@ -129,7 +129,7 @@ const ExploreScreen: React.FC = () => {
     };
 
     return (
-      <Card style={{ margin: 10 }} onPress={() => { }}>
+      <Card style={{ margin: 10 }} onPress={() => { }} accessible={true} accessibilityLabel={`Episodio: ${flatEpisode.title} di ${flatEpisode.podcast.title}`}>
         <Card.Cover source={{ uri: flatEpisode.coverImageUrl }} />
         <Card.Content>
           <Text style={{ marginTop: 15 }} variant="titleMedium">
@@ -168,7 +168,9 @@ const ExploreScreen: React.FC = () => {
               });
             }}
             buttonColor={theme.colors.primary}
-            textColor={theme.colors.onPrimary}>
+            textColor={theme.colors.onPrimary}
+            accessibilityLabel={`Apri episodio ${flatEpisode.title}`}
+          >
             Apri
           </Button>
         </Card.Actions>
@@ -185,6 +187,7 @@ const ExploreScreen: React.FC = () => {
           onChangeText={text => setSearchQuery(text)}
           icon="magnify"
           placeholder="Cerca..."
+          accessibilityLabel="Cerca episodi"
         />
 
         {fusePosts?.length > 0 ? (
@@ -216,6 +219,7 @@ const ExploreScreen: React.FC = () => {
             onPress={() => {
               listRef.current!.scrollToOffset({ offset: 0, animated: true });
             }}
+            accessibilityLabel="Torna in cima alla lista"
           />
         )}
       </SafeAreaProvider>

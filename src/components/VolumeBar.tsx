@@ -27,6 +27,7 @@ const VulumeBar:React.FC<Props> = ({
         style={styles.slider}
         minimumTrackTintColor='#fff'
         maximumTrackTintColor='rgba(255, 255, 255, 0.14)'
+        accessibilityLabel="Volume"
         />
     </View>
   );

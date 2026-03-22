@@ -201,7 +201,7 @@ const PodcastsScreen: React.FC = () => {
         const isPlaying = isPlayerPlaying && currentSource?.id === `podcast-${index}`;
         //console.log('isPlaying: ', index, isPlaying);
         return (
-          <Card key={school.slug} style={styles.card}>
+          <Card key={school.slug} style={styles.card} accessible={true} accessibilityLabel={`Podcast: ${episode.title} di ${school.short_name}`}>
             <Card.Cover source={{ uri: coverImageUrl }} />
             <Card.Content>
               <Text variant="headlineSmall">{school.short_name}</Text>
@@ -271,7 +271,9 @@ const PodcastsScreen: React.FC = () => {
                 mode="elevated"
                 onPress={() => handlePlay(index)}
                 buttonColor={theme.colors.primary}
-                textColor={theme.colors.onPrimary}>
+                textColor={theme.colors.onPrimary}
+                accessibilityLabel={isPlaying ? `Ferma ${episode.title}` : `Riproduci ${episode.title}`}
+              >
                 Play
               </Button>
             </Card.Actions>

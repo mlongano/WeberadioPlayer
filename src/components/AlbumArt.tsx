@@ -19,11 +19,17 @@ const AlbumArt: React.FC<Props> = ({
   onPress
 }) => (
   <View style={styles.container}>
-    <TouchableOpacity onPress={onPress}>
+    <TouchableOpacity
+      onPress={onPress}
+      accessibilityRole="image"
+      accessibilityLabel="Copertina album"
+    >
       <Image
         key={url}
         style={styles.image}
         source={{ uri: url }}
+        accessible={true}
+        accessibilityLabel="Copertina album"
       />
     </TouchableOpacity>
   </View>

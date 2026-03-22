@@ -74,10 +74,17 @@ const AboutScreen: React.FC = () => {
     <ScrollView
       style={styles.container}
       contentContainerStyle={styles.contentContainer}>
-      <TouchableOpacity onPress={() => Linking.openURL('https://webe.radio')}>
+      <TouchableOpacity
+        onPress={() => Linking.openURL('https://webe.radio')}
+        accessibilityRole="link"
+        accessibilityLabel="Visita il sito web di WeBe Radio"
+        accessibilityHint="Apre il sito webe.radio nel browser"
+      >
         <Image
           source={heroImageUrl ? { uri: heroImageUrl } : require('./assets/logo.png')}
           style={{ width: 200, height: 200 }}
+          accessible={true}
+          accessibilityLabel="Immagine WeBe Radio"
         />
       </TouchableOpacity>
       {title ? (

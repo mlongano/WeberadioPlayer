@@ -72,9 +72,9 @@ const TrackDetails: React.FC<Props> = ({
   return (
     <View style={styles.container}>
       <View style={styles.detailsWrapper}>
-        <Text style={styles.title} onPress={onTitlePress}>{title}</Text>
-        <Text style={styles.artist} onPress={onArtistPress}>{artist} - {album}</Text>
-        <Text style={styles.artist} onPress={onArtistPress}>{year}</Text>
+        <Text style={styles.title} onPress={onTitlePress} accessibilityRole="text" accessibilityLabel={`Titolo: ${title}`}>{title}</Text>
+        <Text style={styles.artist} onPress={onArtistPress} accessibilityRole="text" accessibilityLabel={`Artista: ${artist}, Album: ${album}`}>{artist} - {album}</Text>
+        <Text style={styles.artist} onPress={onArtistPress} accessibilityRole="text" accessibilityLabel={`Anno: ${year}`}>{year}</Text>
       </View>
     </View>
   )

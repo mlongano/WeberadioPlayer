@@ -57,11 +57,11 @@ const SeekBar = ({
   return (
     <View style={styles.container}>
       <View style={{ flexDirection: 'row' }}>
-        <Text style={styles.text}>
+        <Text style={styles.text} accessibilityLabel={`Tempo trascorso ${elapsed[0]} minuti ${elapsed[1]} secondi`}>
           {elapsed[0] + ":" + elapsed[1]}
         </Text>
         <View style={{ flex: 1 }} />
-        <Text style={[styles.text, { width: 40 }]}>
+        <Text style={[styles.text, { width: 40 }]} accessibilityLabel={trackLength > 1 ? `Tempo rimanente ${remaining[0]} minuti ${remaining[1]} secondi` : ''}>
           {trackLength > 1 && "-" + remaining[0] + ":" + remaining[1]}
         </Text>
       </View>
@@ -73,6 +73,7 @@ const SeekBar = ({
         style={styles.slider}
         minimumTrackTintColor={theme.colors.primary}
         maximumTrackTintColor={theme.colors.shadow}
+        accessibilityLabel="Posizione brano"
         />
     </View>
   );

@@ -16,8 +16,8 @@ const ArticleCard: React.FC<ArticleCardProps> = ({ post }) => {
   const theme = useTheme();
 
   return (
-    <Card key={post.slug}>
-      <Card.Cover source={{ uri: image }} />
+    <Card key={post.slug} accessible={true} accessibilityLabel={`Articolo: ${post.title}`}>
+      <Card.Cover source={{ uri: image }} accessibilityLabel={`Immagine per ${post.title}`} />
       <Card.Content>
         <Text variant="headlineSmall">{post.title}</Text>
         <Markdown

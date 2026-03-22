@@ -190,7 +190,9 @@ export default function EpisodeCard({
         style={styles.button}
         mode="contained"
         onPress={togglePlayback}
-        icon={isPlaying ? 'pause' : 'play'}>
+        icon={isPlaying ? 'pause' : 'play'}
+        accessibilityLabel={isPlaying ? `Metti in pausa ${title}` : `Riproduci ${title}`}
+      >
         Play
       </Button>
       <Text style={styles.titlePodcast} variant="titleMedium">

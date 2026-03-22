@@ -32,7 +32,7 @@ const LoadingSpinner: React.FC = () => {
   return (
     <View style={styles.container}>
       {/*<Animated.View style={[styles.loadingSpinner, { transform: [{ rotate: spin }] }]} /> */}
-      <ActivityIndicator size={60} />
+      <ActivityIndicator size={60} accessibilityLabel="Caricamento in corso" />
     </View>
   );
 };

@@ -73,7 +73,7 @@ const RandomEpisode: React.FC<{ episodes: any[] }> = ({
       renderItem={renderItem}
       keyExtractor={() => 'random-episode-card'}
       refreshControl={
-        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} />
+        <RefreshControl refreshing={isRefreshing} onRefresh={onRefresh} accessibilityLabel="Scorri per un episodio casuale" />
       }
     />
   );

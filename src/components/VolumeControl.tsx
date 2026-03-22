@@ -17,7 +17,10 @@ export default function VolumeControl(
 ): React.JSX.Element {
   return (
     <View style={{ flexDirection: 'row', }} >
-      <Text style={{ color: theme.colors.primary, fontSize: 10, fontWeight: 'bold', marginTop: 10, marginLeft: 15, marginRight: 0, width: 20 }}>{Math.round(volume * 100)}</Text>
+      <Text
+        style={{ color: theme.colors.primary, fontSize: 10, fontWeight: 'bold', marginTop: 10, marginLeft: 15, marginRight: 0, width: 20 }}
+        accessibilityLabel={`Volume ${Math.round(volume * 100)} percento`}
+      >{Math.round(volume * 100)}</Text>
       <Slider
         minimumValue={0}
         maximumValue={1}
@@ -27,13 +30,14 @@ export default function VolumeControl(
         style={{ flex: 1, marginLeft: 0, marginRight: 10, marginTop: 10, marginBottom: 10 }}
         minimumTrackTintColor={theme.colors.primary}
         maximumTrackTintColor={theme.colors.shadow}
+        accessibilityLabel="Volume"
       />
       <Icon.Button name='volume-down' color={theme.colors.primary} backgroundColor={'transparent'} size={20}
-        onPress={volumeDown} />
+        onPress={volumeDown} accessibilityLabel="Diminuisci volume" />
       <Icon.Button name='volume-off' color={theme.colors.primary} backgroundColor={'transparent'} size={20}
-        onPress={toggleMute} />
+        onPress={toggleMute} accessibilityLabel="Silenzia" />
       <Icon.Button name='volume-up' color={theme.colors.primary} backgroundColor={'transparent'} size={20}
-        onPress={volumeUp} />
+        onPress={volumeUp} accessibilityLabel="Aumenta volume" />
 
     </View>
   )

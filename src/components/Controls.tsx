@@ -51,12 +51,22 @@ const Controls: React.FC<Props> = ({
   return (
     <View style={styles.container}>
       {!isPlaying ?
-        <TouchableOpacity onPress={onPressPlay}>
+        <TouchableOpacity
+          onPress={onPressPlay}
+          accessibilityRole="button"
+          accessibilityLabel="Riproduci"
+          accessibilityState={{ selected: false }}
+        >
           <View style={styles.playButton}>
             <Icon name={'play-arrow'} size={50} color={theme ? theme.colors.primary : 'rgb(253 224 71)'} />
           </View>
         </TouchableOpacity> :
-        <TouchableOpacity onPress={onPressPause}>
+        <TouchableOpacity
+          onPress={onPressPause}
+          accessibilityRole="button"
+          accessibilityLabel="Pausa"
+          accessibilityState={{ selected: true }}
+        >
           <View style={styles.playButton}>
             <Icon name={'pause'} size={50} color={theme ? theme.colors.primary : 'rgb(253 224 71)'} />
           </View>

@@ -22,13 +22,13 @@ const TopBar: React.FC<Props> = ({
   onMessagePress,
 }) => (
   <View style={styles.container}>
-    <TouchableOpacity onPress={onDownPress}>
+    <TouchableOpacity onPress={onDownPress} accessibilityRole="button" accessibilityLabel="Chiudi">
       <Image style={styles.button}
         source={require('@/assets/ic_keyboard_arrow_down_white.png')} />
     </TouchableOpacity>
     <Text onPress={onMessagePress}
-      style={styles.message}>{message.toUpperCase()}</Text>
-    <TouchableOpacity onPress={onQueuePress}>
+      style={styles.message} accessibilityRole="button" accessibilityLabel={message}>{message.toUpperCase()}</Text>
+    <TouchableOpacity onPress={onQueuePress} accessibilityRole="button" accessibilityLabel="Coda di riproduzione">
       <Image style={styles.button}
         source={require('@/assets/ic_queue_music_white.png')} />
     </TouchableOpacity>
