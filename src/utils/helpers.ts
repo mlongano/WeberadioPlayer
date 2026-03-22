@@ -8,9 +8,9 @@
 // { titolo: 'Yellow Bus', artista: 'Baklan', anno: '2020', album: 'Yellow Bus' }
 
 
-export function zip(props: string[], values: string[]) {
-  return values.reduce((acc, curr: string, i) => {
-    (acc as any)[props[i]] = curr;
+export function zip(props: string[], values: string[]): Record<string, string> {
+  return values.reduce<Record<string, string>>((acc, curr, i) => {
+    acc[props[i]] = curr;
     return acc;
   }, {});
 }
@@ -23,7 +23,7 @@ export const clamp = (num: number, min: number, max: number) => Math.min(Math.ma
 export const getFriendlyDate = (date: string) => {
   const d = new Date(date);
 
-  let options: any = {
+  const options: Intl.DateTimeFormatOptions = {
     year: "numeric",
     month: "long",
     day: "numeric",
@@ -32,10 +32,10 @@ export const getFriendlyDate = (date: string) => {
 }
 
 
-export const getCover = (attributes: any, imageUrlBase: string) => {
+export const getCover = (attributes: { cover?: { data?: { attributes?: { url?: string; hash?: string; ext?: string; width?: number } } } }, imageUrlBase: string) => {
   if (!attributes?.cover?.data?.attributes?.url) return "";
   const coverData = attributes?.cover?.data?.attributes;
-  const format = coverData.width > 500 ? "small_" : "";
+  const format = (coverData.width ?? 0) > 500 ? "small_" : "";
   const urlPath = coverData.url?.substring(0, coverData.url?.lastIndexOf("/"));
   const cover = `${imageUrlBase}${urlPath}/${format}${coverData.hash}${coverData.ext}`;
   return cover;

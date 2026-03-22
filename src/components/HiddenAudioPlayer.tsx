@@ -24,12 +24,22 @@ export default function HiddenAudioPlayer() {
     return null;
   }
 
-  const handleTimedMetadata = async (metadata: any) => {
+  interface MetadataItem {
+    identifier?: string;
+    key?: string;
+    value?: string;
+  }
+
+  interface TimedMetadataEvent {
+    metadata?: MetadataItem[];
+  }
+
+  const handleTimedMetadata = async (metadata: TimedMetadataEvent) => {
     // Extract StreamTitle from timed metadata
     let rawTitle = '';
 
     if (metadata && metadata.metadata && Array.isArray(metadata.metadata)) {
-      const streamTitleItem = metadata.metadata.find((item: any) =>
+      const streamTitleItem = metadata.metadata.find((item: MetadataItem) =>
         item.identifier === 'icy/StreamTitle' ||
         item.identifier === 'StreamTitle' ||
         item.key === 'StreamTitle'

@@ -1,7 +1,7 @@
 import qs from 'qs';
 import { Config } from '../utils/config';
 import { checkEnvVars, checkStatus } from '../utils/errorHandling';
-import { Episode, EpisodeQuery } from './types';
+import { Episode, EpisodeQuery, School, SchoolQuery, StrapiQuery, TagQuery } from './types';
 
 
 
@@ -163,11 +163,11 @@ export const queryPosts = {
 // Generic fetch function for Strapi
 export const strapiFetch = async (
   endpoint: string,
-  query: any,
+  query: StrapiQuery,
   allPages = false,
   pageSize: number | null = null,
 ) => {
-  const localFetch = async (queryPages: any) => {
+  const localFetch = async (queryPages: StrapiQuery) => {
     checkEnvVars();
     // console.log(`Fetching from Strapi: ${Config.STRAPI_URL_BASE}${endpoint}?${qs.stringify(queryPages)}`, endpoint, queryPages);
     const response = await fetch(
@@ -177,7 +177,7 @@ export const strapiFetch = async (
         // headers: headers,
       },
     );
-    // checkStatus(response);
+    checkStatus(response);
     const data = await response.json();
     // console.log('Fetched data:', JSON.stringify(data, null, 2));
     if (data.error) {
@@ -196,10 +196,10 @@ export const strapiFetch = async (
   };
 
   const ps =
-    query['pagination[pageSize]'] || pageSize || Config.DEFAULT_PAGE_SIZE || 50;
+    (query['pagination[pageSize]'] as number) || pageSize || Config.DEFAULT_PAGE_SIZE || 50;
 
-  let queryPages: any = {
-    'pagination[page]': query['pagination[page]'] || 1,
+  let queryPages: StrapiQuery = {
+    'pagination[page]': (query['pagination[page]'] as number) || 1,
     'pagination[pageSize]': ps,
     ...query,
   };
@@ -220,13 +220,11 @@ export const strapiFetch = async (
       const response = localFetch(queryPages);
       promises.push(response);
     }
-    // wait for all the promises to resolve and check the status of each response
+    // wait for all the promises to resolve
     if (promises.length > 0) {
       const responses = await Promise.all(promises);
-      responses.forEach(response => checkStatus(response));
-      const dataAll = await Promise.all(responses);
       fetchedData.data = fetchedData.data.concat(
-        ...dataAll.map(data => data.data),
+        ...responses.map((data: { data: unknown[] }) => data.data),
       );
     }
   }
@@ -235,10 +233,10 @@ export const strapiFetch = async (
 
 // fetch Hero Image from Strapi
 export const heroImageFetch = async (heroImageId: string) => {
-  const queryHeroImage: any = {
+  const queryHeroImage: StrapiQuery = {
     populate: {},
   };
-  queryHeroImage.populate[heroImageId] = {
+  (queryHeroImage.populate as Record<string, unknown>)[heroImageId] = {
     fields: ['url'],
   };
 
@@ -249,7 +247,7 @@ export const heroImageFetch = async (heroImageId: string) => {
 
 // schoolsFetchAllSlugs fetches all schools slugs
 export const schoolsFetchAllBasic = async () => {
-  const query: any = {
+  const query: StrapiQuery = {
     sort: 'sort_order:asc',
     fields: ['name', 'slug', 'short_name', 'description', 'sort_order'],
     populate: {
@@ -264,26 +262,26 @@ export const schoolsFetchAllBasic = async () => {
 };
 
 // Fetch all pages of podcasts fitered by query
-export const podcastsFetchAll = async (query: any) => {
+export const podcastsFetchAll = async (query: StrapiQuery) => {
   const podcasts = await strapiFetch('/api/podcasts', query, true);
   return podcasts?.data;
 };
 
 // Fetch all pages of episodes fitered by query
-export const episodesFetchAll = async (query: any) => {
+export const episodesFetchAll = async (query: StrapiQuery) => {
   const episodes = await strapiFetch('/api/episodes', query, true);
   return episodes?.data;
 };
 
 // Fetch all posts fitered by query
-export const postsFetchAll = async (query: any) => {
+export const postsFetchAll = async (query: StrapiQuery) => {
   const posts = await strapiFetch('/api/posts', query, true);
   return posts?.data;
 };
 
 // Fetch a single podcast by slug
 export const podcastFetchFirst = async (slug: string) => {
-  const query: any = {
+  const query: StrapiQuery = {
     filters: {
       slug: {
         $eq: slug,
@@ -298,7 +296,7 @@ export const podcastFetchFirst = async (slug: string) => {
 
 // Fetch a single episode by slug
 export const episodeFetchFirst = async (slug: string) => {
-  const query: any = {
+  const query: StrapiQuery = {
     filters: {
       slug: {
         $eq: slug,
@@ -314,7 +312,7 @@ export const episodeFetchFirst = async (slug: string) => {
 // Fetch a single post by slug
 export const postFetchFirst = async (slug: string) => {
   checkEnvVars();
-  const query: any = {
+  const query: StrapiQuery = {
     filters: {
       slug: {
         $eq: slug,
@@ -339,12 +337,12 @@ export const flattenEpisode = (episode: EpisodeQuery): Episode => {
     spreaker_id: attributes.spreaker_id,
 
     spreaker_limited: attributes.spreaker_limited,
-    tags: attributes.tags?.data?.map((tag: any) => tag.attributes.name),
+    tags: attributes.tags?.data?.map((tag: TagQuery) => tag.attributes.name),
 
     coverImageUrl:
       Config.STRAPI_URL_BASE + attributes.cover?.data?.attributes?.url,
     audioUrl: Config.STRAPI_URL_BASE + attributes.audio?.data?.attributes?.url,
-    schools: attributes.schools?.data?.map((school: any) => {
+    schools: attributes.schools?.data?.map((school: SchoolQuery) => {
       const { id, attributes } = school;
       return {
         id,
@@ -364,7 +362,7 @@ export const flattenEpisode = (episode: EpisodeQuery): Episode => {
         Config.STRAPI_URL_BASE +
         attributes.podcast.data.attributes.cover?.data?.attributes?.url,
       schools: attributes.podcast.data.attributes.schools?.data?.map(
-        (school: any) => {
+        (school: SchoolQuery) => {
           const { id, attributes } = school;
           return {
             id,

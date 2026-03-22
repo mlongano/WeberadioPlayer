@@ -10,7 +10,7 @@ export interface AudioSource {
   artist: string;
   artwork?: string;
   type: 'radio' | 'podcast' | 'episode';
-  metadata?: any;
+  metadata?: Record<string, string>;
   isLiveStream?: boolean;
 }
 

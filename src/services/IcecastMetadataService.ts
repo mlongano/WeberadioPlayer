@@ -226,7 +226,7 @@ class IcecastMetadataService {
       }
 
       // Filter results for quality
-      const validReleases = data.results.filter((item: any) => {
+      const validReleases = data.results.filter((item: { country?: string; title?: string; cover_image?: string }) => {
         // Skip Russian releases (often have quality issues)
         if (item.country === 'Russia') return false;
 

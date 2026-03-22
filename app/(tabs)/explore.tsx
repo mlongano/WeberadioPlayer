@@ -32,7 +32,7 @@ type Episode = {
 };
 
 const ExploreScreen: React.FC = () => {
-  const [episodes, setEpisodes] = useState<any[]>([]);
+  const [episodes, setEpisodes] = useState<EpisodeQuery[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const listRef = useRef<FlatList>(null);
@@ -103,7 +103,7 @@ const ExploreScreen: React.FC = () => {
   const fuse = useMemo(() => new Fuse(episodes, fuseOptions), [episodes, fuseOptions]);
   const fusePosts =
     searchQuery.length > 0
-      ? fuse.search(searchQuery).map((result: any) => result.item)
+      ? fuse.search(searchQuery).map((result) => result.item)
       : episodes;
 
   if (loading) {
@@ -122,7 +122,7 @@ const ExploreScreen: React.FC = () => {
       audioUrl: flatEpisode.audioUrl,
       imageUrl: flatEpisode.coverImageUrl,
       schools: flatEpisode.schools.reduce(
-        (acc: string, school: any) => `${acc} ${school.short_name}`,
+        (acc: string, school: { short_name: string }) => `${acc} ${school.short_name}`,
         '',
       ),
       podcastTitle: flatEpisode.podcast.title,
@@ -135,7 +135,7 @@ const ExploreScreen: React.FC = () => {
           <Text style={{ marginTop: 15 }} variant="titleMedium">
             {flatEpisode.podcast.title}
           </Text>
-          {flatEpisode.schools.map((school: any) => (
+          {flatEpisode.schools.map((school: { id: number; short_name: string }) => (
             <Text key={school.id} variant="titleMedium">
               {school.short_name}
             </Text>

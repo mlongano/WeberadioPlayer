@@ -43,7 +43,7 @@ export default function App(): React.JSX.Element {
   useEffect(() => {
     if (Platform.OS === 'android') {
       const setupIcyListener = async () => {
-        const sub = TrackPlayer.addEventListener(Event.MetadataTimedReceived, async (event: any) => {
+        const sub = TrackPlayer.addEventListener(Event.MetadataTimedReceived, async (event: { metadata?: Array<{ title?: string }> }) => {
           const currentTrack = await TrackPlayer.getActiveTrack();
           const isRadioStream = currentTrack?.url === Config.WEBE_STREAM_URL;
 

@@ -1,11 +1,12 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { episodesFetchAll, queryEpisodes } from '../../src/api/fetch';
+import { EpisodeQuery } from '../../src/api/types';
 import LoadingSpinner from '@/src/components/LoadingSpinner';
 import ErrorMessage from '@/src/components/ErrorMessage';
 import RandomEpisode from '@/src/components/RandomEpisode';
 
 const HomeScreen: React.FC = () => {
-  const [episodes, setEpisodes] = useState<any[]>([]);
+  const [episodes, setEpisodes] = useState<EpisodeQuery[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 

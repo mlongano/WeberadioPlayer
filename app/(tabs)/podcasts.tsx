@@ -4,6 +4,7 @@ import Video from 'react-native-video';
 import { Button, Card, Text, useTheme } from 'react-native-paper';
 import { Config } from '../../src/utils/config';
 import { queryEpisodes, schoolsFetchAllBasic, strapiFetch } from '../../src/api/fetch';
+import { SchoolLastEpisode, SchoolQuery } from '../../src/api/types';
 import LoadingSpinner from '@/src/components/LoadingSpinner';
 import ErrorMessage from '@/src/components/ErrorMessage';
 import SeekBar from '@/src/components/SeekBar';
@@ -13,7 +14,7 @@ import { audioManager, AudioSource } from '../../src/services/AudioManager';
 import { useRadioPlayer } from '../../src/hooks/useRadioPlayer';
 
 const PodcastsScreen: React.FC = () => {
-  const [lastSchoolsEpisode, setLastSchoolsEpisode] = useState<any[]>([]);
+  const [lastSchoolsEpisode, setLastSchoolsEpisode] = useState<SchoolLastEpisode[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const { currentSource, isPlaying: isPlayerPlaying, volume, playPodcast, stop } = useRadioPlayer();
@@ -24,30 +25,27 @@ const PodcastsScreen: React.FC = () => {
   const handlePlay = async (index: number) => {
     const episode = lastSchoolsEpisode[index]?.episode?.attributes;
     const school = lastSchoolsEpisode[index]?.school;
-    const audioUrl = Config.STRAPI_URL_BASE + episode?.audio?.data?.attributes?.url;
+    if (!episode || !school) return;
+
+    const audioUrl = (Config.STRAPI_URL_BASE ?? '') + (episode.audio?.data?.attributes?.url ?? '');
 
     const isCurrentEpisode = currentSource?.id === `podcast-${index}`;
 
     if (isCurrentEpisode) {
-      // Same episode - toggle play/pause
       if (isPlayerPlaying) {
         await stop();
       } else {
-        // Resume the current episode
-        // Note: playPodcast currently resets track player on Android, so it restarts.
-        // To support resume, AudioManager needs update, but keeping behavior consistent for now.
         if (currentSource) {
           await playPodcast(currentSource);
         }
       }
     } else {
-      // Different episode - load and play
       const podcastSource: AudioSource = {
         id: `podcast-${index}`,
         url: audioUrl,
         title: episode.title,
         artist: school.short_name,
-        artwork: Config.STRAPI_URL_BASE + episode?.cover?.data?.attributes?.url,
+        artwork: (Config.STRAPI_URL_BASE ?? '') + (episode.cover?.data?.attributes?.url ?? ''),
         type: 'podcast',
         isLiveStream: false,
       };
@@ -61,7 +59,7 @@ const PodcastsScreen: React.FC = () => {
     setError(null);
     try {
       const schools = await schoolsFetchAllBasic();
-      const queriesSchoolsLastEpisode = schools.map((school: any) => {
+      const queriesSchoolsLastEpisode = schools.map((school: SchoolQuery) => {
         return {
           school: school.attributes,
           query: {
@@ -79,7 +77,7 @@ const PodcastsScreen: React.FC = () => {
       });
 
       const schoolsLastEpisode = await Promise.all(
-        queriesSchoolsLastEpisode.map(async (querySchool: any) => {
+        queriesSchoolsLastEpisode.map(async (querySchool: { school: SchoolQuery['attributes']; query: Record<string, unknown> }) => {
           try {
             const episode = await strapiFetch(
               `/api/episodes`,
@@ -89,7 +87,7 @@ const PodcastsScreen: React.FC = () => {
             );
             return {
               school: querySchool.school,
-              episode: episode?.data[0],
+              episode: episode?.data[0] ?? null,
             };
           } catch (e) {
             return {
@@ -101,16 +99,13 @@ const PodcastsScreen: React.FC = () => {
       );
 
       const episodes = schoolsLastEpisode.filter(
-        (episode: any) => episode.episode !== null,
+        (item): item is SchoolLastEpisode & { episode: NonNullable<SchoolLastEpisode['episode']> } => item.episode !== null,
       );
-      // Sort episodes by date desc
-      episodes.sort((a: any, b: any) => {
-        if (a.episode?.attributes.date > b.episode?.attributes.date) {
-          return -1;
-        }
-        if (a.episode?.attributes.date < b.episode?.attributes.date) {
-          return 1;
-        }
+      episodes.sort((a, b) => {
+        const dateA = a.episode?.attributes.date ?? '';
+        const dateB = b.episode?.attributes.date ?? '';
+        if (dateA > dateB) return -1;
+        if (dateA < dateB) return 1;
         return 0;
       });
 
@@ -194,12 +189,12 @@ const PodcastsScreen: React.FC = () => {
       {lastSchoolsEpisode.map((item, index) => {
         const episode = item?.episode?.attributes;
         const school = item?.school;
+        if (!episode || !school) return null;
         const coverImageUrl =
-          Config.STRAPI_URL_BASE + episode?.cover?.data?.attributes?.url;
+          (Config.STRAPI_URL_BASE ?? '') + (episode.cover?.data?.attributes?.url ?? '');
         const audioUrl =
-          Config.STRAPI_URL_BASE + episode?.audio?.data?.attributes?.url;
+          (Config.STRAPI_URL_BASE ?? '') + (episode.audio?.data?.attributes?.url ?? '');
         const isPlaying = isPlayerPlaying && currentSource?.id === `podcast-${index}`;
-        //console.log('isPlaying: ', index, isPlaying);
         return (
           <Card key={school.slug} style={styles.card} accessible={true} accessibilityLabel={`Podcast: ${episode.title} di ${school.short_name}`}>
             <Card.Cover source={{ uri: coverImageUrl }} />

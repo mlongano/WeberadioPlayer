@@ -2,12 +2,13 @@ import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { postsFetchAll, queryPosts } from '../../src/api/fetch';
+import { PostQuery } from '../../src/api/types';
 import LoadingSpinner from '@/src/components/LoadingSpinner';
 import ErrorMessage from '@/src/components/ErrorMessage';
 import ArticleCard from '@/src/components/ArticleCard';
 
 const NewsScreen: React.FC = () => {
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<PostQuery[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 

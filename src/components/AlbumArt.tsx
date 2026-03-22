@@ -11,7 +11,6 @@ import {
 interface Props {
   url: string;
   onPress?: () => void;
-  theme?: any;
 }
 
 const AlbumArt: React.FC<Props> = ({

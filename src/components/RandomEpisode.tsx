@@ -4,13 +4,14 @@ import LoadingSpinner from './LoadingSpinner';
 import EpisodeCard from './EpisodeCard';
 import { FlatList, RefreshControl } from 'react-native';
 import { flattenEpisode } from '@/src/api/fetch';
+import { Episode, EpisodeQuery } from '@/src/api/types';
 
-const RandomEpisode: React.FC<{ episodes: any[] }> = ({
+const RandomEpisode: React.FC<{ episodes: EpisodeQuery[] }> = ({
   episodes,
 }: {
-  episodes: any[];
+  episodes: EpisodeQuery[];
 }) => {
-  const [selectedEpisode, setSelectedEpisode] = useState<any | null>(null);
+  const [selectedEpisode, setSelectedEpisode] = useState<Episode | null>(null);
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   const selectRandomEpisode = () => {
@@ -57,7 +58,7 @@ const RandomEpisode: React.FC<{ episodes: any[] }> = ({
         imageUrl={selectedEpisode.coverImageUrl}
         cardTitle={selectedEpisode.podcast.title}
         cardSubtitle={selectedEpisode.schools.reduce(
-          (acc: string, school: any) => `${acc} ${school.short_name}`,
+          (acc: string, school: { short_name: string }) => `${acc} ${school.short_name}`,
           '',
         )}
       />
