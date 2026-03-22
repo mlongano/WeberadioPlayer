@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { StyleSheet, ScrollView, Platform } from 'react-native';
 import Video from 'react-native-video';
 import { Button, Card, Text, useTheme } from 'react-native-paper';
 import { Config } from '../../src/utils/config';
 import { queryEpisodes, schoolsFetchAllBasic, strapiFetch } from '../../src/api/fetch';
 import LoadingSpinner from '@/src/components/LoadingSpinner';
+import ErrorMessage from '@/src/components/ErrorMessage';
 import SeekBar from '@/src/components/SeekBar';
 import Markdown from 'react-native-markdown-display';
 import TrackPlayer, { State, usePlaybackState, useProgress } from 'react-native-track-player';
@@ -14,6 +15,7 @@ import { useRadioPlayer } from '../../src/hooks/useRadioPlayer';
 const PodcastsScreen: React.FC = () => {
   const [lastSchoolsEpisode, setLastSchoolsEpisode] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const { currentSource, isPlaying: isPlayerPlaying, volume, playPodcast, stop } = useRadioPlayer();
   const playbackState = Platform.OS === 'android' ? usePlaybackState() : { state: State.Stopped };
   const { position, duration } = Platform.OS === 'android' ? useProgress() : { position: 0, duration: 1 };
@@ -54,73 +56,76 @@ const PodcastsScreen: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    const fetchPodcasts = async () => {
+  const fetchPodcasts = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
       const schools = await schoolsFetchAllBasic();
-      try {
-        const queriesSchoolsLastEpisode = schools.map((school: any) => {
-          return {
-            school: school.attributes,
-            query: {
-              sort: 'date:desc',
-              filters: {
-                schools: {
-                  slug: {
-                    $eq: school.attributes.slug,
-                  },
+      const queriesSchoolsLastEpisode = schools.map((school: any) => {
+        return {
+          school: school.attributes,
+          query: {
+            sort: 'date:desc',
+            filters: {
+              schools: {
+                slug: {
+                  $eq: school.attributes.slug,
                 },
               },
-              ...queryEpisodes,
             },
-          };
-        });
+            ...queryEpisodes,
+          },
+        };
+      });
 
-        const schoolsLastEpisode = await Promise.all(
-          queriesSchoolsLastEpisode.map(async (querySchool: any) => {
-            try {
-              const episode = await strapiFetch(
-                `/api/episodes`,
-                querySchool.query,
-                false,
-                1,
-              );
-              return {
-                school: querySchool.school,
-                episode: episode?.data[0],
-              };
-            } catch (e) {
-              return {
-                school: querySchool.school,
-                episode: null,
-              };
-            }
-          }),
-        );
-
-        const episodes = schoolsLastEpisode.filter(
-          (episode: any) => episode.episode !== null,
-        );
-        // Sort episodes by date desc
-        episodes.sort((a: any, b: any) => {
-          if (a.episode?.attributes.date > b.episode?.attributes.date) {
-            return -1;
+      const schoolsLastEpisode = await Promise.all(
+        queriesSchoolsLastEpisode.map(async (querySchool: any) => {
+          try {
+            const episode = await strapiFetch(
+              `/api/episodes`,
+              querySchool.query,
+              false,
+              1,
+            );
+            return {
+              school: querySchool.school,
+              episode: episode?.data[0],
+            };
+          } catch (e) {
+            return {
+              school: querySchool.school,
+              episode: null,
+            };
           }
-          if (a.episode?.attributes.date < b.episode?.attributes.date) {
-            return 1;
-          }
-          return 0;
-        });
+        }),
+      );
 
-        setLastSchoolsEpisode(episodes);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
+      const episodes = schoolsLastEpisode.filter(
+        (episode: any) => episode.episode !== null,
+      );
+      // Sort episodes by date desc
+      episodes.sort((a: any, b: any) => {
+        if (a.episode?.attributes.date > b.episode?.attributes.date) {
+          return -1;
+        }
+        if (a.episode?.attributes.date < b.episode?.attributes.date) {
+          return 1;
+        }
+        return 0;
+      });
 
-    fetchPodcasts();
+      setLastSchoolsEpisode(episodes);
+    } catch (err) {
+      console.error(err);
+      setError('Impossibile caricare i podcast.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchPodcasts();
+  }, [fetchPodcasts]);
 
   const theme = useTheme();
   const styles = useMemo(() => StyleSheet.create({
@@ -179,7 +184,11 @@ const PodcastsScreen: React.FC = () => {
   if (loading) {
     return <LoadingSpinner />;
   }
-  //console.log('playingIndex: ', playingIndex);
+
+  if (error) {
+    return <ErrorMessage message={error} onRetry={fetchPodcasts} />;
+  }
+
   return (
     <ScrollView style={styles.container}>
       {lastSchoolsEpisode.map((item, index) => {

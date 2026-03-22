@@ -1,33 +1,37 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import { View, StyleSheet, FlatList } from 'react-native';
 import { useTheme } from 'react-native-paper';
 import { postsFetchAll, queryPosts } from '../../src/api/fetch';
 import LoadingSpinner from '@/src/components/LoadingSpinner';
+import ErrorMessage from '@/src/components/ErrorMessage';
 import ArticleCard from '@/src/components/ArticleCard';
 
 const NewsScreen: React.FC = () => {
   const [posts, setPosts] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchPosts = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const query = {
+        sort: 'date:desc',
+        ...queryPosts,
+      };
+      const posts = await postsFetchAll(query);
+      setPosts(posts);
+    } catch (err) {
+      console.error(err);
+      setError('Impossibile caricare le notizie.');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const query = {
-          sort: 'date:desc',
-          ...queryPosts,
-        };
-        const posts = await postsFetchAll(query);
-
-        setPosts(posts);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchPosts();
-  }, []);
+  }, [fetchPosts]);
 
   const theme = useTheme();
 
@@ -45,6 +49,10 @@ const NewsScreen: React.FC = () => {
 
   if (loading) {
     return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <ErrorMessage message={error} onRetry={fetchPosts} />;
   }
 
   return (

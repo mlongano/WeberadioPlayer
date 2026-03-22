@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 
 import { View, Image, StyleSheet } from 'react-native';
 import {
@@ -14,6 +14,7 @@ import { useColorScheme } from '@/src/components/useColorScheme';
 import { episodesFetchAll, flattenEpisode, queryEpisodes } from '../../src/api/fetch';
 import Fuse from 'fuse.js';
 import LoadingSpinner from '@/src/components/LoadingSpinner';
+import ErrorMessage from '@/src/components/ErrorMessage';
 
 import { useRouter } from 'expo-router';
 import Markdown from 'react-native-markdown-display';
@@ -33,6 +34,7 @@ type Episode = {
 const ExploreScreen: React.FC = () => {
   const [episodes, setEpisodes] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
   const listRef = useRef<FlatList>(null);
   const [contentVerticalOffset, setContentVerticalOffset] = useState(0);
   const CONTENT_OFFSET_THRESHOLD = 300;
@@ -40,24 +42,27 @@ const ExploreScreen: React.FC = () => {
 
   const router = useRouter();
 
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const query = {
-          sort: 'date:desc',
-          ...queryEpisodes,
-        };
-        const episodes = await episodesFetchAll(query);
-        setEpisodes(episodes);
-      } catch (error) {
-        console.error(error);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchPosts();
+  const fetchEpisodes = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const query = {
+        sort: 'date:desc',
+        ...queryEpisodes,
+      };
+      const episodes = await episodesFetchAll(query);
+      setEpisodes(episodes);
+    } catch (err) {
+      console.error(err);
+      setError('Impossibile caricare gli episodi.');
+    } finally {
+      setLoading(false);
+    }
   }, []);
+
+  useEffect(() => {
+    fetchEpisodes();
+  }, [fetchEpisodes]);
 
   const theme = useTheme();
   const styles = useMemo(() => StyleSheet.create({
@@ -103,6 +108,10 @@ const ExploreScreen: React.FC = () => {
 
   if (loading) {
     return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <ErrorMessage message={error} onRetry={fetchEpisodes} />;
   }
 
   const renderItem = ({ item }: { item: EpisodeQuery }) => {
