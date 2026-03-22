@@ -51,11 +51,12 @@ const ExploreScreen: React.FC = () => {
         setEpisodes(episodes);
       } catch (error) {
         console.error(error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchPosts();
-    setLoading(false);
   }, []);
 
   const theme = useTheme();

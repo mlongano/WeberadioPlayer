@@ -15,14 +15,13 @@ const HomeScreen: React.FC = () => {
         };
         const fetchedEpisodes = await episodesFetchAll(query);
         setEpisodes(fetchedEpisodes);
-        // console.log('fetchedEpisodes', JSON.stringify(episodes, null, 2));
       } catch (error) {
         console.error(error);
+      } finally {
+        setIsLoading(false);
       }
     };
     fetchEpisodes();
-    setIsLoading(false);
-    console.log('episodes LOADED');
   }, []);
 
   //console.log("current time", currentTime);

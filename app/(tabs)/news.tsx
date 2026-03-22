@@ -21,11 +21,12 @@ const NewsScreen: React.FC = () => {
         setPosts(posts);
       } catch (error) {
         console.error(error);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchPosts();
-    setLoading(false);
   }, []);
 
   const theme = useTheme();
