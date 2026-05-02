@@ -32,7 +32,7 @@
         "backgroundColor": "#ffffff"
       },
       "package": "radio.webe.app",
-      "versionCode": 23,
+      "versionCode": 24,
       "permissions": [
         "android.permission.WAKE_LOCK",
         "android.permission.FOREGROUND_SERVICE",
@@ -68,9 +68,9 @@
                 "**/libjsc.so"
               ]
             },
-            "compileSdkVersion": 35,
-            "targetSdkVersion": 35,
-            "buildToolsVersion": "35.0.0",
+            "compileSdkVersion": 36,
+            "targetSdkVersion": 36,
+            "buildToolsVersion": "36.0.0",
             "supportLargeHeap": true,
             "enableSeparateBuildPerCPUArchitecture": false,
             "universalApk": false,
