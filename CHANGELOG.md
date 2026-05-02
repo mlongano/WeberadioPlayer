@@ -5,6 +5,40 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [5.2.2] - 2026-03-22
+
+### 🐛 Fixed
+
+- **HTTP Error Handling**: Uncommented `checkStatus(response)` in `strapiFetch` — HTTP errors (401/404/500) were silently ignored
+- **Pagination Bug**: Removed incorrect `checkStatus` call on parsed JSON objects in `allPages` branch
+- **Race Conditions**: Moved `setLoading(false)` into `finally` blocks on all data screens (ascolta, news, explore, podcasts)
+- **Duplicate Render**: Removed duplicate `ListHeaderComponent` in news FlatList
+- **Missing Keys**: Added `keyExtractor` to FlatLists to eliminate React key warnings
+
+### 🎵 Added
+
+- **Error UI**: New `ErrorMessage` component with retry button on all data screens (Italian labels)
+- **Accessibility**: Added `accessibilityLabel`, `accessibilityRole`, `accessibilityHint` across 18 files
+- **Unit Tests**: 29 tests for `helpers.ts`, `IcecastMetadataService`, and `flattenEpisode`
+- **TypeScript Types**: `StrapiQuery`, `StrapiResponse<T>`, `TagQuery`, `PostQuery`, `SchoolLastEpisode` in `src/api/types.ts`
+
+### 🔧 Changed
+
+- **Type Safety**: Replaced ~30 `any` usages across 14 files with proper TypeScript types
+- **Performance**: Memoized `StyleSheet.create()` and Fuse.js instances with `useMemo`
+
+### 🗑️ Removed
+
+- **Dead Code**: Deleted unused `useAudioControls.ts` hook
+- **Unused Token**: Removed `EXPO_PUBLIC_STRAPI_API_TOKEN` from config, env, and docs
+- **Accidental Dependency**: Removed `install` package from dependencies
+
+### 📚 Documentation
+
+- **README**: Fixed stale `any` in code examples, updated build commands to EAS, expanded component tree
+- **CHANGELOG**: Added missing v5.2.1 to version table
+- **ANALYSIS.md**: Comprehensive quality audit document
+
 ## [5.2.1] - 2025-11-02
 
 ### 🔧 Changed
@@ -186,6 +220,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 | Version | Date       | Description                                      |
 |---------|------------|--------------------------------------------------|
+| 5.2.2   | 2026-03-22 | Quality audit: type safety, error UI, a11y, tests|
+| 5.2.1   | 2025-11-02 | Volume control unification and iOS fixes         |
 | 5.2.0   | 2025-11-02 | ICY metadata architecture with cover enrichment  |
 | 5.1.0   | 2025-11-01 | Unified AudioManager with cross-platform support |
 | 5.0.3   | 2025-10-XX | Enhanced audio controls and notifications        |

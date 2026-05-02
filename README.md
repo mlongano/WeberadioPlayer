@@ -87,7 +87,7 @@ interface AudioSource {
   artist: string;
   artwork?: string;
   type: 'radio' | 'podcast' | 'episode';
-  metadata?: any;
+  metadata?: Record<string, string>;
   isLiveStream?: boolean;
 }
 ```
@@ -122,22 +122,43 @@ src/
 │   ├── IcecastMetadataService.ts # ICY metadata parsing & cover fetching
 │   └── PlaybackService.ts        # Background service for Android
 ├── api/
-│   └── fetch.ts                  # Strapi API integration
-└── utils/
-    └── config.ts                 # App configuration
-
-app/
-├── _layout.tsx                   # Root layout with TrackPlayer setup
+│   ├── fetch.ts                  # Strapi API integration
+│   └── types.ts                  # TypeScript types for Strapi data
 ├── hooks/
+│   ├── useRadioPlayer.ts         # Radio playback hook
 │   └── useSongMetadata.ts        # Metadata hook with ICY enrichment
-├── (tabs)/
-│   ├── index.tsx                 # Main radio player with ICY listener
-│   ├── podcasts.tsx              # Podcast browser & player
-│   └── [other tabs]
+├── utils/
+│   ├── config.ts                 # App configuration
+│   ├── helpers.ts                # Utility functions (zip, clamp, date, etc.)
+│   └── errorHandling.ts         # HTTP error handling (checkStatus)
 └── components/
     ├── Controls.tsx              # Play/pause controls
     ├── TrackDetails.tsx          # Song/episode info display
-    └── AlbumArt.tsx              # Cover art display
+    ├── AlbumArt.tsx              # Cover art display
+    ├── HeroHeader.tsx            # Hero section with image
+    ├── ArticleCard.tsx           # News article card
+    ├── EpisodeCard.tsx           # Podcast episode card
+    ├── RandomEpisode.tsx         # Random episode picker
+    ├── ErrorMessage.tsx          # Reusable error UI with retry
+    ├── LoadingSpinner.tsx        # Loading indicator
+    ├── SeekBar.tsx               # Audio seek control
+    ├── VolumeBar.tsx             # Volume slider
+    ├── VolumeControl.tsx         # Volume control with icon
+    ├── TopBar.tsx                # Top navigation bar
+    ├── Header.tsx                # Screen header
+    ├── Logo.tsx                  # App logo
+    └── HiddenAudioPlayer.tsx     # iOS background audio player
+
+app/
+├── _layout.tsx                   # Root layout with TrackPlayer setup
+└── (tabs)/
+    ├── _layout.tsx               # Tab navigator layout
+    ├── index.tsx                 # Main radio player with ICY listener
+    ├── ascolta.tsx               # Listen/episodes screen
+    ├── podcasts.tsx              # Podcast browser & player
+    ├── explore.tsx               # Search/explore episodes
+    ├── news.tsx                  # News articles
+    └── about.tsx                 # About screen
 ```
 
 ## 🎵 Audio Sources
@@ -149,7 +170,7 @@ app/
   - **Real-time song updates** via TrackPlayer events
   - **Automatic cover art** fetched from iTunes/MusicBrainz APIs
   - **Format**: "Title - Artist - Year - Album"
-- **Radio Paradise**: Alternative radio stream
+- **Radio Paradise**: Alternative radio stream (configured via environment variables)
 - Dynamic metadata updates in notification panel
 
 ### Podcast Episodes
@@ -262,7 +283,7 @@ The app automatically listens for ICY metadata from the stream and enriches it w
 // Automatic setup in index.tsx - uses Event.MetadataTimedReceived
 TrackPlayer.addEventListener(
   Event.MetadataTimedReceived,
-  async (event: any) => {
+  async (event: { metadata?: Array<{ title?: string }> }) => {
     // Only process if playing the radio stream (not podcasts)
     const currentTrack = await TrackPlayer.getActiveTrack();
     const isRadioStream = currentTrack?.url === 'https://stream.webe.radio/live';
@@ -412,12 +433,14 @@ npm run ios
 
 ### Building for Production
 
+The project uses [EAS Build](https://docs.expo.dev/build/introduction/) (configured in `eas.json`):
+
 ```bash
 # Build for Android
-npx expo build:android
+eas build --platform android
 
 # Build for iOS
-npx expo build:ios
+eas build --platform ios
 ```
 
 ## 🔧 Configuration
