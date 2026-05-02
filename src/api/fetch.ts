@@ -174,7 +174,7 @@ export const strapiFetch = async (
       `${Config.STRAPI_URL_BASE}${endpoint}?${qs.stringify(queryPages)}`,
       {
         method: 'GET',
-        // headers: headers,
+        headers: { 'Strapi-Response-Format': 'v4' },
       },
     );
     checkStatus(response);
