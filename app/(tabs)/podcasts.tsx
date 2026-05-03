@@ -23,11 +23,11 @@ const PodcastsScreen: React.FC = () => {
   const videoRefs = useRef<(React.ComponentRef<typeof Video> | null)[]>([]);
 
   const handlePlay = async (index: number) => {
-    const episode = lastSchoolsEpisode[index]?.episode?.attributes;
+    const episode = lastSchoolsEpisode[index]?.episode;
     const school = lastSchoolsEpisode[index]?.school;
     if (!episode || !school) return;
 
-    const audioUrl = (Config.STRAPI_URL_BASE ?? '') + (episode.audio?.data?.attributes?.url ?? '');
+    const audioUrl = (Config.STRAPI_URL_BASE ?? '') + (episode.audio?.url ?? '');
 
     const isCurrentEpisode = currentSource?.id === `podcast-${index}`;
 
@@ -45,7 +45,7 @@ const PodcastsScreen: React.FC = () => {
         url: audioUrl,
         title: episode.title,
         artist: school.short_name,
-        artwork: (Config.STRAPI_URL_BASE ?? '') + (episode.cover?.data?.attributes?.url ?? ''),
+        artwork: (Config.STRAPI_URL_BASE ?? '') + (episode.cover?.url ?? ''),
         type: 'podcast',
         isLiveStream: false,
       };
@@ -61,13 +61,13 @@ const PodcastsScreen: React.FC = () => {
       const schools = await schoolsFetchAllBasic();
       const queriesSchoolsLastEpisode = schools.map((school: SchoolQuery) => {
         return {
-          school: school.attributes,
+          school: school,
           query: {
             sort: 'date:desc',
             filters: {
               schools: {
                 slug: {
-                  $eq: school.attributes.slug,
+                  $eq: school.slug,
                 },
               },
             },
@@ -77,7 +77,7 @@ const PodcastsScreen: React.FC = () => {
       });
 
       const schoolsLastEpisode = await Promise.all(
-        queriesSchoolsLastEpisode.map(async (querySchool: { school: SchoolQuery['attributes']; query: Record<string, unknown> }) => {
+        queriesSchoolsLastEpisode.map(async (querySchool: { school: SchoolQuery; query: Record<string, unknown> }) => {
           try {
             const episode = await strapiFetch(
               `/api/episodes`,
@@ -102,8 +102,8 @@ const PodcastsScreen: React.FC = () => {
         (item): item is SchoolLastEpisode & { episode: NonNullable<SchoolLastEpisode['episode']> } => item.episode !== null,
       );
       episodes.sort((a, b) => {
-        const dateA = a.episode?.attributes.date ?? '';
-        const dateB = b.episode?.attributes.date ?? '';
+        const dateA = a.episode?.date ?? '';
+        const dateB = b.episode?.date ?? '';
         if (dateA > dateB) return -1;
         if (dateA < dateB) return 1;
         return 0;
@@ -187,13 +187,13 @@ const PodcastsScreen: React.FC = () => {
   return (
     <ScrollView style={styles.container}>
       {lastSchoolsEpisode.map((item, index) => {
-        const episode = item?.episode?.attributes;
+        const episode = item?.episode;
         const school = item?.school;
         if (!episode || !school) return null;
         const coverImageUrl =
-          (Config.STRAPI_URL_BASE ?? '') + (episode.cover?.data?.attributes?.url ?? '');
+          (Config.STRAPI_URL_BASE ?? '') + (episode.cover?.url ?? '');
         const audioUrl =
-          (Config.STRAPI_URL_BASE ?? '') + (episode.audio?.data?.attributes?.url ?? '');
+          (Config.STRAPI_URL_BASE ?? '') + (episode.audio?.url ?? '');
         const isPlaying = isPlayerPlaying && currentSource?.id === `podcast-${index}`;
         return (
           <Card key={school.slug} style={styles.card} accessible={true} accessibilityLabel={`Podcast: ${episode.title} di ${school.short_name}`}>

@@ -21,7 +21,7 @@ const AboutScreen: React.FC = () => {
     const fetchHomeScreenInfo = async () => {
       try {
         const result = await strapiFetch('/api/about-us', { fields: ['title', 'about'] });
-        const { title, about } = result.data.attributes;
+        const { title, about } = result.data;
         setTitle(title);
         setAbout(about);
       } catch (error) {
@@ -35,7 +35,7 @@ const AboutScreen: React.FC = () => {
     const fetchHeroImage = async () => {
       try {
         const result = await strapiFetch('/api/hero-image', { populate: 'chi_siamo' });
-        const imageUrl = result.data.attributes.chi_siamo.data.attributes.formats.small.url;
+        const imageUrl = result.data.chi_siamo.formats.small.url;
         setHeroImageUrl(`https://api.webe.radio${imageUrl}`);
       } catch (error) {
         console.error('Error fetching hero image:', error);

@@ -1,51 +1,43 @@
-export type Attributes<T> = {
-  data: T;
-};
+// Strapi v5 native format (flat, no attributes wrapper, no data wrapper on relations)
 
 export type ImageQuery = {
   id: number;
-  attributes: {
-    url: string;
-    caption: string | null;
-    hash: string;
-    ext: string;
-    width: number;
-    height: number;
-    size: number;
-  };
+  url: string;
+  caption: string | null;
+  hash: string;
+  ext: string;
+  width: number;
+  height: number;
+  size: number;
 };
 
 type AudioQuery = {
   id: number;
-  attributes: {
-    caption: string | null;
-    url: string;
-  };
+  caption: string | null;
+  url: string;
 };
 
 export type SchoolQuery = {
   id: number;
-  attributes: {
-    name: string;
-    short_name: string;
-    slug: string;
-    description?: string;
-  };
+  name: string;
+  short_name: string;
+  slug: string;
+  description?: string;
 };
 
 type PodcastQuery = {
   id: number;
-  attributes: {
-    title: string;
-    slug: string;
-    date: string;
-    description: string;
-    schools: Attributes<SchoolQuery[]>;
-    cover: Attributes<ImageQuery>;
-  };
+  title: string;
+  slug: string;
+  date: string;
+  description: string;
+  schools: SchoolQuery[];
+  cover: ImageQuery | null;
 };
 
-export type EpisodeAttributes = {
+// Strapi v5 returns flat episode objects
+export type EpisodeQuery = {
+  id: number;
   title: string;
   slug: string;
   date: string;
@@ -53,16 +45,11 @@ export type EpisodeAttributes = {
   episode_number: number;
   spreaker_id: number | null;
   spreaker_limited: boolean;
-  tags: Attributes<TagQuery[]>;
-  cover: Attributes<ImageQuery>;
-  audio: Attributes<AudioQuery>;
-  schools: Attributes<SchoolQuery[]>;
-  podcast: Attributes<PodcastQuery>;
-};
-
-export type EpisodeQuery = {
-  id: number;
-  attributes: EpisodeAttributes;
+  tags: TagQuery[];
+  cover: ImageQuery | null;
+  audio: AudioQuery | null;
+  schools: SchoolQuery[];
+  podcast: PodcastQuery | null;
 };
 
 export type Episode = {
@@ -101,9 +88,9 @@ export type Podcast = {
 /** Generic Strapi query object passed to strapiFetch */
 export type StrapiQuery = Record<string, unknown>;
 
-/** Generic Strapi list response */
+/** Generic Strapi v5 list response */
 export interface StrapiResponse<T> {
-  data: Array<{ id: number; attributes: T }>;
+  data: T[];
   meta?: {
     pagination?: {
       page: number;
@@ -114,26 +101,31 @@ export interface StrapiResponse<T> {
   };
 }
 
-/** Tag entry in Strapi response */
+/** Tag entry in Strapi v5 response */
 export type TagQuery = {
   id: number;
-  attributes: { name: string };
+  name: string;
 };
 
-/** Post attributes from Strapi */
+/** Post attributes from Strapi v5 (flat) */
 export type PostAttributes = {
   title: string;
   article: string;
   slug: string;
   subtitle: string;
   date: string;
-  image: Attributes<ImageQuery>;
+  image: ImageQuery | null;
 };
 
-/** Post entry from Strapi (id + attributes wrapper) */
+/** Post entry from Strapi v5 (flat, no attributes wrapper) */
 export type PostQuery = {
   id: number;
-  attributes: PostAttributes;
+  title: string;
+  article: string;
+  slug: string;
+  subtitle: string;
+  date: string;
+  image: ImageQuery | null;
 };
 
 /** School with its latest episode (used in podcasts screen) */
@@ -144,5 +136,5 @@ export interface SchoolLastEpisode {
     slug: string;
     description?: string;
   };
-  episode: { id: number; attributes: EpisodeAttributes } | null;
+  episode: EpisodeQuery | null;
 }

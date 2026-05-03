@@ -32,11 +32,11 @@ export const getFriendlyDate = (date: string) => {
 }
 
 
-export const getCover = (attributes: { cover?: { data?: { attributes?: { url?: string; hash?: string; ext?: string; width?: number } } } }, imageUrlBase: string) => {
-  if (!attributes?.cover?.data?.attributes?.url) return "";
-  const coverData = attributes?.cover?.data?.attributes;
+export const getCover = (item: { cover?: { url?: string; hash?: string; ext?: string; width?: number } | null }, imageUrlBase: string) => {
+  if (!item?.cover?.url) return "";
+  const coverData = item.cover;
   const format = (coverData.width ?? 0) > 500 ? "small_" : "";
-  const urlPath = coverData.url?.substring(0, coverData.url?.lastIndexOf("/"));
+  const urlPath = coverData.url!.substring(0, coverData.url!.lastIndexOf("/"));
   const cover = `${imageUrlBase}${urlPath}/${format}${coverData.hash}${coverData.ext}`;
   return cover;
 }

@@ -4,8 +4,8 @@ import Markdown from 'react-native-markdown-display';
 import { Config } from '@/src/utils/config';
 
 const ArticleCard: React.FC<ArticleCardProps> = ({ post }) => {
-  const hash = post.image?.data?.attributes?.hash;
-  const ext = post.image?.data?.attributes?.ext;
+  const hash = post.image?.hash;
+  const ext = post.image?.ext;
   const image = `${Config.STRAPI_URL_BASE}/uploads/small_${hash}${ext}`;
   const date = new Intl.DateTimeFormat('it-IT', {
     year: 'numeric',

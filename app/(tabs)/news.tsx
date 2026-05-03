@@ -60,7 +60,7 @@ const NewsScreen: React.FC = () => {
     <FlatList
       style={styles.container}
       data={posts}
-      renderItem={({ item }) => <ArticleCard post={item.attributes} />}
+      renderItem={({ item }) => <ArticleCard post={item} />}
       ItemSeparatorComponent={() => <View style={styles.separator} />}
       keyExtractor={(item) => item.id.toString()}
     />

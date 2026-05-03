@@ -171,7 +171,6 @@ export const strapiFetch = async (
       `${Config.STRAPI_URL_BASE}${endpoint}?${qs.stringify(queryPages)}`,
       {
         method: 'GET',
-        headers: { 'Strapi-Response-Format': 'v4' },
       },
     );
     checkStatus(response);
@@ -238,7 +237,7 @@ export const heroImageFetch = async (heroImageId: string) => {
   };
 
   const result = await strapiFetch('/api/hero-image', queryHeroImage);
-  let heroImage = result?.data?.attributes[heroImageId]?.data?.attributes?.url;
+  let heroImage = result?.data?.[heroImageId]?.url;
   return heroImage;
 };
 
@@ -288,7 +287,7 @@ export const podcastFetchFirst = async (slug: string) => {
   };
 
   const podcasts = await strapiFetch('/api/podcasts', query, false, 1);
-  return podcasts.data[0].attributes;
+  return podcasts.data[0];
 };
 
 // Fetch a single episode by slug
@@ -303,7 +302,7 @@ export const episodeFetchFirst = async (slug: string) => {
   };
 
   const episodes = await strapiFetch('/api/episodes', query, false, 1);
-  return episodes.data[0].attributes;
+  return episodes.data[0];
 };
 
 // Fetch a single post by slug
@@ -319,56 +318,55 @@ export const postFetchFirst = async (slug: string) => {
   };
 
   const posts = await strapiFetch('/api/posts', query, false, 1);
-  return posts.data[0].attributes;
+  return posts.data[0];
 };
 
 export const flattenEpisode = (episode: EpisodeQuery): Episode => {
-  const { id, attributes } = episode;
+  const { id, ...attrs } = episode;
   return {
     id,
-    title: attributes.title,
-    slug: attributes.slug,
-    date: attributes.date,
-    description: attributes.description,
-    episode_number: attributes.episode_number,
-    spreaker_id: attributes.spreaker_id,
+    title: attrs.title,
+    slug: attrs.slug,
+    date: attrs.date,
+    description: attrs.description,
+    episode_number: attrs.episode_number,
+    spreaker_id: attrs.spreaker_id,
 
-    spreaker_limited: attributes.spreaker_limited,
-    tags: attributes.tags?.data?.map((tag: TagQuery) => tag.attributes.name),
+    spreaker_limited: attrs.spreaker_limited,
+    tags: attrs.tags?.map((tag: TagQuery) => tag.name),
 
     coverImageUrl:
-      Config.STRAPI_URL_BASE + attributes.cover?.data?.attributes?.url,
-    audioUrl: Config.STRAPI_URL_BASE + attributes.audio?.data?.attributes?.url,
-    schools: attributes.schools?.data?.map((school: SchoolQuery) => {
-      const { id, attributes } = school;
+      Config.STRAPI_URL_BASE + attrs.cover?.url,
+    audioUrl: Config.STRAPI_URL_BASE + attrs.audio?.url,
+    schools: attrs.schools?.map((school: SchoolQuery) => {
+      const { id, ...schoolAttrs } = school;
       return {
         id,
-        name: attributes.name,
-        short_name: attributes.short_name,
-        slug: attributes.slug,
+        name: schoolAttrs.name,
+        short_name: schoolAttrs.short_name,
+        slug: schoolAttrs.slug,
       };
     }),
 
     podcast: {
-      id: attributes.podcast.data.id,
-      title: attributes.podcast.data.attributes.title,
-      slug: attributes.podcast.data.attributes.slug,
-      date: attributes.podcast.data.attributes.date,
-      description: attributes.podcast.data.attributes.description,
+      id: attrs.podcast?.id ?? 0,
+      title: attrs.podcast?.title ?? '',
+      slug: attrs.podcast?.slug ?? '',
+      date: attrs.podcast?.date ?? '',
+      description: attrs.podcast?.description ?? '',
       coverImageUrl:
-        Config.STRAPI_URL_BASE +
-        attributes.podcast.data.attributes.cover?.data?.attributes?.url,
-      schools: attributes.podcast.data.attributes.schools?.data?.map(
+        Config.STRAPI_URL_BASE + attrs.podcast?.cover?.url,
+      schools: attrs.podcast?.schools?.map(
         (school: SchoolQuery) => {
-          const { id, attributes } = school;
+          const { id, ...schoolAttrs } = school;
           return {
             id,
-            name: attributes.name,
-            short_name: attributes.short_name,
-            slug: attributes.slug,
+            name: schoolAttrs.name,
+            short_name: schoolAttrs.short_name,
+            slug: schoolAttrs.slug,
           };
         },
-      ),
+      ) ?? [],
     },
   };
 };
