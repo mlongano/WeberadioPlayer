@@ -68,9 +68,20 @@ class AudioManager {
     this.listeners.forEach((listener) => listener());
   }
 
+  private lastActionTime = 0;
+  private readonly DEBOUNCE_MS = 300;
+
+  private isDebounced(): boolean {
+    const now = Date.now();
+    if (now - this.lastActionTime < this.DEBOUNCE_MS) return true;
+    this.lastActionTime = now;
+    return false;
+  }
+
   // --- Playback Control ---
 
   async playRadio(source: AudioSource) {
+    if (this.isDebounced()) return;
     if (this.state.currentSource?.id === source.id && this.state.isPlaying) return;
     this.state = { ...this.state, currentSource: source, isPlaying: true };
     this.emitChange();
@@ -85,6 +96,7 @@ class AudioManager {
   }
 
   async playPodcast(source: AudioSource) {
+    if (this.isDebounced()) return;
     if (this.state.currentSource?.id === source.id && this.state.isPlaying) return;
     this.state = { ...this.state, currentSource: source, isPlaying: true };
     this.emitChange();
@@ -99,6 +111,7 @@ class AudioManager {
   }
 
   async stop() {
+    if (this.isDebounced()) return;
     if (!this.state.isPlaying) return;
     this.state = { ...this.state, isPlaying: false };
     this.emitChange();
