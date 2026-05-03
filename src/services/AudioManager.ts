@@ -144,6 +144,12 @@ class AudioManager {
 
   registerVideoRef(id: string, ref: VideoRef | null) {
     this.videoRefs.set(id, ref);
+    if (ref && this.state.currentSource?.id === id) {
+      this.activeVideoId = id;
+      if (this.state.isPlaying) {
+        ref.resume();
+      }
+    }
   }
 
   unregisterVideoRef(id: string) {
