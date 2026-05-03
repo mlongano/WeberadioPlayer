@@ -71,7 +71,7 @@ class AudioManager {
   // --- Playback Control ---
 
   async playRadio(source: AudioSource) {
-    // Update state immediately for UI responsiveness
+    if (this.state.currentSource?.id === source.id && this.state.isPlaying) return;
     this.state = { ...this.state, currentSource: source, isPlaying: true };
     this.emitChange();
 
@@ -85,6 +85,7 @@ class AudioManager {
   }
 
   async playPodcast(source: AudioSource) {
+    if (this.state.currentSource?.id === source.id && this.state.isPlaying) return;
     this.state = { ...this.state, currentSource: source, isPlaying: true };
     this.emitChange();
 
@@ -98,6 +99,7 @@ class AudioManager {
   }
 
   async stop() {
+    if (!this.state.isPlaying) return;
     this.state = { ...this.state, isPlaying: false };
     this.emitChange();
 
@@ -160,23 +162,25 @@ class AudioManager {
   }
 
   private playVideoOnIOS(source: AudioSource) {
-    if (Platform.OS === 'ios') {
-      if (this.activeVideoId && this.activeVideoId !== source.id) {
-        const currentRef = this.videoRefs.get(this.activeVideoId);
-        currentRef?.pause();
-      }
+    if (Platform.OS !== 'ios') return;
+    // Pause any previously active video
+    const prevId = this.activeVideoId || (this.state.currentSource?.id !== source.id ? this.state.currentSource?.id : undefined);
+    if (prevId && prevId !== source.id) {
+      this.videoRefs.get(prevId)?.pause();
+    }
 
-      const videoRef = this.videoRefs.get(source.id);
-      if (videoRef) {
-        this.activeVideoId = source.id;
-        videoRef.resume();
-      }
+    const videoRef = this.videoRefs.get(source.id);
+    if (videoRef) {
+      this.activeVideoId = source.id;
+      videoRef.resume();
     }
   }
 
   private pauseVideoOnIOS() {
-    if (Platform.OS === 'ios' && this.activeVideoId) {
-      const videoRef = this.videoRefs.get(this.activeVideoId);
+    if (Platform.OS !== 'ios') return;
+    const id = this.activeVideoId || this.state.currentSource?.id;
+    if (id) {
+      const videoRef = this.videoRefs.get(id);
       videoRef?.pause();
     }
   }
