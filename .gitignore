@@ -54,3 +54,7 @@ webe-radio-415421-ac81618ca34a.json
 *.aab
 secrets
 webe-radio-coverServer-main
+/.agents/
+/.claude/
+/.pi/
+/skills-lock.json
