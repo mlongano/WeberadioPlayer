@@ -1,5 +1,5 @@
 import { Text, View } from "react-native";
-import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
+import Icon from '@expo/vector-icons/MaterialCommunityIcons';
 interface Props {
   ascoltatori: number;
   titleSize: number;

@@ -1,7 +1,7 @@
 import Slider from "@react-native-community/slider";
 import { Text, View } from "react-native";
 import { MD3Theme } from "react-native-paper";
-import Icon from "react-native-vector-icons/MaterialIcons";
+import Icon from '@expo/vector-icons/MaterialIcons';
 import React from "react";
 
 interface Props {
