@@ -5,6 +5,7 @@ import EpisodeCard from './EpisodeCard';
 import { FlatList, RefreshControl } from 'react-native';
 import { flattenEpisode } from '@/src/api/fetch';
 import { Episode, EpisodeQuery } from '@/src/api/types';
+import { audioManager } from '@/src/services/AudioManager';
 
 const RandomEpisode: React.FC<{ episodes: EpisodeQuery[] }> = ({
   episodes,
@@ -39,6 +40,10 @@ const RandomEpisode: React.FC<{ episodes: EpisodeQuery[] }> = ({
   };
 
   const onRefresh = () => {
+    const state = audioManager.getSnapshot();
+    if (state.currentSource?.type === 'episode' && state.isPlaying) {
+      audioManager.stop();
+    }
     selectRandomEpisode();
     setIsRefreshing(false);
   };
