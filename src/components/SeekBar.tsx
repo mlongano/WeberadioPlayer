@@ -26,6 +26,25 @@ interface Props {
   theme: MD3Theme;
 }
 
+const baseStyles = StyleSheet.create({
+  slider: {
+    marginTop: 0,
+  },
+  container: {
+    paddingLeft: 16,
+    paddingRight: 16,
+    paddingTop: 10,
+  },
+  track: {
+    height: 2,
+    borderRadius: 1,
+  },
+  text: {
+    fontSize: 12,
+    textAlign: 'center',
+  }
+});
+
 const SeekBar = ({
   trackLength,
   currentPosition,
@@ -35,25 +54,10 @@ const SeekBar = ({
 }: Props) => {
   const elapsed = minutesAndSeconds(currentPosition);
   const remaining = minutesAndSeconds(trackLength - currentPosition);
-  const styles = StyleSheet.create({
-    slider: {
-      marginTop: 0,
-    },
-    container: {
-      paddingLeft: 16,
-      paddingRight: 16,
-      paddingTop: 10,
-    },
-    track: {
-      height: 2,
-      borderRadius: 1,
-    },
-    text: {
-      color: theme.colors.onBackground,
-      fontSize: 12,
-      textAlign: 'center',
-    }
-  });
+  const styles = {
+    ...baseStyles,
+    text: { ...baseStyles.text, color: theme.colors.onBackground },
+  };
   return (
     <View style={styles.container}>
       <View style={{ flexDirection: 'row' }}>

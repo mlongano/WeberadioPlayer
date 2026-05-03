@@ -1,3 +1,4 @@
+import { useMemo } from 'react';
 import Markdown from 'react-native-markdown-display';
 import { Image, ScrollView, StyleSheet, Platform } from 'react-native';
 import { Button, Text, useTheme } from 'react-native-paper';
@@ -29,7 +30,7 @@ export default function EpisodeCard({
       try {
         TrackPlayer.seekTo(time);
       } catch (error) {
-        console.log('Error seeking on Android:', error);
+        if (__DEV__) console.log('Error seeking on Android:', error);
       }
     } else {
       audioManager.seekVideoOnIOS(time);
@@ -55,7 +56,7 @@ export default function EpisodeCard({
   }
 
   const theme = useTheme();
-  const styles = StyleSheet.create({
+  const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       paddingLeft: 16,
@@ -105,7 +106,16 @@ export default function EpisodeCard({
       fontWeight: 'bold',
       marginBottom: 10,
     },
-  });
+  }), [theme.colors.background, theme.colors.onBackground]);
+
+  const markdownStyle = useMemo(() => ({
+    body: {
+      backgroundColor: theme.colors.background,
+      color: theme.colors.onBackground,
+      fontSize: 12,
+      marginBottom: 20,
+    },
+  }), [theme.colors.background, theme.colors.onBackground]);
 
   return (
     <ScrollView style={styles.container}>
@@ -141,15 +151,7 @@ export default function EpisodeCard({
       <Text style={styles.titlePodcast} variant="titleMedium">
         {title}
       </Text>
-      <Markdown
-        style={{
-          body: {
-            backgroundColor: theme.colors.background,
-            color: theme.colors.onBackground,
-            fontSize: 12,
-            marginBottom: 20,
-          },
-        }}>
+      <Markdown style={markdownStyle}>
         {description ?? ''}
       </Markdown>
     </ScrollView>

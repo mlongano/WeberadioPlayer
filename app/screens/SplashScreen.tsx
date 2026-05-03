@@ -1,4 +1,4 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useMemo } from 'react';
 import { View, Animated, StyleSheet } from 'react-native';
 
 import Logo from '@/src/components/Logo';
@@ -34,7 +34,7 @@ const SplashScreen: React.FC<{ onSplashEnd: () => void }> = ({ onSplashEnd }) =>
 
   const theme = useTheme();
 
-  const styles = StyleSheet.create({
+  const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: theme.colors.background,
@@ -44,7 +44,7 @@ const SplashScreen: React.FC<{ onSplashEnd: () => void }> = ({ onSplashEnd }) =>
     logoContainer: {
       alignItems: 'center',
     },
-  });
+  }), [theme.colors.background]);
 
 
   return (

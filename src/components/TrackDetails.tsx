@@ -17,6 +17,46 @@ interface Props {
   theme: MD3Theme;
 }
 
+const baseStyles = StyleSheet.create({
+  container: {
+    paddingTop: 24,
+    flexDirection: 'row',
+    paddingLeft: 20,
+    alignItems: 'center',
+    paddingRight: 20,
+  },
+  detailsWrapper: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    flex: 1,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  artist: {
+    fontSize: 12,
+    marginTop: 4,
+  },
+  button: {
+    opacity: 0.72,
+  },
+  moreButton: {
+    borderWidth: 2,
+    opacity: 0.72,
+    borderRadius: 10,
+    width: 20,
+    height: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  moreButtonIcon: {
+    height: 17,
+    width: 17,
+  }
+});
+
 const TrackDetails: React.FC<Props> = ({
   title,
   artist,
@@ -26,48 +66,12 @@ const TrackDetails: React.FC<Props> = ({
   onArtistPress,
   theme
 }) => {
-  const styles = StyleSheet.create({
-    container: {
-      paddingTop: 24,
-      flexDirection: 'row',
-      paddingLeft: 20,
-      alignItems: 'center',
-      paddingRight: 20,
-    },
-    detailsWrapper: {
-      justifyContent: 'center',
-      alignItems: 'center',
-      flex: 1,
-    },
-    title: {
-      fontSize: 16,
-      fontWeight: 'bold',
-      color: theme.colors.onBackground,
-      textAlign: 'center',
-    },
-    artist: {
-      color: theme.colors.onBackground,
-      fontSize: 12,
-      marginTop: 4,
-    },
-    button: {
-      opacity: 0.72,
-    },
-    moreButton: {
-      borderColor: theme.colors.onBackground,
-      borderWidth: 2,
-      opacity: 0.72,
-      borderRadius: 10,
-      width: 20,
-      height: 20,
-      alignItems: 'center',
-      justifyContent: 'center',
-    },
-    moreButtonIcon: {
-      height: 17,
-      width: 17,
-    }
-  });
+  const styles = {
+    ...baseStyles,
+    title: { ...baseStyles.title, color: theme.colors.onBackground },
+    artist: { ...baseStyles.artist, color: theme.colors.onBackground },
+    moreButton: { ...baseStyles.moreButton, borderColor: theme.colors.onBackground },
+  };
 
   return (
     <View style={styles.container}>
