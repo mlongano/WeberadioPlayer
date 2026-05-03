@@ -6,10 +6,11 @@ A cross-platform React Native radio player app built with Expo, featuring live r
 
 - **Live Radio Streaming**: Stream WeBe Radio with real-time song metadata
 - **Podcast Support**: Play episodes from various schools/podcasters
-- **Cross-Platform**: Native Android and iOS support
+- **Cross-Platform**: Native Android and iOS support via Expo SDK 55
 - **Background Playback**: Continue listening with notification controls
 - **Dynamic Notifications**: Notification panel updates with current track info
-- **Unified Audio Management**: Centralized system for handling multiple audio sources
+- **Unified Audio Management**: Centralized AudioManager for all playback
+- **Strapi v5 API**: Native v5 format integration with flat response types
 
 ## 🏗️ Architecture
 
@@ -23,9 +24,9 @@ The app uses a sophisticated multi-layered architecture to handle audio playback
 
 - Central coordinator for all audio playback operations
 - Manages source switching between radio and podcasts
-- Provides observer pattern for real-time updates
-- **Unified cross-platform support**: TrackPlayer for Android, Video components for iOS
-- **Video ref management**: Registers and controls Video components on iOS
+- Provides observer pattern for real-time updates via `useSyncExternalStore`
+- **Unified cross-platform support**: TrackPlayer for Android, single central Video for iOS
+- **HiddenAudioPlayer**: Sole `<Video>` component on iOS, handles all audio sources
 - **Platform-aware playback**: Automatic detection and appropriate audio implementation
 
 **IcecastMetadataService** (`src/services/IcecastMetadataService.ts`)
@@ -170,7 +171,6 @@ app/
   - **Real-time song updates** via TrackPlayer events
   - **Automatic cover art** fetched from iTunes/MusicBrainz APIs
   - **Format**: "Title - Artist - Year - Album"
-- **Radio Paradise**: Alternative radio stream (configured via environment variables)
 - Dynamic metadata updates in notification panel
 
 ### Podcast Episodes
@@ -243,22 +243,23 @@ const podcastSource = {
 await audioManager.playPodcast(podcastSource);
 ```
 
-### iOS Video Component Registration
+### iOS Playback Architecture
 
-For iOS, components must register their Video refs with AudioManager:
+On iOS, a single `<Video>` component (`HiddenAudioPlayer`) handles ALL audio playback (radio, podcasts, episodes). Other components do NOT register their own Video refs — they use `useRadioPlayer()` and `AudioManager` state for seek tracking and playback control.
 
 ```typescript
-// In component useEffect
-useEffect(() => {
-  if (Platform.OS === 'ios') {
-    audioManager.registerVideoRef('unique-video-id', videoRef.current);
-  }
-  return () => {
-    if (Platform.OS === 'ios') {
-      audioManager.unregisterVideoRef('unique-video-id');
-    }
-  };
-}, []);
+// HiddenAudioPlayer is the sole Video on iOS. It reports progress to AudioManager:
+<Video
+  ref={videoRef}
+  source={{ uri: currentSource.url }}
+  paused={!isPlaying}
+  onProgress={(data) => audioManager.updateProgress(data.currentTime, data.seekableDuration)}
+  onLoad={(data) => audioManager.updateProgress(0, data.duration)}
+  onEnd={() => audioManager.onEnd()}
+/>
+
+// Other components read seek data from AudioState:
+const { currentTime, duration } = useRadioPlayer();
 ```
 
 ### Listening for Changes
@@ -407,7 +408,8 @@ console.log(metadata);
 
 ### Prerequisites
 
-- Node.js 18+
+- Node.js 20+
+- Java 17 (required for Android builds)
 - Expo CLI
 - Android Studio (for Android development)
 - Xcode (for iOS development)
@@ -503,12 +505,6 @@ EXPO_PUBLIC_DISCOGS_SECRET=your_discogs_consumer_secret
 
 ## 🐛 Known Issues & Solutions
 
-### TrackPlayer v5 Notification Issues
-
-- **Problem**: Notification controls not working
-- **Solution**: Dual event listeners (background service + main app)
-- **Fallback**: String-based event names for compatibility
-
 ### iOS MediaToolbox Errors
 
 The following MediaToolbox errors are expected when playing streaming audio on iOS and don't affect functionality:
@@ -520,11 +516,11 @@ The following MediaToolbox errors are expected when playing streaming audio on i
 
 These occur because iOS Video component expects standard video formats, but we're using it for streaming audio. The errors are logged but playback continues normally.
 
-### Cross-Platform AudioManager Integration ✅ RESOLVED
+### Android Edge-to-Edge Deprecation Warnings
 
-- **Previous Problem**: AudioManager only worked on Android, iOS used separate Video implementations
-- **Solution**: Extended AudioManager with Video ref management for unified iOS support
-- **Result**: Single AudioManager API works across both Android and iOS platforms
+- **Problem**: Google Play warns about deprecated `setStatusBarColor`/`setNavigationBarColor` APIs
+- **Source**: React Native internals (`StatusBarModule`) and Material Design library
+- **Status**: Cosmetic warning, does not affect functionality. Requires upstream React Native patch.
 
 ## 🤝 Contributing
 
