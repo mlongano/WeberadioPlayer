@@ -21,9 +21,6 @@ export const queryPodcasts = {
     cover: {
       fields: ['url', 'caption', 'hash', 'ext', 'width', 'height', 'size'],
     },
-    audio: {
-      fields: ['caption', 'url'],
-    },
     schools: {
       fields: ['name', 'short_name', 'slug', 'description'],
       populate: {
