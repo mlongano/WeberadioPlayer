@@ -58,20 +58,16 @@ describe('getCover', () => {
   it('returns empty string when cover data is missing', () => {
     expect(getCover({}, 'https://api.example.com')).toBe('');
     expect(getCover({ cover: undefined }, 'https://api.example.com')).toBe('');
-    expect(getCover({ cover: { data: undefined } }, 'https://api.example.com')).toBe('');
+    expect(getCover({ cover: null }, 'https://api.example.com')).toBe('');
   });
 
   it('constructs URL with small_ prefix for large images', () => {
     const attrs = {
       cover: {
-        data: {
-          attributes: {
-            url: '/uploads/cover.jpg',
-            hash: 'abc123',
-            ext: '.jpg',
-            width: 800,
-          },
-        },
+        url: '/uploads/cover.jpg',
+        hash: 'abc123',
+        ext: '.jpg',
+        width: 800,
       },
     };
     const result = getCover(attrs, 'https://api.example.com');
@@ -81,14 +77,10 @@ describe('getCover', () => {
   it('constructs URL without prefix for small images', () => {
     const attrs = {
       cover: {
-        data: {
-          attributes: {
-            url: '/uploads/cover.jpg',
-            hash: 'abc123',
-            ext: '.jpg',
-            width: 300,
-          },
-        },
+        url: '/uploads/cover.jpg',
+        hash: 'abc123',
+        ext: '.jpg',
+        width: 300,
       },
     };
     const result = getCover(attrs, 'https://api.example.com');
