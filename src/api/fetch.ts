@@ -336,8 +336,8 @@ export const flattenEpisode = (episode: EpisodeQuery): Episode => {
     tags: attrs.tags?.map((tag: TagQuery) => tag.name),
 
     coverImageUrl:
-      Config.STRAPI_URL_BASE + attrs.cover?.url,
-    audioUrl: Config.STRAPI_URL_BASE + attrs.audio?.url,
+      (Config.STRAPI_URL_BASE ?? '') + (attrs.cover?.url ?? ''),
+    audioUrl: (Config.STRAPI_URL_BASE ?? '') + (attrs.audio?.url ?? ''),
     schools: attrs.schools?.map((school: SchoolQuery) => {
       const { id, ...schoolAttrs } = school;
       return {
@@ -355,7 +355,7 @@ export const flattenEpisode = (episode: EpisodeQuery): Episode => {
       date: attrs.podcast?.date ?? '',
       description: attrs.podcast?.description ?? '',
       coverImageUrl:
-        Config.STRAPI_URL_BASE + attrs.podcast?.cover?.url,
+        (Config.STRAPI_URL_BASE ?? '') + (attrs.podcast?.cover?.url ?? ''),
       schools: attrs.podcast?.schools?.map(
         (school: SchoolQuery) => {
           const { id, ...schoolAttrs } = school;
