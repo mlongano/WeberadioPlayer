@@ -16,8 +16,7 @@ const RandomEpisode: React.FC<{ episodes: EpisodeQuery[] }> = ({
   const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
 
   const selectRandomEpisode = () => {
-    //console.log('fetchedEpisodes', JSON.stringify(episodes, null, 2));
-    if (!episodes || episodes.length === 0) return; // Guard against missing episodes
+    if (!episodes || episodes.length === 0) return;
 
     // Pre-filter episodes with valid audio URLs
     const episodesWithAudio = episodes.filter(ep => {
@@ -53,7 +52,7 @@ const RandomEpisode: React.FC<{ episodes: EpisodeQuery[] }> = ({
   }, [episodes]);
 
   const renderItem = (): React.JSX.Element | null => {
-    if (!selectedEpisode) return null; // Guard against missing episode
+    if (!selectedEpisode) return null;
 
     return (
       <EpisodeCard
@@ -73,7 +72,6 @@ const RandomEpisode: React.FC<{ episodes: EpisodeQuery[] }> = ({
   return isRefreshing ? (
     <LoadingSpinner />
   ) : (
-    //console.log("current time", currentTime);
     <FlatList
       data={[selectedEpisode]}
       renderItem={renderItem}

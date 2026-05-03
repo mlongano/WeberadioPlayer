@@ -87,7 +87,7 @@ class IcecastMetadataService {
    * Notify all listeners
    */
   private notifyListeners(metadata: SongMetadata) {
-    console.log(`IcecastMetadataService: Notifying ${this.listeners.length} listeners with:`, metadata);
+    if (__DEV__) console.log(`IcecastMetadataService: Notifying ${this.listeners.length} listeners with:`, metadata);
     this.listeners.forEach(listener => {
       try {
         listener(metadata);
@@ -108,25 +108,25 @@ class IcecastMetadataService {
     // Try iTunes first (fastest, ~200ms)
     const iTunesCover = await this.fetchITunesCover(artist, title);
     if (iTunesCover) {
-      console.log('Cover found via iTunes API');
+      if (__DEV__) console.log('Cover found via iTunes API');
       return iTunesCover;
     }
 
     // Try MusicBrainz second (slower, ~800ms)
     const musicBrainzCover = await this.fetchMusicBrainzCover(artist, title);
     if (musicBrainzCover) {
-      console.log('Cover found via MusicBrainz API');
+      if (__DEV__) console.log('Cover found via MusicBrainz API');
       return musicBrainzCover;
     }
 
     // Try Discogs as final fallback (slowest, ~1000ms, requires auth)
     const discogsCover = await this.fetchDiscogsCover(artist, title);
     if (discogsCover) {
-      console.log('Cover found via Discogs API');
+      if (__DEV__) console.log('Cover found via Discogs API');
       return discogsCover;
     }
 
-    console.log('No cover found for:', artist, '-', title);
+    if (__DEV__) console.log('No cover found for:', artist, '-', title);
     return null;
   }
 
@@ -149,7 +149,7 @@ class IcecastMetadataService {
         }
       }
     } catch (error) {
-      console.log('iTunes API error:', error);
+      if (__DEV__) console.log('iTunes API error:', error);
     }
     return null;
   }
@@ -186,7 +186,7 @@ class IcecastMetadataService {
         }
       }
     } catch (error) {
-      console.log('MusicBrainz API error:', error);
+      if (__DEV__) console.log('MusicBrainz API error:', error);
     }
     return null;
   }
@@ -200,7 +200,7 @@ class IcecastMetadataService {
     const discogsSecret = Config.DISCOGS_SECRET;
 
     if (!discogsKey || !discogsSecret) {
-      console.log('Discogs API credentials not configured');
+      if (__DEV__) console.log('Discogs API credentials not configured');
       return null;
     }
 
@@ -244,12 +244,12 @@ class IcecastMetadataService {
       }
 
       const coverImage = validReleases[0].cover_image;
-      console.log('Discogs cover found:', coverImage, '-', validReleases[0].title);
+      if (__DEV__) console.log('Discogs cover found:', coverImage, '-', validReleases[0].title);
 
       return coverImage;
 
     } catch (error) {
-      console.log('Discogs API error:', error);
+      if (__DEV__) console.log('Discogs API error:', error);
       return null;
     }
   }

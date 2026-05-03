@@ -18,7 +18,6 @@ export default function useSongMetadata() {
 
   const [songMetadata, setSongMetadata] = useState<SongMetadata>({ title: '', artist: '', album: '', year: '', coverUrl: '', listeners: 0 });
   const colorMode = useColorScheme();
-  //console.log("colorMode: ", colorMode);
 
   const [defaultCover, setDefaultCover] = useState<string>(colorMode === "light" ? defaultCoverLight : defaultCoverDark);
   const [cover, setCover] = useState<string>(defaultCoverLight);
@@ -34,21 +33,15 @@ export default function useSongMetadata() {
 
   // Get current song metadata from ICY metadata enriched by IcecastMetadataService
   useEffect(() => {
-    console.log("Setting up metadata listeners...");
-
     // Listen to enriched ICY metadata from IcecastMetadataService
     const handleEnrichedMetadata = (metadata: IcecastMetadata) => {
-      console.log("useSongMetadata: Received enriched metadata:", metadata);
       setSongMetadata(metadata);
       setCover(metadata.coverUrl || defaultCover);
-      console.log("useSongMetadata: Updated state - title:", metadata.title, "cover:", metadata.coverUrl);
     };
 
     icecastMetadataService.addListener(handleEnrichedMetadata);
-    console.log("useSongMetadata: Listener registered");
 
     return () => {
-      console.log("useSongMetadata: Cleaning up listeners");
       icecastMetadataService.removeListener(handleEnrichedMetadata);
     };
   }, [defaultCover]);
@@ -60,7 +53,6 @@ export default function useSongMetadata() {
         // App came to foreground - restore last metadata if available
         const lastMetadata = icecastMetadataService.getLastMetadata();
         if (lastMetadata && (!songMetadata.title || songMetadata.title === '')) {
-          console.log("useSongMetadata: Restoring metadata on app resume:", lastMetadata);
           setSongMetadata(lastMetadata);
           setCover(lastMetadata.coverUrl || defaultCover);
         }

@@ -90,7 +90,9 @@ export default function HiddenAudioPlayer() {
         onProgress={(data) => audioManager.updateProgress(data.currentTime, data.seekableDuration)}
         onLoad={(data) => audioManager.updateProgress(0, data.duration)}
         onEnd={() => audioManager.onEnd()}
-        onError={(e) => console.log('Video Error:', e)}
+        onError={(e) => {
+          if (__DEV__) console.log('Video Error:', e);
+        }}
       />
     </View>
   );

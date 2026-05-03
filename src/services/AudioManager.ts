@@ -149,7 +149,7 @@ class AudioManager {
       try {
         await TrackPlayer.setVolume(volume);
       } catch (error) {
-        console.log('Error setting TrackPlayer volume:', error);
+        if (__DEV__) console.log('Error setting TrackPlayer volume:', error);
       }
     }
     // iOS Video component reads volume from state prop
