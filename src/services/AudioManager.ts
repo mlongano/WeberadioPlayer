@@ -19,6 +19,8 @@ export interface AudioState {
   currentSource: AudioSource | null;
   volume: number;
   isBuffering: boolean;
+  currentTime: number;
+  duration: number;
 }
 
 class AudioManager {
@@ -27,6 +29,8 @@ class AudioManager {
     currentSource: null,
     volume: 0.5,
     isBuffering: false,
+    currentTime: 0,
+    duration: 0,
   };
 
   private listeners: Set<() => void> = new Set();
@@ -153,6 +157,17 @@ class AudioManager {
 
   getVolume(): number {
     return this.state.volume;
+  }
+
+  // --- iOS Progress Reporting (from HiddenAudioPlayer) ---
+
+  updateProgress(currentTime: number, duration: number) {
+    this.state = { ...this.state, currentTime, duration };
+    this.emitChange();
+  }
+
+  onEnd() {
+    this.stop();
   }
 
   // --- iOS Video Handling ---

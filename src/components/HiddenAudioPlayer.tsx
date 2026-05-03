@@ -87,6 +87,9 @@ export default function HiddenAudioPlayer() {
           bufferForPlaybackAfterRebufferMs: 5000,
         }}
         onTimedMetadata={handleTimedMetadata}
+        onProgress={(data) => audioManager.updateProgress(data.currentTime, data.seekableDuration)}
+        onLoad={(data) => audioManager.updateProgress(0, data.duration)}
+        onEnd={() => audioManager.onEnd()}
         onError={(e) => console.log('Video Error:', e)}
       />
     </View>

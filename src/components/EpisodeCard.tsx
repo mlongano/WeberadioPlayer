@@ -1,8 +1,6 @@
 import Markdown from 'react-native-markdown-display';
 import { Image, ScrollView, StyleSheet, Platform } from 'react-native';
 import { Button, Text, useTheme } from 'react-native-paper';
-import { useRef, useState, useEffect } from 'react';
-import Video, { VideoRef } from 'react-native-video';
 import SeekBar from './SeekBar';
 import { EpisodeCardProps } from '@/types';
 import { audioManager, AudioSource } from '@/src/services/AudioManager';
@@ -17,22 +15,16 @@ export default function EpisodeCard({
   cardTitle = 'Benvenuto su WeBe Radio',
   cardSubtitle = 'Il fato ha voluto donarti questo episodio:',
 }: EpisodeCardProps) {
-  const { currentSource, isPlaying: isPlayerPlaying, volume, playPodcast, stop } = useRadioPlayer();
+  const { currentSource, isPlaying: isPlayerPlaying, playPodcast, stop } = useRadioPlayer();
   const isPlaying = isPlayerPlaying && currentSource?.url === audioUrl;
 
   // TrackPlayer progress for Android
   const { position, duration } = Platform.OS === 'android' ? useProgress() : { position: 0, duration: 1 };
 
-  // Video progress for iOS
-  const [currentTime, setCurrentTime] = useState<number>(0);
-  const [videoDuration, setVideoDuration] = useState<number>(0);
-  const audioElement = useRef<VideoRef>(null);
+  // iOS progress from AudioManager (via HiddenAudioPlayer's central Video)
+  const iosState = Platform.OS === 'ios' ? audioManager.getSnapshot() : null;
 
-  // iOS note: AudioManager uses HiddenAudioPlayer's central Video ref.
-  // This inline Video is only for seek tracking (onProgress) and onEnd callback.
-  // It does NOT register with AudioManager to avoid double playback instances.
-
-  function seek(time: number, isPlaying = true) {
+  function seek(time: number) {
     if (Platform.OS === 'android') {
       try {
         TrackPlayer.seekTo(time);
@@ -40,9 +32,7 @@ export default function EpisodeCard({
         console.log('Error seeking on Android:', error);
       }
     } else {
-      // iOS: Use AudioManager to seek
       audioManager.seekVideoOnIOS(time);
-      setCurrentTime(time);
     }
   }
 
@@ -63,6 +53,7 @@ export default function EpisodeCard({
       await playPodcast(episodeSource);
     }
   }
+
   const theme = useTheme();
   const styles = StyleSheet.create({
     container: {
@@ -130,51 +121,11 @@ export default function EpisodeCard({
           alignSelf: 'center',
         }}
       />
-      {Platform.OS === 'ios' && (
-        <Video
-          ref={audioElement}
-          source={{
-            uri: `${audioUrl}`,
-            headers: {
-              'User-Agent': 'WeBeRadioApp/1.0',
-              'Accept': '*/*',
-            }
-          }}
-          style={{ width: 0, height: 0 }}
-          paused={!isPlaying}
-          playInBackground={true}
-          playWhenInactive={true}
-          disableFocus={true}
-          resizeMode="cover"
-          controls={false}
-          muted={false}
-          volume={volume}
-          rate={1.0}
-          onError={(error) => {
-            console.log('iOS EpisodeCard Video Error:', error);
-          }}
-          onLoadStart={() => {
-            console.log('iOS EpisodeCard Load Start');
-          }}
-          onLoad={(data) => {
-            console.log('iOS EpisodeCard Loaded, duration:', data.duration);
-            setVideoDuration(data.duration);
-          }}
-          onProgress={(data) => {
-            setCurrentTime(data.currentTime);
-          }}
-          onEnd={() => {
-            audioManager.stop();
-          }}
-        />
-      )}
       <SeekBar
         onSeek={seek}
-        trackLength={Platform.OS === 'android' ? duration : videoDuration}
-        onSlidingStart={() => {
-          // Don't stop playback during seeking - just seeking is enough
-        }}
-        currentPosition={Platform.OS === 'android' ? position : currentTime}
+        trackLength={Platform.OS === 'android' ? duration : (iosState?.duration ?? 0)}
+        onSlidingStart={() => {}}
+        currentPosition={Platform.OS === 'android' ? position : (iosState?.currentTime ?? 0)}
         theme={theme}
       />
 

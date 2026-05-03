@@ -1,6 +1,5 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { StyleSheet, ScrollView, Platform } from 'react-native';
-import Video from 'react-native-video';
 import { Button, Card, Text, useTheme } from 'react-native-paper';
 import { Config } from '../../src/utils/config';
 import { queryEpisodes, schoolsFetchAllBasic, strapiFetch } from '../../src/api/fetch';
@@ -20,8 +19,6 @@ const PodcastsScreen: React.FC = () => {
   const { currentSource, isPlaying: isPlayerPlaying, volume, playPodcast, stop } = useRadioPlayer();
   const playbackState = Platform.OS === 'android' ? usePlaybackState() : { state: State.Stopped };
   const { position, duration } = Platform.OS === 'android' ? useProgress() : { position: 0, duration: 1 };
-  const videoRefs = useRef<(React.ComponentRef<typeof Video> | null)[]>([]);
-
   const handlePlay = async (index: number) => {
     const episode = lastSchoolsEpisode[index]?.episode;
     const school = lastSchoolsEpisode[index]?.school;
@@ -211,48 +208,18 @@ const PodcastsScreen: React.FC = () => {
                 }}>
                 {episode.description ?? ''}
               </Markdown>
-              {Platform.OS === 'ios' && (
-                <Video
-                  ref={(ref) => {
-                    videoRefs.current[index] = ref;
-                  }}
-                  source={{
-                    uri: audioUrl,
-                    headers: {
-                      'User-Agent': 'WeBeRadioApp/1.0',
-                      'Accept': '*/*',
-                    }
-                  }}
-                  style={styles.audioPlayer}
-                  paused={currentSource?.id !== `podcast-${index}`}
-                  playInBackground={true}
-                  playWhenInactive={true}
-                  ignoreSilentSwitch="ignore"
-                  disableFocus={true}
-                  resizeMode="cover"
-                  controls={false}
-                  muted={false}
-                  volume={volume}
-                  rate={1.0}
-                  onError={(error) => {
-                    console.log(`iOS Podcast Video Error (${index}):`, error);
-                  }}
-                  onLoadStart={() => {
-                    console.log(`iOS Podcast Load Start (${index})`);
-                  }}
-                  onLoad={() => {
-                    console.log(`iOS Podcast Loaded (${index})`);
-                  }}
-                />
-              )}
-              {Platform.OS === 'android' && currentSource?.id === `podcast-${index}` && (
+              {currentSource?.id === `podcast-${index}` && (
                 <SeekBar
                   onSeek={async (time: number) => {
-                    await TrackPlayer.seekTo(time);
+                    if (Platform.OS === 'android') {
+                      await TrackPlayer.seekTo(time);
+                    } else {
+                      audioManager.seekVideoOnIOS(time);
+                    }
                   }}
-                  trackLength={duration}
+                  trackLength={Platform.OS === 'android' ? duration : audioManager.getSnapshot().duration}
                   onSlidingStart={() => { }}
-                  currentPosition={position}
+                  currentPosition={Platform.OS === 'android' ? position : audioManager.getSnapshot().currentTime}
                   theme={theme}
                 />
               )}
