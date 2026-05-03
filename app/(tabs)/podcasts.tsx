@@ -19,7 +19,7 @@ const PodcastsScreen: React.FC = () => {
   const { currentSource, isPlaying: isPlayerPlaying, volume, playPodcast, stop } = useRadioPlayer();
   const playbackState = Platform.OS === 'android' ? usePlaybackState() : { state: State.Stopped };
   const { position, duration } = Platform.OS === 'android' ? useProgress() : { position: 0, duration: 1 };
-  const handlePlay = async (index: number) => {
+  const handlePlay = useCallback(async (index: number) => {
     const episode = lastSchoolsEpisode[index]?.episode;
     const school = lastSchoolsEpisode[index]?.school;
     if (!episode || !school) return;
@@ -49,7 +49,7 @@ const PodcastsScreen: React.FC = () => {
 
       await playPodcast(podcastSource);
     }
-  };
+  }, [lastSchoolsEpisode, currentSource, isPlayerPlaying, stop, playPodcast]);
 
   const fetchPodcasts = useCallback(async () => {
     setLoading(true);
@@ -120,6 +120,13 @@ const PodcastsScreen: React.FC = () => {
   }, [fetchPodcasts]);
 
   const theme = useTheme();
+  const markdownStyle = useMemo(() => ({
+    body: {
+      backgroundColor: theme.colors.background,
+      color: theme.colors.onBackground,
+      fontSize: 14,
+    },
+  }), [theme.colors.background, theme.colors.onBackground]);
   const styles = useMemo(() => StyleSheet.create({
     container: {
       flex: 1,
@@ -198,14 +205,7 @@ const PodcastsScreen: React.FC = () => {
             <Card.Content>
               <Text variant="headlineSmall">{school.short_name}</Text>
               <Text variant="titleMedium">{episode.title}</Text>
-              <Markdown
-                style={{
-                  body: {
-                    backgroundColor: theme.colors.background,
-                    color: theme.colors.onBackground,
-                    fontSize: 14,
-                  },
-                }}>
+              <Markdown style={markdownStyle}>
                 {episode.description ?? ''}
               </Markdown>
               {currentSource?.id === `podcast-${index}` && (

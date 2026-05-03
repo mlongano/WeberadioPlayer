@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback, useDeferredValue } from 'react';
 
 import { View, Image, StyleSheet } from 'react-native';
 import {
@@ -101,20 +101,13 @@ const ExploreScreen: React.FC = () => {
   }), []);
 
   const fuse = useMemo(() => new Fuse(episodes, fuseOptions), [episodes, fuseOptions]);
+  const deferredQuery = useDeferredValue(searchQuery);
   const fusePosts =
-    searchQuery.length > 0
-      ? fuse.search(searchQuery).map((result) => result.item)
+    deferredQuery.length > 0
+      ? fuse.search(deferredQuery).map((result) => result.item)
       : episodes;
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
-
-  if (error) {
-    return <ErrorMessage message={error} onRetry={fetchEpisodes} />;
-  }
-
-  const renderItem = ({ item }: { item: EpisodeQuery }) => {
+  const renderItem = useCallback(({ item }: { item: EpisodeQuery }) => {
     const flatEpisode = flattenEpisode(item);
     const episodeParams: Episode = {
       title: flatEpisode.title,
@@ -176,7 +169,15 @@ const ExploreScreen: React.FC = () => {
         </Card.Actions>
       </Card>
     );
-  };
+  }, [router, theme.colors.primary, theme.colors.onPrimary, theme.colors.background, theme.colors.onBackground]);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <ErrorMessage message={error} onRetry={fetchEpisodes} />;
+  }
 
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
@@ -212,7 +213,7 @@ const ExploreScreen: React.FC = () => {
         {contentVerticalOffset > CONTENT_OFFSET_THRESHOLD && (
           <IconButton
             icon="arrow-up-bold-circle"
-            iconColor={Colors[colorScheme ?? 'light'].tint}
+            iconColor={Colors[colorScheme].tint}
             size={40}
             // previously configured Icon props
             style={styles.scrollTopButton}
