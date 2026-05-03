@@ -60,8 +60,8 @@
         "expo-build-properties",
         {
           "android": {
-            "enableProguardInReleaseBuilds": false,
-            "proguardMinifyEnabled": false,
+            "enableProguardInReleaseBuilds": true,
+            "proguardMinifyEnabled": true,
             "packagingOptions": {
               "pickFirst": [
                 "**/libc++_shared.so",
@@ -74,7 +74,7 @@
             "supportLargeHeap": true,
             "enableSeparateBuildPerCPUArchitecture": false,
             "universalApk": false,
-            "enableMinifyInReleaseBuilds": false,
+            "enableMinifyInReleaseBuilds": true,
             "resizableActivity": true
           }
         }
