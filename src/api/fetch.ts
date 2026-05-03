@@ -75,7 +75,7 @@ export const queryEpisodes = {
       fields: ['name', 'short_name', 'slug'],
     },
     podcast: {
-      fields: ['title', 'slug', 'date', 'description', 'tags', 'cover'],
+      fields: ['title', 'slug', 'date', 'description'],
       populate: {
         schools: {
           fields: ['name', 'short_name', 'slug'],
@@ -95,7 +95,7 @@ export const querySchools = {
       fields: ['url', 'caption'],
     },
     podcasts: {
-      fields: ['title', 'slug', 'description', 'tags', 'cover'],
+      fields: ['title', 'slug', 'description'],
       populate: {
         cover: {
           fields: ['url', 'caption', 'hash', 'ext', 'width', 'height', 'size'],
@@ -121,7 +121,7 @@ export const querySchools = {
           fields: ['caption', 'url'],
         },
         podcast: {
-          fields: ['title', 'slug', 'description', 'tags', 'cover'],
+          fields: ['title', 'slug', 'description'],
           populate: {
             cover: {
               fields: [
@@ -166,7 +166,7 @@ export const strapiFetch = async (
 ) => {
   const localFetch = async (queryPages: StrapiQuery) => {
     checkEnvVars();
-    // console.log(`Fetching from Strapi: ${Config.STRAPI_URL_BASE}${endpoint}?${qs.stringify(queryPages)}`, endpoint, queryPages);
+    if (__DEV__) console.log(`Fetching from Strapi: ${Config.STRAPI_URL_BASE}${endpoint}?${qs.stringify(queryPages)}`);
     const response = await fetch(
       `${Config.STRAPI_URL_BASE}${endpoint}?${qs.stringify(queryPages)}`,
       {

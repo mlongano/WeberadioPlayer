@@ -25,18 +25,5 @@ export const PlaybackService = async function () {
         TrackPlayer.reset();
     });
 
-    // Also try string-based listeners as fallback
-    try {
-        TrackPlayer.addEventListener('remote-play' as any, () => {
-            console.log('String remote play triggered');
-            TrackPlayer.play();
-        });
-        TrackPlayer.addEventListener('remote-pause' as any, () => {
-            console.log('String remote pause triggered');
-            TrackPlayer.pause();
-        });
-    } catch (e) {
-        console.log('String event listeners not supported:', e);
-    }
 };
 

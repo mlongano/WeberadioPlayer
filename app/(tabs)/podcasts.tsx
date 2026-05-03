@@ -215,9 +215,6 @@ const PodcastsScreen: React.FC = () => {
                 <Video
                   ref={(ref) => {
                     videoRefs.current[index] = ref;
-                    if (Platform.OS === 'ios') {
-                      audioManager.registerVideoRef(`podcast-${index}`, ref);
-                    }
                   }}
                   source={{
                     uri: audioUrl,

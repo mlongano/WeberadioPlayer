@@ -7,7 +7,7 @@ import { useRadioPlayer } from '@/src/hooks/useRadioPlayer';
 
 export default function HiddenAudioPlayer() {
   const videoRef = useRef<VideoRef>(null);
-  const { currentSource, volume } = useRadioPlayer();
+  const { currentSource, isPlaying, volume } = useRadioPlayer();
 
   useEffect(() => {
     if (currentSource) {
@@ -69,28 +69,7 @@ export default function HiddenAudioPlayer() {
           type: 'mp3',
         }}
         style={styles.audioElement}
-        paused={!audioManager.getSnapshot().isPlaying} // We read directly to avoid lag, or use prop?
-        // Actually, the AudioManager controls play/pause via ref methods (resume/pause)
-        // But we also need to respect the initial prop state or updates.
-        // However, AudioManager.playVideoOnIOS calls resume(), which overrides 'paused' prop?
-        // react-native-video behavior: 'paused' prop is authoritative.
-        // If AudioManager calls resume(), it might not update the prop here if we don't pass it.
-        // But AudioManager manages the "active" video.
-        // Let's rely on AudioManager calling resume/pause on the ref,
-        // BUT we should also pass the correct 'paused' prop to be safe and declarative.
-        // If isPlaying is true AND this is the active source, it should be playing.
-        // But AudioManager handles multiple sources potentially (though we only render one Video here usually? No, we might render multiple if we had a list, but here we only render the current one).
-        // Wait, if we only render ONE Video component for the current source, then we don't need a map of refs in AudioManager?
-        // The original code rendered ONE Video component for 'webeRadioStream'.
-        // But now we want to support podcasts too on iOS.
-        // So we should render a Video component for the *currentSource*.
-        // If currentSource changes, the Video component updates its source.
-        // So we only need ONE ref.
-        // AudioManager logic `videoRefs.get(source.id)` implies multiple videos could exist?
-        // In the original code, there was only one Video.
-        // My refactor of AudioManager assumes we might register multiple refs.
-        // But if I only render one HiddenAudioPlayer, I only have one ref.
-        // So I should register it with the ID of the current source.
+        paused={!isPlaying}
 
         playInBackground={true}
         playWhenInactive={true}

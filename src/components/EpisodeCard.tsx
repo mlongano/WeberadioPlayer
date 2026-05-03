@@ -28,17 +28,9 @@ export default function EpisodeCard({
   const [videoDuration, setVideoDuration] = useState<number>(0);
   const audioElement = useRef<VideoRef>(null);
 
-  // Register Video ref with AudioManager for iOS
-  useEffect(() => {
-    if (Platform.OS === 'ios') {
-      audioManager.registerVideoRef(`episode-${title}`, audioElement.current);
-    }
-    return () => {
-      if (Platform.OS === 'ios') {
-        audioManager.unregisterVideoRef(`episode-${title}`);
-      }
-    };
-  }, [title]);
+  // iOS note: AudioManager uses HiddenAudioPlayer's central Video ref.
+  // This inline Video is only for seek tracking (onProgress) and onEnd callback.
+  // It does NOT register with AudioManager to avoid double playback instances.
 
   function seek(time: number, isPlaying = true) {
     if (Platform.OS === 'android') {
